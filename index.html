@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bestimme den richtigen Artikel</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      max-width: 600px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    h2 {
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: normal;
+      margin-top: 0;
+      margin-bottom: 1rem;
+      color: #555;
+    }
+    .counter {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-size: 1rem;
+      color: #333;
+    }
+    .word {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    .options button {
+      width: 100%;
+      padding: 1rem;
+      margin: 0.5rem 0;
+      font-size: 1.2rem;
+    }
+    .result {
+      margin-top: 1rem;
+      font-weight: bold;
+      text-align: center;
+    }
+    #nextBtn {
+      display: none;
+      margin-top: 1.5rem;
+      width: 100%;
+      padding: 1rem;
+      font-size: 1.3rem;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    #nextBtn:hover {
+      background-color: #0056b3;
+    }
+    footer {
+      text-align: center;
+      margin-top: 4rem;
+      font-size: 0.8rem;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bestimme den richtigen Artikel</h1>
+  <h2>VHS Charlottenburg A1.2</h2>
+  <div class="counter" id="score">✅ Richtig: 0 ❌ Falsch: 0</div> <!-- 🆕 -->
+  <div class="quiz">
+    <div class="word" id="word">Lade Wörter...</div>
+    <div class="options" id="options"></div>
+    <div class="result" id="result"></div>
+    <button id="nextBtn">Nächstes Wort</button>
+  </div>
+  <footer>by Marco P</footer>
+
+  <script>
+    const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTLMG3zUFzaLSA82QS7T4E8IAHiung0H2LYRU8hoi_svBol2OoFWmTFBhGVhCPxK2xGtADv1sM9guDr/pub?output=csv";
+    let data = [];
+    let current = 0;
+    let correct = 0;   // 🆕
+    let wrong = 0;     // 🆕
+
+    async function loadCSV() {
+      const res = await fetch(csvUrl);
+      const text = await res.text();
+      const lines = text.trim().split("\n").slice(1);
+      data = lines.map(line => {
+        const [article, word] = line.split(",");
+        return { article: article.trim(), word: word.trim() };
+      });
+      shuffle(data);
+      loadQuestion();
+    }
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function updateScore() {  // 🆕
+      document.getElementById("score").textContent = `✅ Richtig: ${correct} ❌ Falsch: ${wrong}`;
+    }
+
+    function loadQuestion() {
+      const item = data[current];
+      document.getElementById("word").textContent = `"${item.word}"`;
+      const options = ["der", "die", "das"];
+      const optionsDiv = document.getElementById("options");
+      const resultDiv = document.getElementById("result");
+      const nextBtn = document.getElementById("nextBtn");
+
+      optionsDiv.innerHTML = "";
+      resultDiv.textContent = "";
+      nextBtn.style.display = "none";
+
+      options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.textContent = opt;
+        btn.onclick = () => {
+          if (opt === item.article) {
+            resultDiv.textContent = "✅ Richtig!";
+            correct++; // 🆕
+          } else {
+            resultDiv.textContent = `❌ Falsch! Richtiger Artikel: "${item.article}"`;
+            wrong++; // 🆕
+          }
+          updateScore(); // 🆕
+          nextBtn.style.display = "block";
+        };
+        optionsDiv.appendChild(btn);
+      });
+    }
+
+    document.getElementById("nextBtn").onclick = () => {
+      current = (current + 1) % data.length;
+      loadQuestion();
+    };
+
+    loadCSV();
+  </script>
+</body>
+</html>
