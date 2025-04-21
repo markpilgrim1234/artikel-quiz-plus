@@ -3,6 +3,7 @@
 <head>
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon.png">
+  <link rel="icon" type="image/png" href="icon.png">
   <meta name="theme-color" content="#ffffff">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -36,7 +37,7 @@
     }
     .word {
       font-size: 2.4rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
       text-align: center;
       font-weight: bold;
     }
@@ -64,7 +65,7 @@
       background-color: #3a6eff; /* blu per das */
     }
     .result {
-      margin-top: 1.8rem;
+      margin-top: 1.5rem;
       font-weight: bold;
       text-align: center;
       font-size: 1.4rem;
@@ -77,7 +78,7 @@
     }
     #nextBtn {
       display: none;
-      margin-top: 1.2rem;
+      margin-top: 1rem;
       width: 100%;
       padding: 1rem;
       font-size: 1.3rem;
@@ -103,11 +104,11 @@
   </style>
 </head>
 <body>
-  <h1 style="margin-bottom: 1.5rem;">Bestimme den richtigen Artikel</h1>
-  <h2 style="margin-bottom: 0.3rem;">VHS Charlottenburg A1.2</h2>
+  <h1 style="margin-bottom: 0.5rem;">Bestimme den richtigen Artikel</h1>
+  <h2 style="margin-top: 0.2rem; margin-bottom: 0.2rem;">VHS Charlottenburg A1.2</h2>
   <hr style="margin: 0rem 0;">
   <div class="counter" id="score" style="margin-top: 2rem; margin-bottom: 2.5rem;">✅ Richtig: 0 ❌ Falsch: 0</div>
-  <div class="quiz" style="margin-top: 0.2rem;">
+  <div class="quiz" style="margin-top: -0.5rem;">
     <div class="word" id="word">Lade Wörter...</div>
     <div class="options" id="options"></div>
     <div class="result" id="result"></div>
@@ -206,7 +207,7 @@
       });
     }
   </script>
-  <footer style="position: fixed; bottom: 40px; left: 0; right: 0; background: #fff; padding: 0.5rem 1rem; border-top: 1px solid #ccc; text-align: center; font-size: 0.8rem; color: #888; z-index: 100;">
+  <footer style="text-align: center; font-size: 0.8rem; color: #888; margin-top: 2rem;">
     by Marco P // Ver. 1.2 // 2025
   </footer>
 </body>
