@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.png">
+  <meta name="theme-color" content="#ffffff">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Bestimme den richtigen Artikel</title>
@@ -51,13 +54,13 @@
       color: white;
     }
     .options button:nth-child(1) {
-      background-color: #007bff; /* blu per der */
+      background-color: #f4c542; /* giallo per der */
     }
     .options button:nth-child(2) {
-      background-color: #e83e8c; /* rosa per die */
+      background-color: #e94e3c; /* rosso per die */
     }
     .options button:nth-child(3) {
-      background-color: #28a745; /* verde per das */
+      background-color: #3a6eff; /* blu per das */
     }
     .result {
       margin-top: 1rem;
@@ -187,6 +190,19 @@
     };
 
     loadCSV();
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+          .then(registration => {
+            console.log('ServiceWorker registrato con successo:', registration);
+          })
+          .catch(error => {
+            console.log('ServiceWorker registration failed:', error);
+          });
+      });
+    }
   </script>
 </body>
 </html>
