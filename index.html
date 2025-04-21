@@ -129,12 +129,13 @@
       const text = await res.text();
       const lines = text.trim().split("\n").slice(1);
       data = lines.map(line => {
-        const [article, word, plural, example] = line.split(",");
+        const [article, word, plural, example, italian] = line.split(",");
         return {
           article: article?.trim(),
           word: word?.trim(),
           plural: plural?.trim(),
-          example: example?.trim()
+          example: example?.trim(),
+          italian: italian?.trim()
         };
       });
       shuffle(data);
@@ -179,7 +180,7 @@
             wrong++;
             resultDiv.textContent = `❌ Falsch! Richtiger Artikel: \"${item.article}\"`;
           }
-          extraDiv.innerHTML = `<em>Plural:</em> ${item.plural}<br><em>Beispiel:</em> ${item.example}`;
+          extraDiv.innerHTML = `<em>Plural:</em> ${item.plural}<br><em>Beispiel:</em> ${item.example}<br><em>Italienisch:</em> ${item.italian}`;
           updateScore();
           nextBtn.style.display = "block";
         };
