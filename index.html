@@ -17,12 +17,12 @@
     }
     h1 {
       text-align: center;
-      font-size: 1.4rem;
+      font-size: 1.6rem;
       margin-bottom: 0.5rem;
     }
     h2 {
       text-align: center;
-      font-size: 1rem;
+      font-size: 1.2rem;
       font-weight: normal;
       margin-top: 0;
       margin-bottom: 1rem;
@@ -35,9 +35,10 @@
       color: #333;
     }
     .word {
-      font-size: 2rem;
+      font-size: 2.4rem;
       margin-bottom: 2rem;
       text-align: center;
+      font-weight: bold;
     }
     .options {
       display: flex;
@@ -46,8 +47,8 @@
     }
     .options button {
       flex: 1;
-      padding: 1.5rem;
-      font-size: 1.8rem;
+      padding: 1.2rem;
+      font-size: 1.6rem;
       border: none;
       border-radius: 8px;
       cursor: pointer;
@@ -63,23 +64,24 @@
       background-color: #3a6eff; /* blu per das */
     }
     .result {
-      margin-top: 1rem;
+      margin-top: 2.5rem;
       font-weight: bold;
       text-align: center;
+      font-size: 1.4rem;
     }
     .extra-info {
       text-align: center;
-      margin-top: 0.5rem;
-      font-size: 0.95rem;
+      margin-top: 1.2rem;
+      font-size: 1.1rem;
       color: #333;
     }
     #nextBtn {
       display: none;
-      margin-top: 1.5rem;
+      margin-top: 2.5rem;
       width: 100%;
       padding: 1rem;
       font-size: 1.3rem;
-      background-color: #ff9800;
+      background-color: #21bf73;
       color: white;
       border: none;
       border-radius: 8px;
@@ -104,13 +106,13 @@
   <h1 style="margin-bottom: 1.5rem;">Bestimme den richtigen Artikel</h1>
   <h2 style="margin-bottom: 2rem;">VHS Charlottenburg A1.2</h2>
   <hr style="margin: 2rem 0;">
-  <div class="counter" id="score" style="margin-top: 1.5rem;">✅ Richtig: 0 ❌ Falsch: 0</div>
-  <div class="quiz" style="margin-top: 3rem;">
+  <div class="counter" id="score" style="margin-top: 2.5rem; margin-bottom: 2rem;">✅ Richtig: 0 ❌ Falsch: 0</div>
+  <div class="quiz" style="margin-top: 1rem;">
     <div class="word" id="word">Lade Wörter...</div>
     <div class="options" id="options"></div>
     <div class="result" id="result"></div>
     <div class="extra-info" id="extra"></div>
-    <button id="nextBtn">⏭️ Nächstes Wort</button>
+    <button id="nextBtn">➡️ Nächstes Wort</button>
   </div>
   
 
