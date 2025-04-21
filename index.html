@@ -46,6 +46,12 @@
       font-weight: bold;
       text-align: center;
     }
+    .extra-info {
+      text-align: center;
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+      color: #333;
+    }
     #nextBtn {
       display: none;
       margin-top: 1.5rem;
@@ -72,11 +78,12 @@
 <body>
   <h1>Bestimme den richtigen Artikel</h1>
   <h2>VHS Charlottenburg A1.2</h2>
-  <div class="counter" id="score">✅ Richtig: 0 ❌ Falsch: 0</div> <!-- 🆕 -->
+  <div class="counter" id="score">✅ Richtig: 0 ❌ Falsch: 0</div>
   <div class="quiz">
     <div class="word" id="word">Lade Wörter...</div>
     <div class="options" id="options"></div>
     <div class="result" id="result"></div>
+    <div class="extra-info" id="extra"></div>
     <button id="nextBtn">Nächstes Wort</button>
   </div>
   <footer>by Marco P</footer>
@@ -85,16 +92,21 @@
     const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTLMG3zUFzaLSA82QS7T4E8IAHiung0H2LYRU8hoi_svBol2OoFWmTFBhGVhCPxK2xGtADv1sM9guDr/pub?output=csv";
     let data = [];
     let current = 0;
-    let correct = 0;   // 🆕
-    let wrong = 0;     // 🆕
+    let correct = 0;
+    let wrong = 0;
 
     async function loadCSV() {
       const res = await fetch(csvUrl);
       const text = await res.text();
       const lines = text.trim().split("\n").slice(1);
       data = lines.map(line => {
-        const [article, word] = line.split(",");
-        return { article: article.trim(), word: word.trim() };
+        const [article, word, plural, example] = line.split(",");
+        return {
+          article: article?.trim(),
+          word: word?.trim(),
+          plural: plural?.trim(),
+          example: example?.trim()
+        };
       });
       shuffle(data);
       loadQuestion();
@@ -107,7 +119,7 @@
       }
     }
 
-    function updateScore() {  // 🆕
+    function updateScore() {
       document.getElementById("score").textContent = `✅ Richtig: ${correct} ❌ Falsch: ${wrong}`;
     }
 
@@ -117,10 +129,12 @@
       const options = ["der", "die", "das"];
       const optionsDiv = document.getElementById("options");
       const resultDiv = document.getElementById("result");
+      const extraDiv = document.getElementById("extra");
       const nextBtn = document.getElementById("nextBtn");
 
       optionsDiv.innerHTML = "";
       resultDiv.textContent = "";
+      extraDiv.textContent = "";
       nextBtn.style.display = "none";
 
       options.forEach(opt => {
@@ -128,13 +142,14 @@
         btn.textContent = opt;
         btn.onclick = () => {
           if (opt === item.article) {
+            correct++;
             resultDiv.textContent = "✅ Richtig!";
-            correct++; // 🆕
           } else {
-            resultDiv.textContent = `❌ Falsch! Richtiger Artikel: "${item.article}"`;
-            wrong++; // 🆕
+            wrong++;
+            resultDiv.textContent = `❌ Falsch! Richtiger Artikel: \"${item.article}\"`;
           }
-          updateScore(); // 🆕
+          extraDiv.innerHTML = `<em>Plural:</em> ${item.plural}<br><em>Beispiel:</em> ${item.example}`;
+          updateScore();
           nextBtn.style.display = "block";
         };
         optionsDiv.appendChild(btn);
