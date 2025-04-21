@@ -125,7 +125,7 @@
     let wrong = 0;
 
     async function loadCSV() {
-      const res = await fetch(csvUrl);
+      const res = await fetch(csvUrl + '?t=' + new Date().getTime());
       const text = await res.text();
       const lines = text.trim().split("\n").slice(1);
       data = lines.map(line => {
