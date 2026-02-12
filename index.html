@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="manifest" href="manifest.json?v=1.2.1">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=1.2.1">
+  <link rel="icon" type="image/png" href="icon.png?v=1.2.1">
   <meta name="theme-color" content="#ffffff">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -109,7 +109,7 @@
     <img src="icon.png" alt="Logo" style="width: 300px; height: 300px;" />
   </div>
   <h1 style="margin-bottom: 0.5rem;">Welcher Artikel?</h1>
-  <h2 style="margin-top: 0.2rem; margin-bottom: 0.2rem;">VHS Charlottenburg A.2</h2>
+  <h2 style="margin-top: 0.2rem; margin-bottom: 0.2rem;">Italian version</h2>
   <hr style="margin: 0rem 0;">
   <div class="counter" id="score" style="margin-top: 2rem; margin-bottom: 2.5rem;">✅ Richtig: 0 ❌ Falsch: 0</div>
   <div class="quiz" style="margin-top: -0.5rem;">
@@ -202,21 +202,39 @@
       document.getElementById("splash").style.display = "none";
     }, 4000);
   </script>
+  
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js')
-          .then(registration => {
-            console.log('ServiceWorker registrato con successo:', registration);
-          })
-          .catch(error => {
-            console.log('ServiceWorker registration failed:', error);
+      window.addEventListener('load', async () => {
+        try {
+          const reg = await navigator.serviceWorker.register('service-worker.js?v=1.2.1');
+  
+          // Se c'è un SW nuovo in attesa, attivalo subito
+          if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+  
+          reg.addEventListener('updatefound', () => {
+            const nw = reg.installing;
+            if (!nw) return;
+            nw.addEventListener('statechange', () => {
+              if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+                nw.postMessage({ type: 'SKIP_WAITING' });
+              }
+            });
           });
+  
+          // Quando il nuovo SW prende il controllo, ricarica la pagina
+          navigator.serviceWorker.addEventListener('controllerchange', () => {
+            window.location.reload();
+          });
+        } catch (e) {
+          console.log('ServiceWorker registration failed:', e);
+        }
       });
     }
   </script>
+
   <footer style="text-align: center; font-size: 0.8rem; color: #888; margin-top: 2rem;">
-    by Marco P // Ver. 1.2 // 2025
+    by Marco P // Ver. 1.3 // 2026
   </footer>
 </body>
 </html>
