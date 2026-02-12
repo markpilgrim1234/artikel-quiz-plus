@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Über mich – Welcher Artikel?</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="icon.png">
+  <meta name="theme-color" content="#ffffff">
+
+  <style>
+    :root{
+      --bg: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --card: #ffffff;
+      --border: #e5e7eb;
+      --shadow: 0 10px 25px rgba(0,0,0,0.06);
+      --radius: 14px;
+
+      --donate: #169BD7;
+      --donateHover: #1287BC;
+    }
+
+    *{ box-sizing: border-box; }
+    body{
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.55;
+      overflow-x: hidden;
+    }
+
+    header{
+      position: sticky;
+      top: 0;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      z-index: 10;
+    }
+
+    .topbar{
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .brand img{
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+    }
+    .titles{
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .titles h1{
+      margin: 0;
+      font-size: 1.05rem;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .titles p{
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .btn{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .05s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+      white-space: nowrap;
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn:hover{ border-color: #d1d5db; background: #fafafa; box-shadow: 0 6px 18px rgba(0,0,0,0.06); }
+
+    .btnDonate{
+      background: var(--donate);
+      border-color: var(--donate);
+      color: #fff;
+      box-shadow: 0 6px 18px rgba(22,155,215,0.25);
+    }
+    .btnDonate:hover{
+      background: var(--donateHover);
+      border-color: var(--donateHover);
+    }
+
+    .wrap{
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 18px 16px 28px;
+    }
+
+    .hero{
+      margin: 18px 0 14px;
+      padding: 18px 18px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 14px;
+    }
+
+    .heroTop{
+      display: grid;
+      gap: 14px;
+    }
+
+    @media (min-width: 700px){
+      .heroTop{
+        grid-template-columns: 180px 1fr;
+        align-items: center;
+      }
+    }
+
+    .avatar{
+      width: 180px;
+      height: 180px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      object-fit: cover;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      background: #fff;
+    }
+
+    .hero h2{
+      margin: 0 0 6px;
+      font-size: 1.35rem;
+      letter-spacing: 0.2px;
+    }
+
+    .hero p{
+      margin: 0;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .card{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .content{
+      padding: 16px;
+      font-size: 1.03rem;
+    }
+
+    .content p{
+      margin: 0 0 12px;
+      color: #374151;
+    }
+
+    .content p:last-child{
+      margin-bottom: 0;
+    }
+
+    footer{
+      margin-top: 18px;
+      text-align: center;
+      color: #888;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="topbar">
+      <div class="brand">
+        <img src="icon.png" alt="Logo" />
+        <div class="titles">
+          <h1>Über mich</h1>
+          <p>Welcher Artikel?</p>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; align-items:center;">
+        <a class="btn" href="index.html" aria-label="Zum Quiz zurückkehren">⬅️ Torna al quiz</a>
+        <a class="btn btnDonate" href="https://www.paypal.com/donate/?hosted_button_id=5HNZSM7VZTNA6" target="_blank" rel="noopener noreferrer" aria-label="Donate via PayPal">Donate</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <section class="hero">
+      <div class="heroTop">
+        <img class="avatar" src="picdeu.png" alt="Marco – Illustration" />
+        <div>
+          <h2>Hallo! Ich bin Marco.</h2>
+          <p>Ich komme aus Italien und lebe in Deutschland.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="content">
+        <p>
+          Wie viele andere finde ich Deutschlernen manchmal ziemlich schwierig – besonders die Artikel
+          (<strong>der / die / das</strong>).
+        </p>
+        <p>
+          Darum habe ich dieses kleine Quiz gebaut: zuerst als Hilfe für mich selbst, und vielleicht auch für alle,
+          die in einer ähnlichen Situation sind.
+        </p>
+        <p>
+          Ich hoffe, dir macht die Seite Spaß und sie hilft dir beim Lernen. Wenn du das Projekt unterstützen
+          möchtest, freue ich mich über eine kleine Spende. Damit kann ich die Seite online halten, verbessern und
+          neue Ideen umsetzen, die schon in Planung sind. Danke! 🙌
+        </p>
+      </div>
+    </section>
+
+    <footer>
+      by Marco P // Über mich // 2026
+    </footer>
+  </div>
+</body>
+</html>
