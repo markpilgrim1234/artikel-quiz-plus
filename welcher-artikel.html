@@ -1,9 +1,13 @@
+
+
+
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Welcher Artikel? – Quiz</title>
+  <title>DeutschBuddy – Welcher Artikel?</title>
 
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -12,7 +16,6 @@
 
   <style>
     :root{
-      /* Same colors as your game buttons */
       --der: #000000;
       --die: #e94e3c;
       --das: #f4c542;
@@ -60,13 +63,16 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
+      flex-wrap: wrap;
     }
 
-    .brand{
+    .brand a{
       display: flex;
       align-items: center;
       gap: 10px;
       min-width: 0;
+      text-decoration: none;
+      color: inherit;
     }
 
     .brand img{
@@ -99,7 +105,6 @@
       text-overflow: ellipsis;
     }
 
-    /* Pill button */
     .btn{
       display: inline-flex;
       align-items: center;
@@ -124,7 +129,6 @@
       box-shadow: 0 6px 18px rgba(0,0,0,0.06);
     }
 
-    /* Donate (blue) */
     .btnDonate{
       background: var(--donate);
       border-color: var(--donate);
@@ -136,7 +140,6 @@
       border-color: var(--donateHover);
     }
 
-    /* Small pill buttons */
     .btnSmall{
       padding: 7px 10px;
       font-size: 0.9rem;
@@ -144,7 +147,6 @@
       box-shadow: none;
     }
 
-    /* Reset small (light gray background) */
     .btnResetSmall{
       background: var(--resetBg);
       border-color: var(--border);
@@ -186,16 +188,12 @@
       margin: 0 0 6px;
       font-size: 1.35rem;
       letter-spacing: 0.2px;
+      font-weight: 900;
     }
     .heroSub{
       margin: 0;
       color: var(--muted);
       font-size: 1rem;
-    }
-    .heroNote{
-      margin: 10px 0 0;
-      color: var(--muted);
-      font-size: 0.95rem;
     }
 
     .card{
@@ -424,35 +422,38 @@
 
 <body>
   <!-- Splash -->
-  <div id="splash">
+  <div id="splash" aria-label="Ladebildschirm">
     <h1>Welcher Artikel?</h1>
-    <img src="icon.png" alt="Logo">
+    <img src="icon.png" alt="DeutschBuddy Logo">
   </div>
 
   <!-- Top bar -->
   <header>
     <div class="topbar">
       <div class="brand">
-        <img src="icon.png" alt="Logo">
-        <div class="titles">
-          <h1>Quiz</h1>
-          <p>Welcher Artikel?</p>
-        </div>
+        <a href="index.html" aria-label="Zur Startseite">
+          <img src="icon.png" alt="DeutschBuddy Logo">
+          <div class="titles">
+            <h1>DeutschBuddy</h1>
+            <p>Welcher Artikel?</p>
+          </div>
+        </a>
       </div>
 
       <div style="display:flex; gap:10px; align-items:center;">
-        <a class="btn" href="artikelregeln.html" aria-label="Artikelregeln öffnen">Artikelregeln</a>
-        <a class="btn btnDonate" href="https://www.paypal.com/donate/?hosted_button_id=5HNZSM7VZTNA6" target="_blank" rel="noopener noreferrer" aria-label="Donate via PayPal">
-          Donate
-        </a>
+        <a class="btn" href="index.html" aria-label="Zur Startseite">Start</a>
+        <a class="btn" href="artikelregeln.html" aria-label="Artikelregeln öffnen">Regeln</a>
       </div>
     </div>
   </header>
 
   <div class="wrap">
     <section class="hero">
-      <h2 class="heroTitle">Wähle den richtigen Artikel !! ⚠ TEST PAGE ⚠ !!</h2>
-      <p class="heroSub">Tippe auf <strong>der</strong>, <strong>die</strong> oder <strong>das</strong>. Danach geht es automatisch weiter (3 Sekunden).</p>
+      <h2 class="heroTitle">Wähle den richtigen Artikel.</h2>
+      <p class="heroSub">
+        Tippe auf <strong>der</strong>, <strong>die</strong> oder <strong>das</strong>.
+        Danach geht es automatisch weiter (3 Sekunden).
+      </p>
     </section>
 
     <div class="grid">
@@ -474,15 +475,14 @@
 
           <div class="options" id="options"></div>
 
-          <div class="result" id="result"></div>
+          <div class="result" id="result" aria-live="polite"></div>
 
-          <div class="extra" id="extra"></div>
+          <div class="extra" id="extra" aria-live="polite"></div>
 
-          <!-- Countdown + Pause + Reset (together) -->
           <div class="countdownRow">
             <div id="countdown"></div>
             <button id="pauseBtn" class="btn btnSmall" type="button">Pause</button>
-            <button id="resetBtn" class="btn btnSmall btnResetSmall" type="button" title="Reset game">Reset</button>
+            <button id="resetBtn" class="btn btnSmall btnResetSmall" type="button" title="Reset">Reset</button>
           </div>
         </div>
       </section>
@@ -492,7 +492,7 @@
         <div class="cardHead">
           <div class="cardHeadLeft">
             <p class="title">Antworten</p>
-            <p class="subtitle">Du hast / ✓✗ / Richtig</p>
+            <p class="subtitle">Deine Antwort / Ergebnis / Richtig wäre</p>
           </div>
         </div>
 
@@ -500,9 +500,9 @@
           <table aria-label="Antworten Tabelle">
             <thead>
               <tr>
-                <th>Du hast</th>
-                <th class="status">✓/✗</th>
-                <th>Richtig</th>
+                <th>Deine Antwort</th>
+                <th class="status">Ergebnis</th>
+                <th>Richtig wäre</th>
               </tr>
             </thead>
             <tbody id="historyBody"></tbody>
@@ -511,10 +511,14 @@
       </section>
     </div>
 
-    <!-- Donate line + small donate button -->
+    <!-- Support -->
     <div class="donateBar">
-      <span>Hilft dir das Quiz? Eine kleine Spende hält die Seite online und ermöglicht neue Updates. Danke!</span>
-      <a class="btn btnDonate btnSmall" href="https://www.paypal.com/donate/?hosted_button_id=5HNZSM7VZTNA6" target="_blank" rel="noopener noreferrer">Donate</a>
+      <span>Gefällt dir das Quiz? Unterstütze das Projekt, damit neue Updates möglich sind. Danke!</span>
+      <a class="btn btnDonate btnSmall"
+         href="https://www.paypal.com/donate/?hosted_button_id=5HNZSM7VZTNA6"
+         target="_blank" rel="noopener noreferrer">
+        Projekt unterstützen / Donate
+      </a>
     </div>
 
     <footer>
@@ -526,7 +530,9 @@
   </div>
 
   <script>
-    const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTLMG3zUFzaLSA82QS7T4E8IAHiung0H2LYRU8hoi_svBol2OoFWmTFBhGVhCPxK2xGtADv1sM9guDr/pub?output=csv";
+    // TIP: Use TSV to avoid bugs with commas inside text (examples often contain commas).
+    const dataUrl =
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vTLMG3zUFzaLSA82QS7T4E8IAHiung0H2LYRU8hoi_svBol2OoFWmTFBhGVhCPxK2xGtADv1sM9guDr/pub?output=tsv";
 
     let data = [];
     let current = 0;
@@ -538,26 +544,40 @@
     let countdownTimer = null;
     let remaining = 0;
 
-    async function loadCSV() {
-      const res = await fetch(csvUrl + '&t=' + new Date().getTime());
-      const text = await res.text();
-      const lines = text.trim().split("\n").slice(1);
+    function safeText(v) {
+      return (v ?? "").toString().trim();
+    }
 
-      data = lines.map(line => {
-        const [article, word, plural, example, italian] = line.split(",");
-        return {
-          article: article?.trim(),
-          word: word?.trim(),
-          plural: plural?.trim(),
-          example: example?.trim(),
-          italian: italian?.trim()
-        };
-      });
+    async function loadData() {
+      try {
+        const res = await fetch(dataUrl + "&t=" + Date.now());
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const text = await res.text();
 
-      shuffle(data);
-      current = 0;
-      updateScore();
-      loadQuestion();
+        const lines = text.trim().split("\n").slice(1);
+        data = lines
+          .map(line => line.split("\t"))
+          .map(cols => {
+            const [article, word, plural, example, italian] = cols;
+            return {
+              article: safeText(article),
+              word: safeText(word),
+              plural: safeText(plural),
+              example: safeText(example),
+              italian: safeText(italian)
+            };
+          })
+          .filter(item => item.word && item.article);
+
+        shuffle(data);
+        current = 0;
+        updateScore();
+        loadQuestion();
+      } catch (e) {
+        document.getElementById("word").textContent = "Fehler beim Laden 😕";
+        document.getElementById("result").textContent = "Bitte prüfe deine Verbindung und lade die Seite neu.";
+        console.error(e);
+      }
     }
 
     function shuffle(array) {
@@ -588,6 +608,7 @@
     }
 
     function nextQuestion() {
+      if (!data.length) return;
       current = (current + 1) % data.length;
       loadQuestion();
     }
@@ -657,22 +678,41 @@
       }
     }
 
+    function renderExtra(item) {
+      const extra = document.getElementById("extra");
+      extra.innerHTML = ""; // clear safely
+
+      const rows = [
+        ["Plural:", item.plural],
+        ["Beispiel:", item.example],
+        ["Italienisch:", item.italian],
+      ];
+
+      rows.forEach(([label, value]) => {
+        const line = document.createElement("div");
+        const strong = document.createElement("strong");
+        strong.textContent = label + " ";
+        line.appendChild(strong);
+        line.appendChild(document.createTextNode(value || "—"));
+        extra.appendChild(line);
+      });
+    }
+
     function loadQuestion() {
       if (!data.length) return;
 
       clearCountdown(false);
 
       const item = data[current];
-      document.getElementById("word").textContent = `${item.word}`;
+      document.getElementById("word").textContent = item.word || "—";
 
       const options = ["der", "die", "das"];
       const optionsDiv = document.getElementById("options");
       const resultDiv = document.getElementById("result");
-      const extraDiv = document.getElementById("extra");
 
       optionsDiv.innerHTML = "";
       resultDiv.textContent = "";
-      extraDiv.innerHTML = "";
+      document.getElementById("extra").textContent = "";
       setCountdownText("");
 
       options.forEach(opt => {
@@ -687,16 +727,14 @@
           if (isCorrect) {
             correct++;
             resultDiv.textContent = "✅ Richtig!";
+            if (navigator.vibrate) navigator.vibrate(10);
           } else {
             wrong++;
             resultDiv.textContent = `❌ Falsch! Richtiger Artikel: "${item.article}"`;
+            if (navigator.vibrate) navigator.vibrate([30, 20, 30]);
           }
 
-          extraDiv.innerHTML =
-            `<strong>Plural:</strong> ${item.plural}<br>` +
-            `<strong>Beispiel:</strong> ${item.example}<br>` +
-            `<strong>Italienisch:</strong> ${item.italian}`;
-
+          renderExtra(item);
           updateScore();
           addHistoryRow(opt, item.word, isCorrect, item.article);
 
@@ -707,7 +745,7 @@
       });
     }
 
-    // Reset button
+    // Reset
     document.getElementById("resetBtn").onclick = () => {
       correct = 0;
       wrong = 0;
@@ -716,7 +754,7 @@
       shuffle(data);
 
       document.getElementById("result").textContent = "";
-      document.getElementById("extra").innerHTML = "";
+      document.getElementById("extra").textContent = "";
       document.getElementById("historyBody").innerHTML = "";
       clearCountdown(false);
 
@@ -732,7 +770,6 @@
       btn.textContent = autoEnabled ? "Pause" : "Weiter";
 
       if (!autoEnabled) {
-        // stop timer but keep remaining seconds
         if (countdownTimer) {
           clearInterval(countdownTimer);
           countdownTimer = null;
@@ -741,7 +778,6 @@
         return;
       }
 
-      // resume
       if (remaining > 0) {
         startCountdown(remaining);
       } else {
@@ -751,16 +787,13 @@
 
     // Start
     updateScore();
-    loadCSV();
+    loadData();
 
     // Splash hide
     setTimeout(() => {
       const splash = document.getElementById("splash");
       if (splash) splash.style.display = "none";
-    }, 1200);
+    }, 1000);
   </script>
 </body>
 </html>
-
-
-
