@@ -24,6 +24,12 @@
       --border: #e5e7eb;
       --shadow: 0 10px 25px rgba(0,0,0,0.06);
       --radius: 14px;
+
+      --donate: #169BD7;
+      --donateHover: #1287BC;
+
+      --resetBg: #f3f4f6;
+      --resetHover: #e5e7eb;
     }
 
     *{ box-sizing: border-box; }
@@ -37,7 +43,6 @@
       overflow-x: hidden;
     }
 
-    /* Top bar */
     header{
       position: sticky;
       top: 0;
@@ -94,7 +99,7 @@
       text-overflow: ellipsis;
     }
 
-    /* Pill button (like "Zum Spiel zurückkehren") */
+    /* Pill button */
     .btn{
       display: inline-flex;
       align-items: center;
@@ -119,24 +124,35 @@
       box-shadow: 0 6px 18px rgba(0,0,0,0.06);
     }
 
+    /* Donate (blue) */
     .btnDonate{
-      background: #169BD7;
-      border-color: #169BD7;
+      background: var(--donate);
+      border-color: var(--donate);
       color: #fff;
       box-shadow: 0 6px 18px rgba(22,155,215,0.25);
     }
     .btnDonate:hover{
-      background: #1287BC;
-      border-color: #1287BC;
+      background: var(--donateHover);
+      border-color: var(--donateHover);
     }
 
-    
-
-    /* Smaller pill button (Pause) */
+    /* Small pill buttons */
     .btnSmall{
       padding: 7px 10px;
       font-size: 0.9rem;
       border-radius: 999px;
+      box-shadow: none;
+    }
+
+    /* Reset small (light gray background) */
+    .btnResetSmall{
+      background: var(--resetBg);
+      border-color: var(--border);
+      color: #374151;
+    }
+    .btnResetSmall:hover{
+      background: var(--resetHover);
+      border-color: #d1d5db;
       box-shadow: none;
     }
 
@@ -238,21 +254,6 @@
       white-space: nowrap;
     }
 
-    .miniBtn{
-      border: 1px solid var(--border);
-      background: #fff;
-      color: #444;
-      font-weight: 700;
-      font-size: 0.85rem;
-      padding: 6px 10px;
-      border-radius: 999px;
-      cursor: pointer;
-    }
-    .miniBtn:hover{
-      border-color: #d1d5db;
-      background: #fafafa;
-    }
-
     .content{
       padding: 16px;
     }
@@ -324,6 +325,7 @@
       justify-content: center;
       gap: 10px;
       min-height: 40px;
+      flex-wrap: wrap;
     }
 
     #countdown{
@@ -370,9 +372,14 @@
     .bad{ color: #b91c1c; }
     .mutedCell{ color: var(--muted); }
 
-    /* Donate micro text (<=127 chars) */
-    .donateLine{
-      margin-top: 10px;
+    /* Donate line + small donate button */
+    .donateBar{
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
       color: var(--muted);
       font-size: 0.95rem;
       text-align: center;
@@ -404,6 +411,13 @@
       text-align: center;
       color: #888;
       font-size: 0.85rem;
+    }
+    .footerRow{
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
     }
   </style>
 </head>
@@ -453,7 +467,6 @@
 
           <div class="scoreRow" aria-label="Punktestand">
             <div id="score">✅ Richtig: 0 ❌ Falsch: 0</div>
-            <button id="resetBtn" class="miniBtn" type="button" title="Reset game">Reset</button>
           </div>
         </div>
 
@@ -466,10 +479,11 @@
 
           <div class="extra" id="extra"></div>
 
-          <!-- Countdown + Pause (now together) -->
+          <!-- Countdown + Pause + Reset (together) -->
           <div class="countdownRow">
             <div id="countdown"></div>
             <button id="pauseBtn" class="btn btnSmall" type="button">Pause</button>
+            <button id="resetBtn" class="btn btnSmall btnResetSmall" type="button" title="Reset game">Reset</button>
           </div>
         </div>
       </section>
@@ -498,12 +512,17 @@
       </section>
     </div>
 
-    <div class="donateLine">
-      Hilft dir das Quiz? Eine kleine Spende hält die Seite online und ermöglicht neue Updates. Danke!
+    <!-- Donate line + small donate button -->
+    <div class="donateBar">
+      <span>Hilft dir das Quiz? Eine kleine Spende hält die Seite online und ermöglicht neue Updates. Danke!</span>
+      <a class="btn btnDonate btnSmall" href="https://www.paypal.com/donate/?hosted_button_id=5HNZSM7VZTNA6" target="_blank" rel="noopener noreferrer">Donate</a>
     </div>
 
     <footer>
-      by Marco P // Ver. 1.6 // 2026
+      <div class="footerRow">
+        <span>by Marco P // Ver. 1.7 // 2026</span>
+        <a class="btn btnSmall" href="ueber-mich.html" aria-label="Über mich">Über mich</a>
+      </div>
     </footer>
   </div>
 
@@ -515,7 +534,6 @@
     let correct = 0;
     let wrong = 0;
 
-    // Auto-next timer (3 seconds)
     const AUTO_SECONDS = 3;
     let autoEnabled = true;
     let countdownTimer = null;
@@ -561,13 +579,13 @@
       document.getElementById("countdown").textContent = text || "";
     }
 
-    function clearCountdown() {
+    function clearCountdown(keepRemaining = false) {
       if (countdownTimer) {
         clearInterval(countdownTimer);
         countdownTimer = null;
       }
-      remaining = 0;
-      setCountdownText("");
+      if (!keepRemaining) remaining = 0;
+      if (!keepRemaining) setCountdownText("");
     }
 
     function nextQuestion() {
@@ -575,9 +593,9 @@
       loadQuestion();
     }
 
-    function startCountdownThenNext() {
-      clearCountdown();
-      remaining = AUTO_SECONDS;
+    function startCountdown(seconds) {
+      clearCountdown(false);
+      remaining = seconds;
 
       if (!autoEnabled) {
         setCountdownText("Pausiert");
@@ -588,8 +606,7 @@
 
       countdownTimer = setInterval(() => {
         if (!autoEnabled) {
-          clearInterval(countdownTimer);
-          countdownTimer = null;
+          clearCountdown(true);
           setCountdownText("Pausiert");
           return;
         }
@@ -599,10 +616,14 @@
         if (remaining > 0) {
           setCountdownText(`Nächstes Wort in ${remaining}…`);
         } else {
-          clearCountdown();
+          clearCountdown(false);
           nextQuestion();
         }
       }, 1000);
+    }
+
+    function startCountdownThenNext() {
+      startCountdown(AUTO_SECONDS);
     }
 
     function addHistoryRow(chosenArticle, word, isCorrect, correctArticle) {
@@ -640,7 +661,7 @@
     function loadQuestion() {
       if (!data.length) return;
 
-      clearCountdown();
+      clearCountdown(false);
 
       const item = data[current];
       document.getElementById("word").textContent = `${item.word}`;
@@ -653,13 +674,13 @@
       optionsDiv.innerHTML = "";
       resultDiv.textContent = "";
       extraDiv.innerHTML = "";
+      setCountdownText("");
 
       options.forEach(opt => {
         const btn = document.createElement("button");
         btn.textContent = opt;
 
         btn.onclick = () => {
-          // disable all buttons after one click
           Array.from(optionsDiv.querySelectorAll("button")).forEach(b => b.disabled = true);
 
           const isCorrect = (opt === item.article);
@@ -672,7 +693,6 @@
             resultDiv.textContent = `❌ Falsch! Richtiger Artikel: "${item.article}"`;
           }
 
-          // Keep Italian translation (Option A)
           extraDiv.innerHTML =
             `<strong>Plural:</strong> ${item.plural}<br>` +
             `<strong>Beispiel:</strong> ${item.example}<br>` +
@@ -686,9 +706,6 @@
 
         optionsDiv.appendChild(btn);
       });
-
-      // countdown visible only after an answer; keep empty here
-      setCountdownText("");
     }
 
     // Reset button
@@ -702,28 +719,34 @@
       document.getElementById("result").textContent = "";
       document.getElementById("extra").innerHTML = "";
       document.getElementById("historyBody").innerHTML = "";
-      clearCountdown();
+      clearCountdown(false);
 
       updateScore();
       loadQuestion();
     };
 
-    // Pause toggle (now near countdown)
+    // Pause toggle
     document.getElementById("pauseBtn").onclick = () => {
       autoEnabled = !autoEnabled;
 
       const btn = document.getElementById("pauseBtn");
       btn.textContent = autoEnabled ? "Pause" : "Weiter";
 
-      if (autoEnabled) {
-        if (remaining > 0) {
-          // resume the countdown cleanly
-          startCountdownThenNext();
-        } else {
-          setCountdownText("");
+      if (!autoEnabled) {
+        // stop timer but keep remaining seconds
+        if (countdownTimer) {
+          clearInterval(countdownTimer);
+          countdownTimer = null;
         }
-      } else {
         setCountdownText("Pausiert");
+        return;
+      }
+
+      // resume
+      if (remaining > 0) {
+        startCountdown(remaining);
+      } else {
+        setCountdownText("");
       }
     };
 
@@ -739,5 +762,6 @@
   </script>
 </body>
 </html>
+
 
 
