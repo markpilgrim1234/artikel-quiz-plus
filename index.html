@@ -24,8 +24,6 @@
       --border: #e5e7eb;
       --shadow: 0 10px 25px rgba(0,0,0,0.06);
       --radius: 14px;
-
-      --green: #21bf73;
     }
 
     *{ box-sizing: border-box; }
@@ -164,6 +162,11 @@
       margin: 0;
       color: var(--muted);
       font-size: 1rem;
+    }
+    .heroNote{
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
     }
 
     .card{
@@ -315,6 +318,7 @@
       color: var(--muted);
       font-size: 0.95rem;
       text-align: center;
+      white-space: nowrap;
     }
 
     /* History table */
@@ -349,9 +353,17 @@
       font-weight: 900;
       white-space: nowrap;
     }
-    .ok{ color: #0f766e; }     /* teal-ish */
-    .bad{ color: #b91c1c; }    /* red-ish */
+    .ok{ color: #0f766e; }
+    .bad{ color: #b91c1c; }
     .mutedCell{ color: var(--muted); }
+
+    /* Donate micro text (<=127 chars) */
+    .donateLine{
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      text-align: center;
+    }
 
     /* Splash */
     #splash{
@@ -397,13 +409,15 @@
         <img src="icon.png" alt="Logo">
         <div class="titles">
           <h1>Quiz</h1>
-          <p>Welcher Artikel? – A2</p>
+          <p>Welcher Artikel?</p>
         </div>
       </div>
 
       <div style="display:flex; gap:10px; align-items:center;">
-        <button id="pauseBtn" class="btn btnSmall" type="button">Pause</button>
         <a class="btn" href="artikelregeln.html" aria-label="Artikelregeln öffnen">Artikelregeln</a>
+        <a class="btn" href="https://www.paypal.com/donate/?hosted_button_id=5HNZSM7VZTNA6" target="_blank" rel="noopener noreferrer" aria-label="Donate via PayPal">
+          Donate
+        </a>
       </div>
     </div>
   </header>
@@ -411,7 +425,8 @@
   <div class="wrap">
     <section class="hero">
       <h2 class="heroTitle">Wähle den richtigen Artikel</h2>
-      <p class="heroSub">Tippe auf <strong>der</strong>, <strong>die</strong> oder <strong>das</strong>. Danach geht es automatisch weiter (2 Sekunden).</p>
+      <p class="heroSub">Tippe auf <strong>der</strong>, <strong>die</strong> oder <strong>das</strong>. Danach geht es automatisch weiter (3 Sekunden).</p>
+      <p class="heroNote">Für Italiener: Deutsch lernen mit italienischer Übersetzung.</p>
     </section>
 
     <div class="grid">
@@ -438,8 +453,10 @@
 
           <div class="extra" id="extra"></div>
 
+          <!-- Countdown + Pause (now together) -->
           <div class="countdownRow">
             <div id="countdown"></div>
+            <button id="pauseBtn" class="btn btnSmall" type="button">Pause</button>
           </div>
         </div>
       </section>
@@ -462,16 +479,18 @@
                 <th>Richtig</th>
               </tr>
             </thead>
-            <tbody id="historyBody">
-              <!-- rows inserted by JS -->
-            </tbody>
+            <tbody id="historyBody"></tbody>
           </table>
         </div>
       </section>
     </div>
 
+    <div class="donateLine">
+      Hilft dir das Quiz? Eine kleine Spende hält die Seite online und ermöglicht neue Updates. Danke!
+    </div>
+
     <footer>
-      by Marco P // Ver. 1.5 // 2026
+      by Marco P // Ver. 1.6 // 2026
     </footer>
   </div>
 
@@ -483,8 +502,8 @@
     let correct = 0;
     let wrong = 0;
 
-    // Auto-next timer (2 seconds)
-    const AUTO_SECONDS = 2;
+    // Auto-next timer (3 seconds)
+    const AUTO_SECONDS = 3;
     let autoEnabled = true;
     let countdownTimer = null;
     let remaining = 0;
@@ -538,11 +557,15 @@
       setCountdownText("");
     }
 
+    function nextQuestion() {
+      current = (current + 1) % data.length;
+      loadQuestion();
+    }
+
     function startCountdownThenNext() {
       clearCountdown();
       remaining = AUTO_SECONDS;
 
-      // If paused, do nothing
       if (!autoEnabled) {
         setCountdownText("Pausiert");
         return;
@@ -551,7 +574,6 @@
       setCountdownText(`Nächstes Wort in ${remaining}…`);
 
       countdownTimer = setInterval(() => {
-        // If paused mid-countdown, stop and show paused
         if (!autoEnabled) {
           clearInterval(countdownTimer);
           countdownTimer = null;
@@ -568,11 +590,6 @@
           nextQuestion();
         }
       }, 1000);
-    }
-
-    function nextQuestion() {
-      current = (current + 1) % data.length;
-      loadQuestion();
     }
 
     function addHistoryRow(chosenArticle, word, isCorrect, correctArticle) {
@@ -599,10 +616,8 @@
       tr.appendChild(tdStatus);
       tr.appendChild(tdRight);
 
-      // Add on top (newest first)
       tbody.prepend(tr);
 
-      // Optional: limit rows to keep it tidy
       const MAX_ROWS = 200;
       while (tbody.children.length > MAX_ROWS) {
         tbody.removeChild(tbody.lastChild);
@@ -644,6 +659,7 @@
             resultDiv.textContent = `❌ Falsch! Richtiger Artikel: "${item.article}"`;
           }
 
+          // Keep Italian translation (Option A)
           extraDiv.innerHTML =
             `<strong>Plural:</strong> ${item.plural}<br>` +
             `<strong>Beispiel:</strong> ${item.example}<br>` +
@@ -652,12 +668,14 @@
           updateScore();
           addHistoryRow(opt, item.word, isCorrect, item.article);
 
-          // auto next with countdown
           startCountdownThenNext();
         };
 
         optionsDiv.appendChild(btn);
       });
+
+      // countdown visible only after an answer; keep empty here
+      setCountdownText("");
     }
 
     // Reset button
@@ -666,10 +684,8 @@
       wrong = 0;
       current = 0;
 
-      // fresh order
       shuffle(data);
 
-      // clear UI
       document.getElementById("result").textContent = "";
       document.getElementById("extra").innerHTML = "";
       document.getElementById("historyBody").innerHTML = "";
@@ -679,23 +695,21 @@
       loadQuestion();
     };
 
-    // Pause toggle
+    // Pause toggle (now near countdown)
     document.getElementById("pauseBtn").onclick = () => {
       autoEnabled = !autoEnabled;
 
       const btn = document.getElementById("pauseBtn");
       btn.textContent = autoEnabled ? "Pause" : "Weiter";
 
-      // If enabling again and there is remaining time, resume countdown
       if (autoEnabled) {
-        // If the user already answered and countdown was paused, continue
         if (remaining > 0) {
+          // resume the countdown cleanly
           startCountdownThenNext();
         } else {
           setCountdownText("");
         }
       } else {
-        // Pause
         setCountdownText("Pausiert");
       }
     };
@@ -712,4 +726,5 @@
   </script>
 </body>
 </html>
+
 
