@@ -50,7 +50,7 @@
     }
 
     .topbar{
-      max-width: 760px;
+      max-width: 1100px;
       margin: 0 auto;
       padding: 14px 16px;
       display: flex;
@@ -96,25 +96,55 @@
       text-overflow: ellipsis;
     }
 
-    /* Clean link like a website nav */
-    .navlink{
-      font-weight: 700;
-      color: #1f4fd6;
+    /* Pill button (like "Zum Spiel zurückkehren") */
+    .btn{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
       text-decoration: none;
-      padding: 8px 10px;
-      border-radius: 10px;
-      border: 1px solid transparent;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .05s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
       white-space: nowrap;
     }
-    .navlink:hover{
-      background: rgba(31,79,214,0.06);
-      border-color: rgba(31,79,214,0.15);
+    .btn:active{ transform: translateY(1px); }
+    .btn:hover{
+      border-color: #d1d5db;
+      background: #fafafa;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    }
+
+    /* Smaller pill button (Pause) */
+    .btnSmall{
+      padding: 7px 10px;
+      font-size: 0.9rem;
+      border-radius: 999px;
+      box-shadow: none;
     }
 
     .wrap{
-      max-width: 760px;
+      max-width: 1100px;
       margin: 0 auto;
       padding: 18px 16px 28px;
+    }
+
+    .grid{
+      display: grid;
+      gap: 14px;
+    }
+
+    @media (min-width: 980px){
+      .grid{
+        grid-template-columns: 1.25fr 0.9fr;
+        align-items: start;
+      }
     }
 
     .hero{
@@ -174,7 +204,6 @@
       color: var(--muted);
     }
 
-    /* Score row + small reset */
     .scoreRow{
       display: inline-flex;
       align-items: center;
@@ -237,15 +266,20 @@
       color: #fff;
       font-weight: 900;
       box-shadow: 0 10px 18px rgba(0,0,0,0.08);
-      transition: transform .05s ease, filter .2s ease;
+      transition: transform .05s ease, filter .2s ease, opacity .2s ease;
     }
     .options button:active{ transform: translateY(1px); }
     .options button:hover{ filter: brightness(0.98); }
 
-    /* Match your colors: der/die/das */
     .options button:nth-child(1){ background: var(--der); }
     .options button:nth-child(2){ background: var(--die); }
     .options button:nth-child(3){ background: var(--das); color: #111; }
+
+    .options button:disabled{
+      opacity: 0.6;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
 
     .result{
       margin-top: 14px;
@@ -267,28 +301,57 @@
       min-height: 1.2em;
     }
 
-    #nextBtn{
-      display: none;
+    .countdownRow{
       margin-top: 12px;
-      width: 100%;
-      padding: 0.95rem;
-      font-size: 1.15rem;
-      background: var(--green);
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      font-weight: 900;
-      box-shadow: 0 10px 18px rgba(0,0,0,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 40px;
     }
-    #nextBtn:hover{ filter: brightness(0.97); }
 
-    footer{
-      margin-top: 18px;
+    #countdown{
+      font-weight: 800;
+      color: var(--muted);
+      font-size: 0.95rem;
       text-align: center;
-      color: #888;
-      font-size: 0.85rem;
     }
+
+    /* History table */
+    .historyWrap{
+      max-height: 520px;
+      overflow: auto;
+      padding: 0 16px 16px;
+    }
+
+    table{
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+    th, td{
+      padding: 10px 8px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    th{
+      text-align: left;
+      color: #374151;
+      font-weight: 900;
+      position: sticky;
+      top: 0;
+      background: #fff;
+      z-index: 2;
+    }
+    td.status{
+      width: 56px;
+      text-align: center;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .ok{ color: #0f766e; }     /* teal-ish */
+    .bad{ color: #b91c1c; }    /* red-ish */
+    .mutedCell{ color: var(--muted); }
 
     /* Splash */
     #splash{
@@ -311,10 +374,11 @@
       height: 260px;
     }
 
-    @media (min-width: 700px){
-      .wrap{ padding: 22px 18px 34px; }
-      .hero{ padding: 20px; }
-      .word{ font-size: 2.4rem; }
+    footer{
+      margin-top: 18px;
+      text-align: center;
+      color: #888;
+      font-size: 0.85rem;
     }
   </style>
 </head>
@@ -333,48 +397,81 @@
         <img src="icon.png" alt="Logo">
         <div class="titles">
           <h1>Quiz</h1>
-          <p>Welcher Artikel?</p>
+          <p>Welcher Artikel? – A2</p>
         </div>
       </div>
 
-      <a class="navlink" href="artikelregeln.html">Artikelregeln</a>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <button id="pauseBtn" class="btn btnSmall" type="button">Pause</button>
+        <a class="btn" href="artikelregeln.html" aria-label="Artikelregeln öffnen">Artikelregeln</a>
+      </div>
     </div>
   </header>
 
   <div class="wrap">
     <section class="hero">
       <h2 class="heroTitle">Wähle den richtigen Artikel</h2>
-      <p class="heroSub">Tippe auf <strong>der</strong>, <strong>die</strong> oder <strong>das</strong>. Danach siehst du Plural, Beispiel und Italienisch.</p>
+      <p class="heroSub">Tippe auf <strong>der</strong>, <strong>die</strong> oder <strong>das</strong>. Danach geht es automatisch weiter (2 Sekunden).</p>
     </section>
 
-    <section class="card">
-      <div class="cardHead">
-        <div class="cardHeadLeft">
-          <p class="title">Spiel</p>
-          <p class="subtitle">Trainiere der / die / das</p>
+    <div class="grid">
+      <!-- LEFT: Quiz -->
+      <section class="card">
+        <div class="cardHead">
+          <div class="cardHeadLeft">
+            <p class="title">Spiel</p>
+            <p class="subtitle">Trainiere der / die / das</p>
+          </div>
+
+          <div class="scoreRow" aria-label="Punktestand">
+            <div id="score">✅ Richtig: 0 ❌ Falsch: 0</div>
+            <button id="resetBtn" class="miniBtn" type="button" title="Reset game">Reset</button>
+          </div>
         </div>
 
-        <div class="scoreRow" aria-label="Punktestand">
-          <div id="score">✅ Richtig: 0 ❌ Falsch: 0</div>
-          <button id="resetBtn" class="miniBtn" type="button" title="Reset game">Reset</button>
+        <div class="content">
+          <div class="word" id="word">Lade Wörter...</div>
+
+          <div class="options" id="options"></div>
+
+          <div class="result" id="result"></div>
+
+          <div class="extra" id="extra"></div>
+
+          <div class="countdownRow">
+            <div id="countdown"></div>
+          </div>
         </div>
-      </div>
+      </section>
 
-      <div class="content">
-        <div class="word" id="word">Lade Wörter...</div>
+      <!-- RIGHT: History -->
+      <section class="card">
+        <div class="cardHead">
+          <div class="cardHeadLeft">
+            <p class="title">Antworten</p>
+            <p class="subtitle">Du hast / ✓✗ / Richtig</p>
+          </div>
+        </div>
 
-        <div class="options" id="options"></div>
-
-        <div class="result" id="result"></div>
-
-        <div class="extra" id="extra"></div>
-
-        <button id="nextBtn">➡️ Nächstes Wort</button>
-      </div>
-    </section>
+        <div class="historyWrap">
+          <table aria-label="Antworten Tabelle">
+            <thead>
+              <tr>
+                <th>Du hast</th>
+                <th class="status">✓/✗</th>
+                <th>Richtig</th>
+              </tr>
+            </thead>
+            <tbody id="historyBody">
+              <!-- rows inserted by JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
 
     <footer>
-      by Marco P // Ver. 1.4 // 2026
+      by Marco P // Ver. 1.5 // 2026
     </footer>
   </div>
 
@@ -386,10 +483,15 @@
     let correct = 0;
     let wrong = 0;
 
+    // Auto-next timer (2 seconds)
+    const AUTO_SECONDS = 2;
+    let autoEnabled = true;
+    let countdownTimer = null;
+    let remaining = 0;
+
     async function loadCSV() {
       const res = await fetch(csvUrl + '&t=' + new Date().getTime());
       const text = await res.text();
-
       const lines = text.trim().split("\n").slice(1);
 
       data = lines.map(line => {
@@ -423,8 +525,94 @@
         `✅ Richtig: ${correct} ❌ Falsch: ${wrong} 📊 ${percentage}% korrekt`;
     }
 
+    function setCountdownText(text) {
+      document.getElementById("countdown").textContent = text || "";
+    }
+
+    function clearCountdown() {
+      if (countdownTimer) {
+        clearInterval(countdownTimer);
+        countdownTimer = null;
+      }
+      remaining = 0;
+      setCountdownText("");
+    }
+
+    function startCountdownThenNext() {
+      clearCountdown();
+      remaining = AUTO_SECONDS;
+
+      // If paused, do nothing
+      if (!autoEnabled) {
+        setCountdownText("Pausiert");
+        return;
+      }
+
+      setCountdownText(`Nächstes Wort in ${remaining}…`);
+
+      countdownTimer = setInterval(() => {
+        // If paused mid-countdown, stop and show paused
+        if (!autoEnabled) {
+          clearInterval(countdownTimer);
+          countdownTimer = null;
+          setCountdownText("Pausiert");
+          return;
+        }
+
+        remaining -= 1;
+
+        if (remaining > 0) {
+          setCountdownText(`Nächstes Wort in ${remaining}…`);
+        } else {
+          clearCountdown();
+          nextQuestion();
+        }
+      }, 1000);
+    }
+
+    function nextQuestion() {
+      current = (current + 1) % data.length;
+      loadQuestion();
+    }
+
+    function addHistoryRow(chosenArticle, word, isCorrect, correctArticle) {
+      const tbody = document.getElementById("historyBody");
+
+      const tr = document.createElement("tr");
+
+      const tdChosen = document.createElement("td");
+      tdChosen.textContent = `${chosenArticle} ${word}`;
+
+      const tdStatus = document.createElement("td");
+      tdStatus.className = "status " + (isCorrect ? "ok" : "bad");
+      tdStatus.textContent = isCorrect ? "✓" : "✗";
+
+      const tdRight = document.createElement("td");
+      if (isCorrect) {
+        tdRight.textContent = "—";
+        tdRight.className = "mutedCell";
+      } else {
+        tdRight.textContent = `${correctArticle} ${word}`;
+      }
+
+      tr.appendChild(tdChosen);
+      tr.appendChild(tdStatus);
+      tr.appendChild(tdRight);
+
+      // Add on top (newest first)
+      tbody.prepend(tr);
+
+      // Optional: limit rows to keep it tidy
+      const MAX_ROWS = 200;
+      while (tbody.children.length > MAX_ROWS) {
+        tbody.removeChild(tbody.lastChild);
+      }
+    }
+
     function loadQuestion() {
       if (!data.length) return;
+
+      clearCountdown();
 
       const item = data[current];
       document.getElementById("word").textContent = `${item.word}`;
@@ -433,19 +621,22 @@
       const optionsDiv = document.getElementById("options");
       const resultDiv = document.getElementById("result");
       const extraDiv = document.getElementById("extra");
-      const nextBtn = document.getElementById("nextBtn");
 
       optionsDiv.innerHTML = "";
       resultDiv.textContent = "";
       extraDiv.innerHTML = "";
-      nextBtn.style.display = "none";
 
       options.forEach(opt => {
         const btn = document.createElement("button");
         btn.textContent = opt;
 
         btn.onclick = () => {
-          if (opt === item.article) {
+          // disable all buttons after one click
+          Array.from(optionsDiv.querySelectorAll("button")).forEach(b => b.disabled = true);
+
+          const isCorrect = (opt === item.article);
+
+          if (isCorrect) {
             correct++;
             resultDiv.textContent = "✅ Richtig!";
           } else {
@@ -459,30 +650,54 @@
             `<strong>Italienisch:</strong> ${item.italian}`;
 
           updateScore();
-          nextBtn.style.display = "block";
+          addHistoryRow(opt, item.word, isCorrect, item.article);
+
+          // auto next with countdown
+          startCountdownThenNext();
         };
 
         optionsDiv.appendChild(btn);
       });
     }
 
-    document.getElementById("nextBtn").onclick = () => {
-      current = (current + 1) % data.length;
-      loadQuestion();
-    };
-
+    // Reset button
     document.getElementById("resetBtn").onclick = () => {
       correct = 0;
       wrong = 0;
       current = 0;
+
+      // fresh order
       shuffle(data);
 
+      // clear UI
       document.getElementById("result").textContent = "";
       document.getElementById("extra").innerHTML = "";
-      document.getElementById("nextBtn").style.display = "none";
+      document.getElementById("historyBody").innerHTML = "";
+      clearCountdown();
 
       updateScore();
       loadQuestion();
+    };
+
+    // Pause toggle
+    document.getElementById("pauseBtn").onclick = () => {
+      autoEnabled = !autoEnabled;
+
+      const btn = document.getElementById("pauseBtn");
+      btn.textContent = autoEnabled ? "Pause" : "Weiter";
+
+      // If enabling again and there is remaining time, resume countdown
+      if (autoEnabled) {
+        // If the user already answered and countdown was paused, continue
+        if (remaining > 0) {
+          startCountdownThenNext();
+        } else {
+          setCountdownText("");
+        }
+      } else {
+        // Pause
+        setCountdownText("Pausiert");
+      }
     };
 
     // Start
@@ -497,3 +712,4 @@
   </script>
 </body>
 </html>
+
