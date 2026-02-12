@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="it">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Artikelregeln – Welcher Artikel?</title>
+  <title>Regole degli articoli – Welcher Artikel?</title>
 
-  <!-- (Optional) Icons/manifest, same as main page -->
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" href="icon.png">
@@ -13,7 +12,7 @@
 
   <style>
     :root{
-      /* Colors aligned with your game buttons */
+      /* Colori allineati al quiz */
       --der: #000000;
       --die: #e94e3c;
       --das: #f4c542;
@@ -35,12 +34,6 @@
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
       line-height: 1.55;
       overflow-x: hidden;
-    }
-
-    .wrap{
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 18px 16px 28px;
     }
 
     header{
@@ -73,12 +66,12 @@
       height: 34px;
       border-radius: 10px;
     }
-    .brand .titles{
+    .titles{
       display: flex;
       flex-direction: column;
       min-width: 0;
     }
-    .brand h1{
+    .titles h1{
       margin: 0;
       font-size: 1.05rem;
       line-height: 1.2;
@@ -86,7 +79,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .brand p{
+    .titles p{
       margin: 0;
       color: var(--muted);
       font-size: 0.9rem;
@@ -106,14 +99,20 @@
       background: #fff;
       color: var(--text);
       text-decoration: none;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      transition: transform .05s ease, box-shadow .2s ease, border-color .2s ease;
+      transition: transform .05s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
       box-shadow: 0 2px 10px rgba(0,0,0,0.04);
       white-space: nowrap;
     }
     .btn:active{ transform: translateY(1px); }
-    .btn:hover{ border-color: #d1d5db; box-shadow: 0 6px 18px rgba(0,0,0,0.06); }
+    .btn:hover{ border-color: #d1d5db; background: #fafafa; box-shadow: 0 6px 18px rgba(0,0,0,0.06); }
+
+    .wrap{
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 18px 16px 28px;
+    }
 
     .hero{
       margin: 18px 0 14px;
@@ -152,18 +151,13 @@
       font-size: 0.95rem;
     }
     .dot{
-      width: 12px;
-      height: 12px;
-      border-radius: 999px;
+      width: 12px; height: 12px; border-radius: 999px;
     }
     .dot.der{ background: var(--der); }
     .dot.die{ background: var(--die); }
     .dot.das{ background: var(--das); }
 
-    main{
-      display: grid;
-      gap: 14px;
-    }
+    main{ display: grid; gap: 14px; }
 
     .card{
       background: var(--card);
@@ -172,7 +166,6 @@
       box-shadow: var(--shadow);
       overflow: hidden;
     }
-
     .cardHead{
       padding: 14px 16px;
       display: flex;
@@ -181,7 +174,6 @@
       gap: 10px;
       border-bottom: 1px solid var(--border);
     }
-
     .tag{
       display: inline-flex;
       align-items: center;
@@ -196,31 +188,11 @@
     .tag.die{ background: var(--die); color: #fff; }
     .tag.das{ background: var(--das); color: #111; }
 
-    .cardHead h3{
-      margin: 0;
-      font-size: 1.05rem;
-      color: var(--text);
-    }
+    .cardHead h3{ margin: 0; font-size: 1.05rem; }
+    .content{ padding: 14px 16px 16px; }
 
-    .content{
-      padding: 14px 16px 16px;
-      color: var(--text);
-    }
-
-    .sub{
-      margin: 12px 0 6px;
-      font-weight: 800;
-      font-size: 0.98rem;
-    }
-    .muted{
-      color: var(--muted);
-      margin: 0 0 10px;
-    }
-
-    ul{
-      margin: 8px 0 0 18px;
-      padding: 0;
-    }
+    .sub{ margin: 12px 0 6px; font-weight: 800; font-size: 0.98rem; }
+    ul{ margin: 8px 0 0 18px; padding: 0; }
     li{ margin: 6px 0; }
 
     .examples{
@@ -231,11 +203,10 @@
       background: #fbfbfb;
       color: #374151;
     }
-    .examples strong{ font-weight: 900; }
 
     .note{
       margin-top: 14px;
-      padding: 12px 12px;
+      padding: 12px;
       border-radius: 12px;
       border: 1px solid #dbeafe;
       background: #eff6ff;
@@ -248,11 +219,6 @@
       color: #888;
       font-size: 0.85rem;
     }
-
-    @media (min-width: 700px){
-      .wrap{ padding: 22px 18px 34px; }
-      .hero{ padding: 20px 20px; }
-    }
   </style>
 </head>
 
@@ -262,29 +228,27 @@
       <div class="brand">
         <img src="icon.png" alt="Logo" />
         <div class="titles">
-          <h1>Artikelregeln</h1>
-          <p>Welcher Artikel? – A2 Übersicht</p>
+          <h1>Regole (Italiano)</h1>
+          <p>Welcher Artikel?</p>
         </div>
       </div>
 
-      <a class="btn" href="index.html" aria-label="Zum Spiel zurückkehren">
-        ⬅️ Zum Spiel zurückkehren
-      </a>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <a class="btn" href="index.html" aria-label="Torna al quiz">⬅️ Torna al quiz</a>
+        <a class="btn" href="https://www.paypal.com/donate/?hosted_button_id=5HNZSM7VZTNA6" target="_blank" rel="noopener noreferrer" aria-label="Donate via PayPal">Donate</a>
+      </div>
     </div>
   </header>
 
   <div class="wrap">
     <section class="hero">
-      <h2>Der, die oder das?</h2>
-      <p>
-        Hier findest du einfache Regeln (A2). Oft hilft die Bedeutung oder eine typische Endung.
-        Es gibt aber Ausnahmen – lerne neue Wörter am besten immer mit Artikel.
-      </p>
+      <h2>Regole degli articoli: der / die / das</h2>
+      <p>Queste regole ti aiutano a scegliere l’articolo. Ci sono eccezioni: impara sempre il sostantivo con l’articolo.</p>
 
-      <div class="legend" aria-label="Farben im Spiel">
-        <span class="pill"><span class="dot der"></span> der (schwarz)</span>
-        <span class="pill"><span class="dot die"></span> die (rot)</span>
-        <span class="pill"><span class="dot das"></span> das (gelb)</span>
+      <div class="legend" aria-label="Colori nel quiz">
+        <span class="pill"><span class="dot der"></span> der (nero)</span>
+        <span class="pill"><span class="dot die"></span> die (rosso)</span>
+        <span class="pill"><span class="dot das"></span> das (giallo)</span>
       </div>
     </section>
 
@@ -293,37 +257,35 @@
       <section class="card">
         <div class="cardHead">
           <div class="tag der">DER</div>
-          <h3>Maskulin – oft für Männer &amp; viele feste Gruppen</h3>
+          <h3>Maschile</h3>
         </div>
         <div class="content">
-          <div class="sub">1) Personen (meist männlich)</div>
-          <p class="muted">Viele Wörter für Männer sind <strong>der</strong>.</p>
+          <div class="sub">1) Persone (spesso maschili)</div>
           <div class="examples">
-            <strong>Beispiele:</strong> der Mann, der Student, der Lehrer, der Junge, der Spezialist
-            <br><strong>Ausnahmen:</strong> das Baby, das Kind
+            <strong>Esempi:</strong> der Vater, der Bruder, der Arzt, der Bäcker, der Fahrer<br>
+            <strong>Eccezioni:</strong> das Baby, das Kind
           </div>
 
-          <div class="sub">2) Oft der</div>
+          <div class="sub">2) Spesso maschili (categorie)</div>
           <ul>
-            <li>Tageszeiten: der Morgen, der Abend</li>
-            <li>Jahreszeiten: der Sommer, der Winter</li>
-            <li>Wochentage: der Montag, der Mittwoch, der Freitag</li>
-            <li>Monate: der April, der Juni, der September</li>
-            <li>Wetter: der Regen, der Schnee, der Blitz</li>
-            <li>Himmelsrichtungen: der Süden, der Westen, der Osten</li>
-            <li>Automarken: der VW, der Fiat, der Renault</li>
-            <li>Züge: der ICE, der Regionalexpress</li>
-            <li>Alkohol: der Wein, der Schnaps, der Gin</li>
+            <li>Momenti della giornata: der Vormittag, der Nachmittag</li>
+            <li>Giorni e mesi: der Dienstag, der Donnerstag, der Oktober</li>
+            <li>Fenomeni meteo: der Wind, der Nebel</li>
+            <li>Punti cardinali: der Norden</li>
           </ul>
 
-          <div class="sub">3) Endungen (oft der)</div>
+          <div class="sub">3) Desinenze tipiche (spesso der)</div>
           <ul>
-            <li>-er: der Computer, der Drucker</li>
-            <li>-ling: der Schmetterling, der Frühling</li>
-            <li>-or: der Professor, der Motor</li>
-            <li>-ist: der Journalist, der Pazifist</li>
-            <li>-ismus: der Mechanismus, der Kapitalismus</li>
+            <li><strong>-er</strong>: der Wecker, der Toaster, der Rechner</li>
+            <li><strong>-ling</strong>: der Liebling, der Zwilling</li>
+            <li><strong>-or</strong>: der Generator, der Sensor</li>
+            <li><strong>-ist</strong>: der Tourist, der Pianist</li>
+            <li><strong>-ismus</strong>: der Tourismus, der Realismus</li>
           </ul>
+
+          <div class="note">
+            <strong>Tip veloce:</strong> molti mestieri “base” finiscono in <strong>-er</strong> e sono spesso <strong>der</strong>.
+          </div>
         </div>
       </section>
 
@@ -331,43 +293,38 @@
       <section class="card">
         <div class="cardHead">
           <div class="tag die">DIE</div>
-          <h3>Feminin – oft für Frauen &amp; viele Endungen</h3>
+          <h3>Femminile</h3>
         </div>
         <div class="content">
-          <div class="sub">1) Personen (meist weiblich)</div>
-          <p class="muted">Viele Wörter für Frauen sind <strong>die</strong>.</p>
+          <div class="sub">1) Persone (spesso femminili)</div>
           <div class="examples">
-            <strong>Beispiele:</strong> die Frau, die Lehrerin, die Professorin
-            <br><strong>Ausnahmen:</strong> das Mädchen, das Weib
+            <strong>Esempi:</strong> die Mutter, die Schwester, die Ärztin, die Verkäuferin, die Studentin<br>
+            <strong>Eccezioni:</strong> das Mädchen, das Weib
           </div>
 
-          <div class="sub">2) Oft die</div>
+          <div class="sub">2) Spesso femminili (categorie)</div>
           <ul>
-            <li>Motorradmarken: die Suzuki, die Harley Davidson, die Triumph</li>
-            <li>Schiffe: die Queen Elisabeth, die Europa</li>
-            <li>Flugzeuge: die Boing, die Concorde</li>
-            <li>Zahlen als Nomen: die Eins, die Sieben, die Neun</li>
-            <li>Blumen: die Tulpe, die Rose, die Narzisse</li>
+            <li>Fiori: die Sonnenblume, die Lilie</li>
+            <li>Numeri come sostantivi: die Drei, die Zehn</li>
+            <li>Navi (nomi): die Titanic, die Andrea Doria</li>
           </ul>
 
-          <div class="sub">3) Endungen (oft die)</div>
+          <div class="sub">3) Desinenze tipiche (spesso die)</div>
           <ul>
-            <li>-e: die Lampe, die Tasche</li>
-            <li>-t: die Fahrt, die Tat</li>
-            <li>-ei: die Bäckerei, die Wäscherei</li>
-            <li>-in: die Studentin, die Prinzessin</li>
-            <li>-schaft: die Mannschaft, die Freundschaft</li>
-            <li>-heit / -keit: die Freiheit, die Möglichkeit</li>
-            <li>-ung: die Zeitung, die Meinung</li>
-            <li>-ion: die Aktion, die Tradition</li>
-            <li>-age: die Garage, die Passage</li>
-            <li>-ur: die Agentur, die Manufaktur</li>
-            <li>-ik: die Musik, die Physik</li>
-            <li>-anz: die Toleranz, die Eleganz</li>
-            <li>-tät: die Qualität, die Realität</li>
-            <li>-ade: die Limonade, die Parade</li>
-            <li>-enz: die Präsenz, die Tendenz</li>
+            <li><strong>-e</strong>: die Straße, die Küche, die Wolke</li>
+            <li><strong>-t</strong>: die Antwort, die Sicht, die Angst</li>
+            <li><strong>-ei</strong>: die Konditorei, die Gärtnerei</li>
+            <li><strong>-in</strong>: die Musikerin, die Kollegin</li>
+            <li><strong>-schaft</strong>: die Gesellschaft, die Wissenschaft</li>
+            <li><strong>-heit / -keit</strong>: die Gesundheit, die Schwierigkeit</li>
+            <li><strong>-ung</strong>: die Rechnung, die Einladung</li>
+            <li><strong>-ion</strong>: die Information, die Situation</li>
+            <li><strong>-ur</strong>: die Kultur, die Struktur</li>
           </ul>
+
+          <div class="note">
+            <strong>Tip veloce:</strong> se un nome astratto finisce in <strong>-ung</strong> o <strong>-heit</strong>, molto spesso è <strong>die</strong>.
+          </div>
         </div>
       </section>
 
@@ -375,42 +332,37 @@
       <section class="card">
         <div class="cardHead">
           <div class="tag das">DAS</div>
-          <h3>Neutral – oft für Farben, Metalle &amp; Verben als Nomen</h3>
+          <h3>Neutro</h3>
         </div>
         <div class="content">
-          <div class="sub">1) Oft das</div>
+          <div class="sub">1) Spesso neutri (categorie)</div>
           <ul>
-            <li>Farben: das Blau, das Grün, das Weiß</li>
-            <li>Metalle: das Gold, das Silber, das Eisen</li>
-            <li>Chemische Elemente: das Helium, das Uran, das Neon</li>
-            <li>Verben als Nomen: das Lesen, das Schlafen, das Schwimmen</li>
-            <li>Adjektive als Nomen: das Gute, das Schöne</li>
-            <li>Diminutiv -chen / -lein: das Mädchen, das Häuschen</li>
+            <li>Colori (come sostantivi): das Rot, das Grau</li>
+            <li>Metalli: das Kupfer, das Zinn</li>
+            <li>Elementi chimici: das Natrium, das Chlor</li>
+            <li>Verbi sostantivati: das Kochen, das Reisen</li>
+            <li>Aggettivi sostantivati: das Wichtigste, das Neue</li>
+            <li>Diminutivi (-chen / -lein): das Brötchen, das Hündchen</li>
           </ul>
 
-          <div class="sub">2) Endungen (oft das)</div>
+          <div class="sub">2) Desinenze tipiche (spesso das)</div>
           <ul>
-            <li>-um: das Museum, das Publikum</li>
-            <li>-nis: das Ereignis, das Erlebnis</li>
-            <li>-tum: das Beamtentum, das Brauchtum</li>
-            <li>-ment: das Instrument, das Parlament</li>
-            <li>-o: das Auto, das Kino, das Motto</li>
+            <li><strong>-um</strong>: das Zentrum, das Stadium</li>
+            <li><strong>-nis</strong>: das Ergebnis, das Geheimnis</li>
+            <li><strong>-tum</strong>: das Christentum, das Eigentum</li>
+            <li><strong>-ment</strong>: das Dokument, das Experiment</li>
+            <li><strong>-o</strong>: das Radio, das Foto</li>
           </ul>
 
           <div class="note">
-            <strong>Tipp:</strong> Wenn du unsicher bist, schau auf die Endung – aber lerne am besten immer:
-            <strong>der/die/das + Wort</strong>.
+            <strong>Tip veloce:</strong> se vedi <strong>-chen</strong> o <strong>-lein</strong>, quasi sempre è <strong>das</strong>.
           </div>
         </div>
       </section>
-
-      <a class="btn" href="index.html" style="justify-self:center; margin-top: 2px;">
-        ⬅️ Zum Spiel zurückkehren
-      </a>
     </main>
 
     <footer>
-      by Marco P // Artikelregeln // 2026
+      by Marco P // Regole (Italiano) // 2026
     </footer>
   </div>
 </body>
