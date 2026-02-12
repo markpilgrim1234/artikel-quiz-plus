@@ -1,184 +1,381 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Welcher Artikel? – Quiz</title>
+
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" href="icon.png">
   <meta name="theme-color" content="#ffffff">
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Welcher Artikel?</title>
 
   <style>
-    body {
-      font-family: sans-serif;
-      padding: 1rem;
+    :root{
+      /* Same colors as your game buttons */
+      --der: #000000;
+      --die: #e94e3c;
+      --das: #f4c542;
+
+      --bg: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --card: #ffffff;
+      --border: #e5e7eb;
+      --shadow: 0 10px 25px rgba(0,0,0,0.06);
+      --radius: 14px;
+
+      --green: #21bf73;
+    }
+
+    *{ box-sizing: border-box; }
+
+    body{
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.55;
       overflow-x: hidden;
-      max-width: 600px;
-      margin: auto;
     }
 
-    h1 {
-      text-align: center;
-      font-size: 1.4rem;
-      margin-bottom: 0.5rem;
+    /* Top bar */
+    header{
+      position: sticky;
+      top: 0;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      z-index: 20;
     }
 
-    h2 {
-      text-align: center;
-      font-size: 1.2rem;
-      font-weight: normal;
-      margin-top: 0;
-      margin-bottom: 1rem;
-      color: #555;
-    }
-
-    .counter {
-      text-align: center;
-      margin-bottom: 1.2rem;
-      font-size: 1rem;
-      color: #333;
-    }
-
-    .word {
-      font-size: 2.4rem;
-      margin-bottom: 1.5rem;
-      text-align: center;
-      font-weight: bold;
-    }
-
-    .options {
+    .topbar{
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 14px 16px;
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      gap: 0.5rem;
+      gap: 12px;
     }
 
-    .options button {
-      flex: 1;
-      padding: 1.2rem;
-      font-size: 1.6rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      color: white;
-    }
-
-    /* Colors match your game */
-    .options button:nth-child(1) { background-color: #000000; } /* der */
-    .options button:nth-child(2) { background-color: #e94e3c; } /* die */
-    .options button:nth-child(3) { background-color: #f4c542; } /* das */
-
-    .result {
-      margin-top: 1.5rem;
-      font-weight: bold;
-      text-align: center;
-      font-size: 1.4rem;
-    }
-
-    .extra-info {
-      text-align: center;
-      margin-top: 1.2rem;
-      font-size: 1.1rem;
-      color: #333;
-    }
-
-    #nextBtn {
-      display: none;
-      margin-top: 1rem;
-      width: 100%;
-      padding: 1rem;
-      font-size: 1.3rem;
-      background-color: #21bf73;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    #nextBtn:hover {
-      background-color: #0056b3;
-    }
-
-    /* New buttons row */
-    .top-actions {
+    .brand{
       display: flex;
-      gap: 0.6rem;
-      margin-top: 0.8rem;
-      margin-bottom: 1.2rem;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
     }
 
-    .top-actions button,
-    .top-actions a {
-      flex: 1;
+    .brand img{
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+    }
+
+    .titles{
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .titles h1{
+      margin: 0;
+      font-size: 1.05rem;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .titles p{
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Clean link like a website nav */
+    .navlink{
+      font-weight: 700;
+      color: #1f4fd6;
+      text-decoration: none;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+    .navlink:hover{
+      background: rgba(31,79,214,0.06);
+      border-color: rgba(31,79,214,0.15);
+    }
+
+    .wrap{
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 18px 16px 28px;
+    }
+
+    .hero{
+      margin: 18px 0 14px;
+      padding: 18px 18px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+      box-shadow: var(--shadow);
+    }
+    .heroTitle{
+      margin: 0 0 6px;
+      font-size: 1.35rem;
+      letter-spacing: 0.2px;
+    }
+    .heroSub{
+      margin: 0;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .card{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .cardHead{
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .cardHeadLeft{
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .cardHeadLeft .title{
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .cardHeadLeft .subtitle{
+      margin: 0;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    /* Score row + small reset */
+    .scoreRow{
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      padding: 0.9rem;
-      font-size: 1.05rem;
-      border: none;
-      border-radius: 8px;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #fff;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    }
+
+    #score{
+      font-weight: 800;
+      font-size: 0.98rem;
+      color: #333;
+      white-space: nowrap;
+    }
+
+    .miniBtn{
+      border: 1px solid var(--border);
+      background: #fff;
+      color: #444;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 6px 10px;
+      border-radius: 999px;
       cursor: pointer;
-      text-decoration: none;
-      font-weight: 600;
+    }
+    .miniBtn:hover{
+      border-color: #d1d5db;
+      background: #fafafa;
     }
 
-    #resetBtn {
-      background: #666;
-      color: #fff;
+    .content{
+      padding: 16px;
     }
 
-    #resetBtn:hover {
-      background: #444;
-    }
-
-    #rulesBtn {
-      background: #1f4fd6;
-      color: #fff;
-    }
-
-    #rulesBtn:hover {
-      background: #163aa2;
-    }
-
-    footer {
+    .word{
+      font-size: 2.2rem;
       text-align: center;
-      font-size: 0.8rem;
-      color: #888;
-      margin-top: 2rem;
+      font-weight: 900;
+      margin: 10px 0 14px;
+      letter-spacing: 0.2px;
     }
 
-    @media (min-width: 600px) {
-      body { padding: 2rem; }
+    .options{
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .options button{
+      flex: 1;
+      padding: 1.1rem;
+      font-size: 1.5rem;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      color: #fff;
+      font-weight: 900;
+      box-shadow: 0 10px 18px rgba(0,0,0,0.08);
+      transition: transform .05s ease, filter .2s ease;
+    }
+    .options button:active{ transform: translateY(1px); }
+    .options button:hover{ filter: brightness(0.98); }
+
+    /* Match your colors: der/die/das */
+    .options button:nth-child(1){ background: var(--der); }
+    .options button:nth-child(2){ background: var(--die); }
+    .options button:nth-child(3){ background: var(--das); color: #111; }
+
+    .result{
+      margin-top: 14px;
+      font-weight: 900;
+      text-align: center;
+      font-size: 1.25rem;
+      min-height: 1.6em;
+    }
+
+    .extra{
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px dashed #d1d5db;
+      background: #fbfbfb;
+      text-align: center;
+      color: #374151;
+      font-size: 1.05rem;
+      min-height: 1.2em;
+    }
+
+    #nextBtn{
+      display: none;
+      margin-top: 12px;
+      width: 100%;
+      padding: 0.95rem;
+      font-size: 1.15rem;
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 900;
+      box-shadow: 0 10px 18px rgba(0,0,0,0.08);
+    }
+    #nextBtn:hover{ filter: brightness(0.97); }
+
+    footer{
+      margin-top: 18px;
+      text-align: center;
+      color: #888;
+      font-size: 0.85rem;
+    }
+
+    /* Splash */
+    #splash{
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    #splash h1{
+      font-size: 2rem;
+      margin: 0 0 1rem;
+    }
+    #splash img{
+      width: 260px;
+      height: 260px;
+    }
+
+    @media (min-width: 700px){
+      .wrap{ padding: 22px 18px 34px; }
+      .hero{ padding: 20px; }
+      .word{ font-size: 2.4rem; }
     }
   </style>
 </head>
 
 <body>
   <!-- Splash -->
-  <div id="splash" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999;">
-    <h1 style="font-size: 2rem; margin-bottom: 1rem;">Welcher Artikel?</h1>
-    <img src="icon.png" alt="Logo" style="width: 300px; height: 300px;" />
+  <div id="splash">
+    <h1>Welcher Artikel?</h1>
+    <img src="icon.png" alt="Logo">
   </div>
 
-  <h1 style="margin-bottom: 0.5rem;">Welcher Artikel?</h1>
-  <h2 style="margin-top: 0.2rem; margin-bottom: 0.2rem;">VHS Charlottenburg A.2</h2>
+  <!-- Top bar -->
+  <header>
+    <div class="topbar">
+      <div class="brand">
+        <img src="icon.png" alt="Logo">
+        <div class="titles">
+          <h1>Quiz</h1>
+          <p>Welcher Artikel? – VHS Charlottenburg A.2</p>
+        </div>
+      </div>
 
-  <hr style="margin: 0rem 0;">
+      <a class="navlink" href="artikelregeln.html">Artikelregeln</a>
+    </div>
+  </header>
 
-  <div class="counter" id="score" style="margin-top: 2rem;">✅ Richtig: 0 ❌ Falsch: 0</div>
+  <div class="wrap">
+    <section class="hero">
+      <h2 class="heroTitle">Wähle den richtigen Artikel</h2>
+      <p class="heroSub">Tippe auf <strong>der</strong>, <strong>die</strong> oder <strong>das</strong>. Danach siehst du Plural, Beispiel und Italienisch.</p>
+    </section>
 
-  <!-- New top actions -->
-  <div class="top-actions">
-    <button id="resetBtn" type="button">🔄 Reset game</button>
-    <a id="rulesBtn" href="artikelregeln.html">📘 Artikelregeln</a>
-  </div>
+    <section class="card">
+      <div class="cardHead">
+        <div class="cardHeadLeft">
+          <p class="title">Spiel</p>
+          <p class="subtitle">Trainiere der / die / das</p>
+        </div>
 
-  <div class="quiz" style="margin-top: -0.5rem;">
-    <div class="word" id="word">Lade Wörter...</div>
-    <div class="options" id="options"></div>
-    <div class="result" id="result"></div>
-    <div class="extra-info" id="extra"></div>
-    <button id="nextBtn">➡️ Nächstes Wort</button>
+        <div class="scoreRow" aria-label="Punktestand">
+          <div id="score">✅ Richtig: 0 ❌ Falsch: 0</div>
+          <button id="resetBtn" class="miniBtn" type="button" title="Reset game">Reset</button>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="word" id="word">Lade Wörter...</div>
+
+        <div class="options" id="options"></div>
+
+        <div class="result" id="result"></div>
+
+        <div class="extra" id="extra"></div>
+
+        <button id="nextBtn">➡️ Nächstes Wort</button>
+      </div>
+    </section>
+
+    <footer>
+      by Marco P // Ver. 1.4 // 2026
+    </footer>
   </div>
 
   <script>
@@ -208,6 +405,7 @@
 
       shuffle(data);
       current = 0;
+      updateScore();
       loadQuestion();
     }
 
@@ -239,7 +437,7 @@
 
       optionsDiv.innerHTML = "";
       resultDiv.textContent = "";
-      extraDiv.textContent = "";
+      extraDiv.innerHTML = "";
       nextBtn.style.display = "none";
 
       options.forEach(opt => {
@@ -256,9 +454,9 @@
           }
 
           extraDiv.innerHTML =
-            `<em>Plural:</em> ${item.plural}<br>` +
-            `<em>Beispiel:</em> ${item.example}<br>` +
-            `<em>Italienisch:</em> ${item.italian}`;
+            `<strong>Plural:</strong> ${item.plural}<br>` +
+            `<strong>Beispiel:</strong> ${item.example}<br>` +
+            `<strong>Italienisch:</strong> ${item.italian}`;
 
           updateScore();
           nextBtn.style.display = "block";
@@ -273,17 +471,14 @@
       loadQuestion();
     };
 
-    // Reset button
     document.getElementById("resetBtn").onclick = () => {
       correct = 0;
       wrong = 0;
       current = 0;
-
-      // Optional: re-shuffle so it feels fresh
       shuffle(data);
 
       document.getElementById("result").textContent = "";
-      document.getElementById("extra").textContent = "";
+      document.getElementById("extra").innerHTML = "";
       document.getElementById("nextBtn").style.display = "none";
 
       updateScore();
@@ -294,14 +489,11 @@
     updateScore();
     loadCSV();
 
-    // Splash timeout
+    // Splash hide
     setTimeout(() => {
-      document.getElementById("splash").style.display = "none";
-    }, 4000);
+      const splash = document.getElementById("splash");
+      if (splash) splash.style.display = "none";
+    }, 1200);
   </script>
-
-  <footer>
-    by Marco P // Ver. 1.3 // 2026
-  </footer>
 </body>
 </html>
