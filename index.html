@@ -1,393 +1,477 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DeutschBuddy – Start</title>
+  <title>DeutschBuddy</title>
 
-  <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="db.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="db.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="db.png">
   <link rel="apple-touch-icon" href="db.png">
-
   <meta name="theme-color" content="#ffffff">
 
   <style>
     :root{
-      --der:#000000; --die:#e94e3c; --das:#f4c542;
-
       --bg:#ffffff;
       --text:#0f172a;
-      --muted:#475569;
+      --muted:#64748b;
+      --border:#e5e7eb;
+      --card:#ffffff;
+      --shadow: 0 14px 40px rgba(15,23,42,.08);
+      --radius: 18px;
 
-      --shadow:0 18px 40px rgba(15,23,42,0.08);
-      --shadowSoft:0 10px 24px rgba(15,23,42,0.06);
-      --radius:22px;
+      --blue:#169BD7;
+      --blueHover:#1287BC;
 
-      --donate:#169BD7;
-      --donateHover:#1287BC;
+      --softBlue:#eaf6ff;
+      --softYellow:#fff6db;
+      --softRed:#ffe7e3;
+
+      --lockedBg:#f7f7f8;
+      --lockedText:#94a3b8;
     }
 
-    *{ box-sizing:border-box; }
+    *{box-sizing:border-box}
     body{
       margin:0;
-      background:var(--bg);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
       color:var(--text);
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-      line-height:1.45;
+      background:var(--bg);
+      line-height:1.55;
     }
 
     header{
-      position:sticky;
-      top:0;
-      z-index:50;
-      background:rgba(255,255,255,0.82);
-      backdrop-filter:blur(10px);
-      border-bottom:1px solid rgba(15,23,42,0.08);
+      border-bottom:1px solid var(--border);
+      background:#fff;
     }
-
     .topbar{
-      max-width:1160px;
-      margin:0 auto;
-      padding:18px 18px;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 14px 16px;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:16px;
+      gap:14px;
     }
-
     .brand{
-      display:inline-flex;
+      display:flex;
       align-items:center;
       gap:12px;
+      min-width:0;
       text-decoration:none;
       color:inherit;
+    }
+    .brand img{
+      width:42px;
+      height:42px;
+      border-radius:14px;
+      box-shadow: 0 8px 20px rgba(0,0,0,.08);
+      background:#fff;
+    }
+    .brandText{
+      display:flex;
+      flex-direction:column;
       min-width:0;
     }
-    .brandLogo{
-      width:40px; height:40px;
-      border-radius:14px;
-      overflow:hidden;
-      box-shadow:0 10px 18px rgba(0,0,0,0.08);
-      border:1px solid rgba(15,23,42,0.08);
-      background:#fff;
-      flex:0 0 auto;
-    }
-    .brandLogo img{ width:100%; height:100%; object-fit:cover; display:block; }
-    .brandText{ display:flex; flex-direction:column; min-width:0; }
     .brandText strong{
-      font-size:1.02rem;
-      letter-spacing:.2px;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      font-size:1.12rem;
+      line-height:1.15;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
     .brandText span{
+      font-size:.95rem;
       color:var(--muted);
-      font-size:.92rem;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
 
     .wrap{
-      max-width:1160px;
+      max-width:1100px;
       margin:0 auto;
-      padding:34px 18px 40px;
+      padding: 22px 16px 0;
     }
 
-    .layout{
+    .grid{
       display:grid;
-      gap:22px;
+      gap:18px;
     }
-    @media (min-width:980px){
-      .layout{
-        grid-template-columns:1.25fr 0.85fr;
-        gap:26px;
-        align-items:start;
-      }
+    @media (min-width: 980px){
+      .grid{ grid-template-columns: 1.15fr 0.85fr; align-items:start; }
     }
 
-    /* LEFT */
-    .intro{
-      border-radius:var(--radius);
-      padding:26px;
-      box-shadow:var(--shadow);
-      border:1px solid rgba(15,23,42,0.08);
-      background:
-        radial-gradient(900px 420px at 20% 10%, rgba(244,197,66,0.22) 0%, rgba(244,197,66,0.00) 55%),
-        radial-gradient(900px 420px at 90% 0%, rgba(233,78,60,0.18) 0%, rgba(233,78,60,0.00) 55%),
-        #fff;
+    /* HERO */
+    .hero{
+      border:1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      background: linear-gradient(135deg, var(--softYellow) 0%, #fff 40%, var(--softRed) 100%);
+      padding: 22px;
+    }
+    .heroInner{
+      background: rgba(255,255,255,.78);
+      border: 1px solid rgba(229,231,235,.9);
+      border-radius: 20px;
+      padding: 18px 18px 16px;
+      box-shadow: 0 10px 28px rgba(15,23,42,.06);
     }
 
-    .kicker{
+    .pill{
       display:inline-flex;
       align-items:center;
       gap:10px;
-      font-weight:900;
-      letter-spacing:.2px;
-      padding:8px 12px;
-      border-radius:999px;
-      border:1px solid rgba(15,23,42,0.10);
-      background:rgba(255,255,255,0.85);
-      width:fit-content;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(229,231,235,.9);
+      background: rgba(255,255,255,.9);
+      color: #111827;
+      font-weight: 800;
+      font-size: .95rem;
     }
-    .kDot{
-      width:10px; height:10px;
-      border-radius:999px;
-      background:var(--die);
-      box-shadow:0 0 0 6px rgba(233,78,60,0.12);
-    }
-
-    h1{
-      margin:16px 0 10px;
-      font-size:2.1rem;
-      line-height:1.1;
-      letter-spacing:-.6px;
-    }
-    @media (min-width:980px){ h1{ font-size:2.5rem; } }
-
-    .sub{
-      margin:0;
-      color:var(--muted);
-      font-size:1.05rem;
-      max-width:56ch;
+    .dot{
+      width:12px;height:12px;border-radius:50%;
+      background:#ef4444;
+      box-shadow: 0 0 0 4px rgba(239,68,68,.12);
     }
 
-    .miniBadges{
-      margin-top:18px;
+    .hero h1{
+      margin: 14px 0 10px;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+    }
+    .hero .sub{
+      margin: 0 0 12px;
+      font-size: 1.05rem;
+      color: #0f172a;
+      font-weight: 700;
+    }
+    .hero .mini{
+      margin:0 0 16px;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .chips{
       display:flex;
-      gap:10px;
       flex-wrap:wrap;
+      gap:10px;
+      margin-top: 6px;
     }
-    .miniBadge{
-      padding:10px 12px;
-      border-radius:999px;
-      border:1px solid rgba(15,23,42,0.10);
-      background:rgba(255,255,255,0.78);
-      font-weight:800;
-      color:rgba(15,23,42,0.85);
+    .chip{
       display:inline-flex;
       align-items:center;
       gap:10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(229,231,235,.9);
+      background: rgba(255,255,255,.9);
+      font-weight: 800;
+      color:#111827;
     }
-    .miniBadge i{
-      width:10px; height:10px;
-      border-radius:999px;
-      display:inline-block;
-      background:var(--das);
-      box-shadow:0 0 0 6px rgba(244,197,66,0.14);
-    }
-
-    /* RIGHT */
-    .modules{
-      border-radius:var(--radius);
-      padding:18px;
-      border:1px solid rgba(15,23,42,0.08);
-      box-shadow:var(--shadow);
-      background:
-        radial-gradient(650px 300px at 30% 0%, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.00) 60%),
-        #fff;
+    .chip .cDot{
+      width:12px;height:12px;border-radius:50%;
+      background:#fbbf24;
+      box-shadow: 0 0 0 5px rgba(251,191,36,.14);
+      flex: 0 0 auto;
     }
 
-    .modulesHeader{
+    /* RIGHT PANEL */
+    .panel{
+      border:1px solid var(--border);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      background:#fff;
+      padding: 18px;
+    }
+    .panelHead{
       display:flex;
       align-items:baseline;
       justify-content:space-between;
       gap:12px;
-      padding:6px 6px 14px;
+      margin-bottom: 12px;
     }
-    .modulesHeader h2{
+    .panelHead h2{
       margin:0;
-      font-size:1.1rem;
-      font-weight:950;
-      letter-spacing:.2px;
+      font-size: 1.45rem; /* bigger */
+      font-weight: 900;
+      letter-spacing: -0.01em;
     }
-    .modulesHeader span{
-      color:var(--muted);
-      font-weight:800;
-      font-size:.92rem;
-    }
-
-    .stack{ display:grid; gap:12px; }
-
-    .moduleCard{
-      display:grid;
-      grid-template-columns:58px 1fr;
-      gap:14px;
-      align-items:center;
-      padding:14px;
-      border-radius:18px;
-      border:1px solid rgba(15,23,42,0.10);
-      background:#fff;
-      text-decoration:none;
-      color:inherit;
-      box-shadow:0 14px 26px rgba(15,23,42,0.08);
-      transition:transform .06s ease, box-shadow .2s ease, border-color .2s ease;
-      position:relative;
-    }
-    .moduleCard:hover{
-      transform:translateY(-1px);
-      box-shadow:0 18px 36px rgba(15,23,42,0.10);
-      border-color:rgba(15,23,42,0.16);
-    }
-
-    .mIcon{
-      width:58px; height:58px;
-      border-radius:18px;
-      border:1px solid rgba(15,23,42,0.10);
-      overflow:hidden;
-      background:#fff;
-      display:grid;
-      place-items:center;
-    }
-    .mIcon img{ width:100%; height:100%; object-fit:cover; display:block; }
-
-    .mTitle{
+    .panelHead .hint{
       margin:0;
-      font-weight:950;
-      font-size:1.05rem;
-      letter-spacing:.2px;
-    }
-    .mText{
-      margin:4px 0 0;
-      color:var(--muted);
-      font-weight:700;
-      font-size:.95rem;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: .95rem;
     }
 
-    .tagNow{
-      position:absolute;
-      top:12px;
-      right:12px;
-      padding:8px 10px;
-      border-radius:999px;
-      font-weight:950;
-      font-size:.78rem;
-      background:rgba(244,197,66,0.22);
-      border:1px solid rgba(244,197,66,0.40);
-    }
-
-    .slot{
-      padding:14px;
-      border-radius:18px;
-      border:1px dashed rgba(15,23,42,0.18);
-      background:linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.65));
-      display:grid;
-      grid-template-columns:58px 1fr;
-      gap:14px;
-      align-items:center;
-      min-height:86px;
-      position:relative;
-      overflow:hidden;
-    }
-    .slot::after{
-      content:"";
-      position:absolute;
-      inset:-44px -70px auto auto; /* a bit tighter */
-      width:160px; height:160px;   /* tighter */
-      border-radius:999px;
-      background:radial-gradient(circle, rgba(233,78,60,0.10), rgba(233,78,60,0.00) 65%);
-      transform:rotate(12deg);
-      pointer-events:none;
-    }
-    .slotIcon{
-      width:58px; height:58px;
-      border-radius:18px;
-      border:1px dashed rgba(15,23,42,0.20);
-      display:grid;
-      place-items:center;
-      color:rgba(15,23,42,0.35);
-      font-weight:950;
-      background:rgba(255,255,255,0.65);
-    }
-    .slotTitle{ margin:0; font-weight:950; color:rgba(15,23,42,0.60); }
-    .slotText{ margin:4px 0 0; color:rgba(15,23,42,0.45); font-weight:750; font-size:.92rem; }
-
-    /* SUPPORT (make background shape tighter) */
-    .support{
-      margin-top:22px;
+    .cards{
       display:flex;
-      gap:12px;
-      flex-wrap:wrap;
+      flex-direction:column;
+      gap: 12px;
+    }
+
+    .gameCard{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 14px;
+      padding: 14px 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(229,231,235,.95);
+      background: #fff;
+      cursor:pointer;
+      transition: transform .06s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+    .gameCard:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 14px 34px rgba(15,23,42,.10);
+      border-color: #d1d5db;
+    }
+    .left{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      min-width:0;
+    }
+    .gIcon{
+      width:46px;height:46px;border-radius:16px;
+      border: 1px solid rgba(229,231,235,.95);
+      background: #fff;
+      display:flex;
       align-items:center;
       justify-content:center;
-      text-align:center;
-      color:var(--muted);
-      padding:12px 10px 0;
-      position:relative;
+      overflow:hidden;
+      flex: 0 0 auto;
     }
-    .support::before{
-      content:"";
-      position:absolute;
-      top:-6px;
-      left:50%;
-      transform:translateX(-50%);
-      width:420px;        /* narrower */
-      height:64px;        /* shorter */
-      border-radius:999px;
-      background:radial-gradient(circle at 30% 40%, rgba(22,155,215,0.14), rgba(22,155,215,0.00) 70%);
-      pointer-events:none;
-      z-index:0;
+    .gIcon img{
+      width:100%;
+      height:100%;
+      object-fit: cover;
     }
-    .support > *{ position:relative; z-index:1; }
 
+    .gText{
+      display:flex;
+      flex-direction:column;
+      gap: 2px;
+      min-width:0;
+    }
+    .gTitle{
+      font-weight: 900;
+      font-size: 1.05rem;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      margin:0;
+    }
+    .gSub{
+      margin:0;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: .95rem;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .ctaPill{
+      flex: 0 0 auto;
+      padding: 9px 12px;
+      border-radius: 999px;
+      font-weight: 900;
+      border: 1px solid rgba(229,231,235,.95);
+      background: #fff7d6;
+      color:#111827;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: 900;
+      font-size: .86rem;
+      border: 1px solid rgba(229,231,235,.95);
+      background: #f3f4f6;
+      color:#111827;
+    }
+    .badgePlus{
+      background: #eef2ff;
+      border-color: #e0e7ff;
+      color:#3730a3;
+    }
+
+    /* Locked style */
+    .locked{
+      background: var(--lockedBg);
+      border-style: dashed;
+      opacity: .9;
+    }
+    .locked .gTitle{ color:#475569; }
+    .locked .gSub{ color: var(--lockedText); }
+    .locked .ctaPill{
+      background: #f3f4f6;
+      color:#64748b;
+    }
+
+    /* Donate */
+    .donateWrap{
+      max-width:1100px;
+      margin: 26px auto 0;
+      padding: 0 16px;
+    }
+    .donateRow{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap: 14px;
+      flex-wrap: wrap;
+      padding: 14px 0;
+    }
+    .donateText{
+      color: var(--muted);
+      font-weight: 800;
+      text-align:center;
+    }
     .btnDonate{
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      padding:12px 14px;
-      border-radius:999px;
-      background:var(--donate);
-      border:1px solid var(--donate);
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: var(--blue);
       color:#fff;
+      font-weight: 900;
       text-decoration:none;
-      font-weight:900;
-      box-shadow:0 14px 26px rgba(22,155,215,0.24);
-      transition:transform .06s ease, box-shadow .2s ease, background .2s ease;
+      border: 1px solid var(--blue);
+      box-shadow: 0 10px 26px rgba(22,155,215,.22);
+      transition: transform .06s ease, background .2s ease;
+      white-space: nowrap;
     }
-    .btnDonate:hover{
-      transform:translateY(-1px);
-      background:var(--donateHover);
-      border-color:var(--donateHover);
-      box-shadow:0 18px 36px rgba(22,155,215,0.26);
-    }
+    .btnDonate:hover{ background: var(--blueHover); border-color: var(--blueHover); }
+    .btnDonate:active{ transform: translateY(1px); }
 
+    /* Footer */
     footer{
-      margin-top:22px;
-      padding-top:18px;
-      border-top:1px solid rgba(15,23,42,0.08);
-      text-align:center;
-      color:rgba(15,23,42,0.55);
-      font-size:.88rem;
+      border-top:1px solid var(--border);
+      margin-top: 14px;
     }
-    .footerLinks{
-      display:inline-flex;
-      gap:12px;
+    .footerInner{
+      max-width:1100px;
+      margin:0 auto;
+      padding: 16px 16px 26px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap: 12px;
+      color: var(--muted);
+      text-align:center;
+    }
+    .footerBtns{
+      display:flex;
+      gap:10px;
       flex-wrap:wrap;
       justify-content:center;
-      margin-top:10px;
     }
-    .footerLinks a{
-      color:rgba(15,23,42,0.70);
-      text-decoration:none;
-      font-weight:800;
-      padding:8px 10px;
-      border-radius:999px;
-      border:1px solid rgba(15,23,42,0.08);
-      background:rgba(255,255,255,0.7);
-    }
-    .footerLinks a:hover{
+    .footerBtn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(229,231,235,.95);
       background:#fff;
-      border-color:rgba(15,23,42,0.16);
+      font-weight: 900;
+      text-decoration:none;
+      color:#111827;
     }
+
+    /* Modal */
+    .modalOverlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(2,6,23,.55);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      z-index: 9999;
+    }
+    .modal{
+      width: min(520px, 100%);
+      background: #fff;
+      border-radius: 20px;
+      border: 1px solid rgba(229,231,235,.95);
+      box-shadow: 0 22px 60px rgba(15,23,42,.22);
+      overflow:hidden;
+    }
+    .modalHead{
+      padding: 16px 16px 10px;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+      border-bottom: 1px solid rgba(229,231,235,.95);
+    }
+    .modalHead h3{
+      margin:0;
+      font-size: 1.12rem;
+      font-weight: 900;
+    }
+    .closeBtn{
+      border: 1px solid rgba(229,231,235,.95);
+      background:#fff;
+      border-radius: 12px;
+      padding: 8px 10px;
+      cursor:pointer;
+      font-weight: 900;
+    }
+    .modalBody{
+      padding: 14px 16px 16px;
+      color:#0f172a;
+    }
+    .modalBody p{
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .modalActions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top: 10px;
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(229,231,235,.95);
+      background:#fff;
+      font-weight: 900;
+      text-decoration:none;
+      color:#111827;
+      cursor:pointer;
+    }
+    .btnPrimary{
+      background: var(--blue);
+      border-color: var(--blue);
+      color:#fff;
+      box-shadow: 0 10px 26px rgba(22,155,215,.20);
+    }
+    .btnPrimary:hover{ background: var(--blueHover); border-color: var(--blueHover); }
   </style>
 </head>
 
 <body>
   <header>
     <div class="topbar">
-      <a class="brand" href="home.html" aria-label="DeutschBuddy Start">
-        <div class="brandLogo">
-          <img src="icon.png" alt="DeutschBuddy Logo (temporär)">
-        </div>
+      <a class="brand" href="index.html" aria-label="DeutschBuddy Home">
+        <!-- Replace this with your new logo file if you want -->
+        <img src="db.png" alt="DeutschBuddy Logo">
         <div class="brandText">
           <strong>DeutschBuddy</strong>
           <span>Kurz. Klar. Jeden Tag.</span>
@@ -397,85 +481,191 @@
   </header>
 
   <main class="wrap">
-    <div class="layout">
-      <!-- LEFT -->
-      <section class="intro" aria-label="Einführung">
-        <div class="kicker"><span class="kDot"></span>Deutsch lernen – ohne Stress</div>
+    <div class="grid">
+      <!-- LEFT / HERO -->
+      <section class="hero" aria-label="DeutschBuddy Intro">
+        <div class="heroInner">
+          <div class="pill"><span class="dot"></span> Deutsch lernen – ohne Stress</div>
 
-        <h1>Trainiere Deutsch<br>in wenigen Minuten.</h1>
-        <p class="sub">
-          Klar, schnell und motivierend – DeutschBuddy wächst Schritt für Schritt zur Lernplattform.
-        </p>
+          <h1>Trainiere Deutsch – spielerisch, kurz und effektiv.</h1>
 
-        <div class="miniBadges" aria-label="Highlights">
-          <span class="miniBadge"><i></i> Ohne Anmeldung</span>
-          <span class="miniBadge"><i></i> Klar & schnell</span>
-          <span class="miniBadge"><i></i> Fürs Handy</span>
+          <p class="sub">Build German skills in a few minutes a day — by having fun!</p>
+          <p class="mini">Clear, fast, and motivating.</p>
+
+          <div class="chips" aria-label="Key benefits">
+            <div class="chip"><span class="cDot"></span> No sign-up</div>
+            <div class="chip"><span class="cDot"></span> Clear &amp; quick</div>
+            <div class="chip"><span class="cDot"></span> Mobile-friendly</div>
+          </div>
         </div>
-
-        <!-- Removed the extra left box (illustration) as requested -->
       </section>
 
-      <!-- RIGHT -->
-      <aside class="modules" aria-label="Starten">
-        <div class="modulesHeader">
-          <h2>Starten</h2>
-          <span>klicken</span>
+      <!-- RIGHT / GAMES -->
+      <aside class="panel" aria-label="Games">
+        <div class="panelHead">
+          <h2>Games</h2>
+          <p class="hint">tap to play</p>
         </div>
 
-        <div class="stack">
-          <a class="moduleCard" href="welcher-artikel.html" aria-label="Welcher Artikel? Quiz öffnen">
-            <div class="mIcon" aria-hidden="true">
-              <img src="icon.png" alt="">
+        <div class="cards">
+          <!-- FREE / ACTIVE -->
+          <a class="gameCard" href="artikel-quiz.html" style="text-decoration:none; color:inherit;" aria-label="Start Article Trainer">
+            <div class="left">
+              <div class="gIcon" aria-hidden="true">
+                <!-- Keep your existing game icon here if you prefer -->
+                <img src="icon.png" alt="">
+              </div>
+              <div class="gText">
+                <p class="gTitle">Welcher Artikel?</p>
+                <p class="gSub">Der / Die / Das — the best quiz.</p>
+              </div>
             </div>
-            <div>
-              <p class="mTitle">Welcher Artikel?</p>
-              <p class="mText">Der / Die / Das: das beste Quiz.</p>
-            </div>
-            <span class="tagNow">Jetzt</span>
+            <div class="ctaPill">Play</div>
           </a>
 
-          <div class="slot" aria-label="Platzhalter für zukünftiges Modul 1">
-            <div class="slotIcon">+</div>
-            <div>
-              <p class="slotTitle">Neues Modul</p>
-              <p class="slotText">Bald verfügbar.</p>
+          <!-- PLUS / COMING SOON -->
+          <div class="gameCard locked" data-plus="Plural Trainer" role="button" tabindex="0" aria-label="Plural Trainer (Coming soon)">
+            <div class="left">
+              <div class="gIcon" aria-hidden="true">
+                <img src="plural.png" alt="">
+              </div>
+              <div class="gText">
+                <p class="gTitle">Plural Trainer</p>
+                <p class="gSub">Plus • Coming soon</p>
+              </div>
             </div>
+            <div class="badge badgePlus">Plus</div>
           </div>
 
-          <div class="slot" aria-label="Platzhalter für zukünftiges Modul 2">
-            <div class="slotIcon">+</div>
-            <div>
-              <p class="slotTitle">Neues Modul</p>
-              <p class="slotText">Bald verfügbar.</p>
+          <div class="gameCard locked" data-plus="Präsens Trainer" role="button" tabindex="0" aria-label="Präsens Trainer (Coming soon)">
+            <div class="left">
+              <div class="gIcon" aria-hidden="true">
+                <!-- No image provided: clean placeholder -->
+                <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-weight:1000;color:#64748b;background:#fff;border-radius:16px;">
+                  P
+                </div>
+              </div>
+              <div class="gText">
+                <p class="gTitle">Präsens Trainer</p>
+                <p class="gSub">Plus • Coming soon</p>
+              </div>
             </div>
+            <div class="badge badgePlus">Plus</div>
           </div>
 
-          <div class="slot" aria-label="Platzhalter für zukünftiges Modul 3">
-            <div class="slotIcon">+</div>
-            <div>
-              <p class="slotTitle">Neues Modul</p>
-              <p class="slotText">Bald verfügbar.</p>
+          <div class="gameCard locked" data-plus="Perfekt Trainer" role="button" tabindex="0" aria-label="Perfekt Trainer (Coming soon)">
+            <div class="left">
+              <div class="gIcon" aria-hidden="true">
+                <img src="perfekt.png" alt="">
+              </div>
+              <div class="gText">
+                <p class="gTitle">Perfekt Trainer</p>
+                <p class="gSub">Plus • Coming soon</p>
+              </div>
             </div>
+            <div class="badge badgePlus">Plus</div>
           </div>
+
         </div>
       </aside>
     </div>
+  </main>
 
-    <div class="support">
-      <span>Gefällt dir DeutschBuddy? Unterstütze das Projekt.</span>
+  <!-- Donate (NO background bar behind the text) -->
+  <div class="donateWrap">
+    <div class="donateRow" aria-label="Donate">
+      <div class="donateText">Gefällt dir DeutschBuddy? Unterstütze das Projekt.</div>
       <a class="btnDonate" href="https://www.paypal.com/donate/?hosted_button_id=5HNZSM7VZTNA6" target="_blank" rel="noopener noreferrer">
         Projekt unterstützen / Donate
       </a>
     </div>
+  </div>
 
-    <footer>
+  <footer>
+    <div class="footerInner">
       <div>DeutschBuddy • Ver. 1.0</div>
-      <div class="footerLinks">
-        <a href="datenschutz.html" aria-label="Datenschutz (Privacy)">Datenschutz</a>
-        <a href="impressum.html">Impressum</a>
+      <div class="footerBtns">
+        <a class="footerBtn" href="datenschutz.html">Datenschutz</a>
+        <a class="footerBtn" href="impressum.html">Impressum</a>
       </div>
-    </footer>
-  </main>
+    </div>
+  </footer>
+
+  <!-- Plus modal -->
+  <div class="modalOverlay" id="plusModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="plusTitle">
+      <div class="modalHead">
+        <div>
+          <h3 id="plusTitle">DeutschBuddy Plus — Coming soon</h3>
+        </div>
+        <button class="closeBtn" id="closeModal" aria-label="Close">✕</button>
+      </div>
+      <div class="modalBody">
+        <p id="plusText">
+          This game is part of <strong>DeutschBuddy Plus</strong> and will be available soon.
+          Want early access and updates?
+        </p>
+        <div class="modalActions">
+          <a class="btn btnPrimary" id="waitlistBtn" href="https://docs.google.com/forms/d/e/1FAIpQLSd7aZ8okTdi2sr08p8l8HZ2r6oH09BsF3L_mJQtSc8q0nFRdw/viewform?usp=header" target="_blank" rel="noopener noreferrer">
+            Join the waitlist
+          </a>
+          <button class="btn" id="okBtn" type="button">Not now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // If your Article quiz file has a different name, change this:
+    // e.g. "index.html" (quiz) or "artikel-quiz.html"
+    // The rest is for the Plus popup.
+    const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSd7aZ8okTdi2sr08p8l8HZ2r6oH09BsF3L_mJQtSc8q0nFRdw/viewform?usp=header";
+
+    const modal = document.getElementById("plusModal");
+    const closeModalBtn = document.getElementById("closeModal");
+    const okBtn = document.getElementById("okBtn");
+    const plusText = document.getElementById("plusText");
+    const waitlistBtn = document.getElementById("waitlistBtn");
+
+    function openModal(moduleName){
+      plusText.innerHTML =
+        `The <strong>${moduleName}</strong> is part of <strong>DeutschBuddy Plus</strong> and will be available soon.<br>` +
+        `Want early access and updates?`;
+      waitlistBtn.href = formUrl; // keep it simple (no prefill)
+      modal.style.display = "flex";
+      modal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeModal(){
+      modal.style.display = "none";
+      modal.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
+
+    // Open modal on locked cards
+    document.querySelectorAll(".gameCard.locked").forEach(card => {
+      const name = card.getAttribute("data-plus") || "This game";
+      card.addEventListener("click", () => openModal(name));
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openModal(name);
+        }
+      });
+    });
+
+    closeModalBtn.addEventListener("click", closeModal);
+    okBtn.addEventListener("click", closeModal);
+
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal.style.display === "flex") closeModal();
+    });
+  </script>
 </body>
 </html>
+
