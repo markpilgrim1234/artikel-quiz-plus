@@ -1,18 +1,22 @@
-
-
-
-
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>DeutschBuddy – Welcher Artikel?</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DeutschBuddy — Welcher Artikel? (der/die/das)</title>
+  <meta name="description" content="Quick 1–3 minute German article quiz. Tap der/die/das, get instant feedback, track streaks and progress — no account needed." />
 
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="icon" type="image/png" href="icon.png">
-  <meta name="theme-color" content="#ffffff">
+  <!-- Social preview -->
+  <meta property="og:title" content="DeutschBuddy — Welcher Artikel?" />
+  <meta property="og:description" content="Quick German article quiz: der/die/das. Instant feedback + streaks. Snackable 1–3 minute sessions." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="icon.png" />
+  <meta name="twitter:card" content="summary" />
+
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href="icon.png" />
+  <meta name="theme-color" content="#ffffff" />
 
   <style>
     :root{
@@ -28,11 +32,16 @@
       --shadow: 0 10px 25px rgba(0,0,0,0.06);
       --radius: 14px;
 
-      --donate: #169BD7;
-      --donateHover: #1287BC;
+      --primary: #169BD7;
+      --primaryHover: #1287BC;
 
       --resetBg: #f3f4f6;
       --resetHover: #e5e7eb;
+
+      --ok: #0f766e;
+      --bad: #b91c1c;
+
+      --focus: rgba(22,155,215,0.35);
     }
 
     *{ box-sizing: border-box; }
@@ -45,6 +54,8 @@
       line-height: 1.55;
       overflow-x: hidden;
     }
+
+    a{ color: inherit; }
 
     header{
       position: sticky;
@@ -116,7 +127,7 @@
       background: #fff;
       color: var(--text);
       text-decoration: none;
-      font-weight: 700;
+      font-weight: 800;
       cursor: pointer;
       transition: transform .05s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
       box-shadow: 0 2px 10px rgba(0,0,0,0.04);
@@ -128,16 +139,20 @@
       background: #fafafa;
       box-shadow: 0 6px 18px rgba(0,0,0,0.06);
     }
+    .btn:focus-visible{
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
 
-    .btnDonate{
-      background: var(--donate);
-      border-color: var(--donate);
+    .btnPrimary{
+      background: var(--primary);
+      border-color: var(--primary);
       color: #fff;
       box-shadow: 0 6px 18px rgba(22,155,215,0.25);
     }
-    .btnDonate:hover{
-      background: var(--donateHover);
-      border-color: var(--donateHover);
+    .btnPrimary:hover{
+      background: var(--primaryHover);
+      border-color: var(--primaryHover);
     }
 
     .btnSmall{
@@ -195,6 +210,7 @@
       color: var(--muted);
       font-size: 1rem;
     }
+    .heroSub span[lang="de"]{ font-weight: 900; }
 
     .card{
       background: var(--card);
@@ -224,7 +240,7 @@
     .cardHeadLeft .title{
       margin: 0;
       font-size: 1.05rem;
-      font-weight: 800;
+      font-weight: 900;
       color: var(--text);
     }
 
@@ -234,26 +250,90 @@
       color: var(--muted);
     }
 
-    .scoreRow{
-      display: inline-flex;
-      align-items: center;
+    .hud{
+      display: flex;
       gap: 10px;
-      padding: 10px 12px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: #fff;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
     }
 
-    #score{
-      font-weight: 800;
-      font-size: 0.98rem;
-      color: #333;
+    .pill{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-weight: 900;
+      font-size: 0.95rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
       white-space: nowrap;
     }
+    .pill span{ color: var(--muted); font-weight: 800; }
 
     .content{
       padding: 16px;
+    }
+
+    .setup{
+      display: grid;
+      gap: 12px;
+    }
+
+    .levelRow{
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .levelLabel{
+      font-weight: 900;
+      color: var(--text);
+    }
+
+    .levelBtn{
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+      transition: transform .05s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
+      user-select: none;
+    }
+    .levelBtn:hover{
+      border-color: #d1d5db;
+      background: #fafafa;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    }
+    .levelBtn:active{ transform: translateY(1px); }
+    .levelBtn[aria-pressed="true"]{
+      border-color: rgba(22,155,215,0.55);
+      box-shadow: 0 8px 22px rgba(22,155,215,0.18);
+    }
+    .levelBtn:focus-visible{
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .plusTag{
+      margin-left: 6px;
+      font-size: 0.75rem;
+      font-weight: 900;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid #dbeafe;
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+
+    .miniNote{
+      color: var(--muted);
+      font-size: 0.95rem;
     }
 
     .word{
@@ -262,6 +342,13 @@
       font-weight: 900;
       margin: 10px 0 14px;
       letter-spacing: 0.2px;
+    }
+    .metaLine{
+      text-align: center;
+      color: var(--muted);
+      font-weight: 800;
+      margin-top: -6px;
+      margin-bottom: 10px;
     }
 
     .options{
@@ -285,10 +372,14 @@
     }
     .options button:active{ transform: translateY(1px); }
     .options button:hover{ filter: brightness(0.98); }
+    .options button:focus-visible{
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
 
-    .options button:nth-child(1){ background: var(--der); }
-    .options button:nth-child(2){ background: var(--die); }
-    .options button:nth-child(3){ background: var(--das); color: #111; }
+    .options button[data-article="der"]{ background: var(--der); }
+    .options button[data-article="die"]{ background: var(--die); }
+    .options button[data-article="das"]{ background: var(--das); color: #111; }
 
     .options button:disabled{
       opacity: 0.6;
@@ -327,20 +418,59 @@
     }
 
     #countdown{
-      font-weight: 800;
+      font-weight: 900;
       color: var(--muted);
       font-size: 0.95rem;
       text-align: center;
       white-space: nowrap;
     }
 
-    /* History table */
+    .divider{
+      height: 1px;
+      background: var(--border);
+      margin: 14px 0;
+    }
+
+    .howItWorks{
+      padding: 14px 16px 16px;
+      border-top: 1px solid var(--border);
+      background: linear-gradient(180deg, #fff 0%, #fafafa 100%);
+    }
+    .howItWorks h3{
+      margin: 0 0 6px;
+      font-size: 1.05rem;
+      font-weight: 900;
+    }
+    .howItWorks p{
+      margin: 0;
+      color: var(--muted);
+    }
+    .howItWorks ul{
+      margin: 10px 0 0;
+      padding-left: 18px;
+      color: #374151;
+    }
+
+    /* History table (wrapped in details for mobile) */
+    details.answersDetails{
+      border-top: 1px solid var(--border);
+    }
+    details.answersDetails > summary{
+      cursor: pointer;
+      list-style: none;
+      padding: 14px 16px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    details.answersDetails > summary::-webkit-details-marker{ display:none; }
     .historyWrap{
       max-height: 520px;
       overflow: auto;
       padding: 0 16px 16px;
     }
-
     table{
       width: 100%;
       border-collapse: collapse;
@@ -366,11 +496,11 @@
       font-weight: 900;
       white-space: nowrap;
     }
-    .ok{ color: #0f766e; }
-    .bad{ color: #b91c1c; }
+    .ok{ color: var(--ok); }
+    .bad{ color: var(--bad); }
     .mutedCell{ color: var(--muted); }
 
-    /* Donate line + small donate button */
+    /* Support */
     .donateBar{
       margin-top: 14px;
       display: flex;
@@ -417,189 +547,739 @@
       justify-content: center;
       flex-wrap: wrap;
     }
+
+    /* Settings (simple modal-ish card) */
+    .settingsPanel{
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.32);
+      z-index: 50;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .settingsCard{
+      width: min(560px, 100%);
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 18px 45px rgba(0,0,0,0.18);
+      overflow: hidden;
+    }
+    .settingsHead{
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .settingsHead h3{
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 900;
+    }
+    .settingsBody{
+      padding: 14px 16px 16px;
+      display: grid;
+      gap: 12px;
+    }
+    .row{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .row label{
+      font-weight: 900;
+    }
+    .row .hint{
+      width: 100%;
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: -6px;
+    }
+    select, input[type="checkbox"]{
+      cursor: pointer;
+    }
+    select{
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 800;
+      background: #fff;
+    }
+
+    /* ========= Plus modal styles (kept compatible with Index) ========= */
+    .modalOverlay{
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      z-index: 60;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal{
+      width: min(560px, 100%);
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 18px 45px rgba(0,0,0,0.18);
+      overflow: hidden;
+    }
+    .modalHead{
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .modalHead h3{
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 900;
+    }
+    .closeBtn{
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 12px;
+      padding: 8px 10px;
+      cursor: pointer;
+      font-weight: 900;
+    }
+    .closeBtn:hover{ background: #fafafa; }
+    .modalBody{
+      padding: 14px 16px 16px;
+      color: #374151;
+    }
+    .modalActions{
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
   </style>
 </head>
 
 <body>
   <!-- Splash -->
-  <div id="splash" aria-label="Ladebildschirm">
-    <h1>Welcher Artikel?</h1>
-    <img src="icon.png" alt="DeutschBuddy Logo">
+  <div id="splash" aria-label="Loading screen">
+    <h1><span lang="de">Welcher Artikel?</span></h1>
+    <img src="icon.png" alt="DeutschBuddy Logo" />
   </div>
 
   <!-- Top bar -->
   <header>
     <div class="topbar">
       <div class="brand">
-        <a href="index.html" aria-label="Zur Startseite">
-          <img src="icon.png" alt="DeutschBuddy Logo">
+        <a href="index.html" aria-label="Go to home">
+          <img src="icon.png" alt="DeutschBuddy Logo" />
           <div class="titles">
             <h1>DeutschBuddy</h1>
-            <p>Welcher Artikel?</p>
+            <p><span lang="de">Welcher Artikel?</span> • der/die/das</p>
           </div>
         </a>
       </div>
 
-      <div style="display:flex; gap:10px; align-items:center;">
-        <a class="btn" href="index.html" aria-label="Zur Startseite">Start</a>
-        <a class="btn" href="artikelregeln.html" aria-label="Artikelregeln öffnen">Regeln</a>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <a class="btn" href="index.html" aria-label="Go to home">Home</a>
+        <a class="btn" href="artikelregeln.html" aria-label="Open rules">Rules</a>
+        <button class="btn" id="settingsBtn" type="button" aria-label="Open settings">Settings</button>
       </div>
     </div>
   </header>
 
   <div class="wrap">
-    <section class="hero">
-      <h2 class="heroTitle">Wähle den richtigen Artikel.</h2>
+    <section class="hero" aria-label="Game intro">
+      <h2 class="heroTitle">Choose the correct article.</h2>
       <p class="heroSub">
-        Tippe auf <strong>der</strong>, <strong>die</strong> oder <strong>das</strong>.
-        Danach geht es automatisch weiter (3 Sekunden).
+        Tap <span lang="de">der</span>, <span lang="de">die</span> or <span lang="de">das</span>.
+        Instant feedback — the next word loads automatically.
       </p>
     </section>
 
     <div class="grid">
       <!-- LEFT: Quiz -->
-      <section class="card">
+      <section class="card" aria-label="Quiz">
         <div class="cardHead">
           <div class="cardHeadLeft">
-            <p class="title">Spiel</p>
-            <p class="subtitle">Trainiere der / die / das</p>
+            <p class="title">Game</p>
+            <p class="subtitle">Fast practice • 1–3 minutes</p>
           </div>
 
-          <div class="scoreRow" aria-label="Punktestand">
-            <div id="score">✅ Richtig: 0 ❌ Falsch: 0</div>
+          <div class="hud" aria-label="Progress">
+            <div class="pill" title="Score"><span>⭐</span><div id="hudScore">0</div></div>
+            <div class="pill" title="Streak"><span>🔥</span><div id="hudStreak">0</div></div>
+            <div class="pill" title="Accuracy"><span>📊</span><div id="hudAcc">0%</div></div>
+            <div class="pill" title="Mistakes (stop rule)"><span>❌</span><div id="hudMistakes">0</div></div>
           </div>
         </div>
 
         <div class="content">
-          <div class="word" id="word">Lade Wörter...</div>
+          <!-- Setup (shown before first start, and after reset) -->
+          <div class="setup" id="setup">
+            <div class="levelRow" aria-label="Level selection">
+              <div class="levelLabel">Level:</div>
 
-          <div class="options" id="options"></div>
+              <button class="levelBtn" type="button" id="lvlA1" aria-pressed="true" aria-label="Select A1">A1</button>
 
-          <div class="result" id="result" aria-live="polite"></div>
+              <button class="levelBtn" type="button" id="lvlA2" aria-pressed="false" aria-label="Select A2 (includes A1)">
+                A2 <span class="plusTag" title="Includes A1">A1+</span>
+              </button>
 
-          <div class="extra" id="extra" aria-live="polite"></div>
+              <!-- Locked levels: use same selector as Index script -->
+              <div class="levelBtn gameCard locked" role="button" tabindex="0" data-plus="B1 level" aria-label="B1 Plus (locked)">
+                B1 <span class="plusTag">Plus</span>
+              </div>
 
-          <div class="countdownRow">
-            <div id="countdown"></div>
-            <button id="pauseBtn" class="btn btnSmall" type="button">Pause</button>
-            <button id="resetBtn" class="btn btnSmall btnResetSmall" type="button" title="Reset">Reset</button>
+              <div class="levelBtn gameCard locked" role="button" tabindex="0" data-plus="B2 level" aria-label="B2 Plus (locked)">
+                B2 <span class="plusTag">Plus</span>
+              </div>
+            </div>
+
+            <div class="miniNote" id="levelHint">
+              A2 automatically includes A1 words for more variety.
+            </div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <button class="btn btnPrimary" id="startBtn" type="button">Start</button>
+
+              <!-- Plus-only feature entry point -->
+              <div class="btn gameCard locked" role="button" tabindex="0" data-plus="Fehler üben (Practice mistakes)">
+                Practice mistakes <span class="plusTag">Plus</span>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="miniNote" id="deviceStatsLine">
+              Loading your device stats…
+            </div>
+          </div>
+
+          <!-- Playing UI -->
+          <div id="playArea" style="display:none;">
+            <div class="word" id="word">Loading words…</div>
+            <div class="metaLine" id="metaLine"></div>
+
+            <div class="options" id="options" aria-label="Answer options"></div>
+
+            <div class="result" id="result" aria-live="polite"></div>
+
+            <div class="extra" id="extra" aria-live="polite"></div>
+
+            <div class="countdownRow">
+              <div id="countdown"></div>
+              <button id="pauseBtn" class="btn btnSmall" type="button">Pause</button>
+              <button id="resetBtn" class="btn btnSmall btnResetSmall" type="button" title="Reset session">Reset</button>
+            </div>
           </div>
         </div>
+
+        <!-- How it works (in-page, SEO-friendly) -->
+        <div class="howItWorks">
+          <h3>How it works</h3>
+          <p>
+            You’ll see a German noun. Choose the correct article:
+            <span lang="de">der</span> / <span lang="de">die</span> / <span lang="de">das</span>.
+          </p>
+          <ul>
+            <li>Instant feedback and quick info (translation/plural) if you enable it in Settings.</li>
+            <li>Set a “stop after mistakes” rule (e.g., 5 or 10) to keep sessions short.</li>
+            <li>Your progress is stored locally on this device (no account).</li>
+          </ul>
+        </div>
+
+        <!-- Answers on the same card (collapsible) -->
+        <details class="answersDetails" id="answersDetails">
+          <summary>
+            <span>Answers</span>
+            <span style="color:var(--muted); font-weight:900;" id="answersSummary">0 items</span>
+          </summary>
+          <div class="historyWrap">
+            <table aria-label="Answers table">
+              <thead>
+                <tr>
+                  <th>Your answer</th>
+                  <th class="status">Result</th>
+                  <th>Correct</th>
+                </tr>
+              </thead>
+              <tbody id="historyBody"></tbody>
+            </table>
+          </div>
+        </details>
       </section>
 
-      <!-- RIGHT: History -->
-      <section class="card">
+      <!-- RIGHT: Session summary / quick stats -->
+      <aside class="card" aria-label="Session and device stats">
         <div class="cardHead">
           <div class="cardHeadLeft">
-            <p class="title">Antworten</p>
-            <p class="subtitle">Deine Antwort / Ergebnis / Richtig wäre</p>
+            <p class="title">Stats</p>
+            <p class="subtitle">Session + device progress (local)</p>
           </div>
         </div>
 
-        <div class="historyWrap">
-          <table aria-label="Antworten Tabelle">
-            <thead>
-              <tr>
-                <th>Deine Antwort</th>
-                <th class="status">Ergebnis</th>
-                <th>Richtig wäre</th>
-              </tr>
-            </thead>
-            <tbody id="historyBody"></tbody>
-          </table>
+        <div class="content" style="display:grid; gap:12px;">
+          <div class="pill" style="justify-content:space-between;">
+            <span>Best score (device)</span>
+            <strong id="bestScore">0</strong>
+          </div>
+          <div class="pill" style="justify-content:space-between;">
+            <span>Best streak (device)</span>
+            <strong id="bestStreak">0</strong>
+          </div>
+          <div class="pill" style="justify-content:space-between;">
+            <span>Daily streak</span>
+            <strong id="dailyStreak">0</strong>
+          </div>
+
+          <div class="divider"></div>
+
+          <div style="color:var(--muted); font-size:0.95rem;">
+            Tip: Choose <strong>A2</strong> for more variety — it includes A1 words automatically.
+          </div>
         </div>
-      </section>
+      </aside>
     </div>
 
     <!-- Support -->
     <div class="donateBar">
-      <span>Gefällt dir das Quiz? Unterstütze das Projekt, damit neue Updates möglich sind. Danke!</span>
-      <a class="btn btnDonate btnSmall"
+      <span>Enjoying the quiz? Support the project so new updates can happen. Thank you!</span>
+      <a class="btn btnPrimary btnSmall"
          href="https://www.paypal.com/donate/?hosted_button_id=5HNZSM7VZTNA6"
          target="_blank" rel="noopener noreferrer">
-        Projekt unterstützen / Donate
+        Support / Donate
       </a>
     </div>
 
     <footer>
       <div class="footerRow">
-        <span>by Marco P // Ver. 1.7 // 2026</span>
-        <a class="btn btnSmall" href="ueber-mich.html" aria-label="Über mich">Über mich</a>
+        <span>by Marco P // Ver. 2.0 // 2026</span>
+        <a class="btn btnSmall" href="ueber-mich.html" aria-label="About">About</a>
       </div>
     </footer>
   </div>
 
+  <!-- Settings panel -->
+  <div class="settingsPanel" id="settingsPanel" aria-hidden="true">
+    <div class="settingsCard" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <div class="settingsHead">
+        <h3 id="settingsTitle">Settings</h3>
+        <button class="closeBtn" id="closeSettings" aria-label="Close settings">✕</button>
+      </div>
+
+      <div class="settingsBody">
+        <div class="row">
+          <label for="showTranslation">Show translation</label>
+          <input id="showTranslation" type="checkbox" />
+          <div class="hint">Uses the “Italian/Translation” column from your sheet (labelled as “Translation” in the UI).</div>
+        </div>
+
+        <div class="row">
+          <label for="showPlural">Show plural</label>
+          <input id="showPlural" type="checkbox" />
+        </div>
+
+        <div class="row">
+          <label for="autoAdvance">Auto-advance</label>
+          <input id="autoAdvance" type="checkbox" />
+          <div class="hint">If enabled, the next word loads after a short countdown.</div>
+        </div>
+
+        <div class="row">
+          <label for="autoSeconds">Auto-advance delay</label>
+          <select id="autoSeconds">
+            <option value="2">2 seconds</option>
+            <option value="3" selected>3 seconds</option>
+            <option value="4">4 seconds</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <label for="maxErrors">Stop after mistakes</label>
+          <select id="maxErrors">
+            <option value="0">Off</option>
+            <option value="5">5 mistakes</option>
+            <option value="10">10 mistakes</option>
+          </select>
+          <div class="hint">When you reach the limit, the session ends with “Game over”.</div>
+        </div>
+
+        <div class="row">
+          <label for="haptics">Haptics (vibration)</label>
+          <input id="haptics" type="checkbox" />
+        </div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; margin-top:6px;">
+          <button class="btn btnResetSmall" id="resetDeviceStats" type="button" title="Clear local stats">Reset device stats</button>
+          <button class="btn btnPrimary" id="saveSettings" type="button">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Plus modal (EXACT CODE FROM INDEX) -->
+  <!-- Plus modal -->
+  <div class="modalOverlay" id="plusModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="plusTitle">
+      <div class="modalHead">
+        <div>
+          <h3 id="plusTitle">DeutschBuddy Plus — Coming soon</h3>
+        </div>
+        <button class="closeBtn" id="closeModal" aria-label="Close">✕</button>
+      </div>
+      <div class="modalBody">
+        <p id="plusText">
+          This game is part of <strong>DeutschBuddy Plus</strong> and will be available soon.
+          Want early access and updates?
+        </p>
+        <div class="modalActions">
+          <a class="btn btnPrimary" id="waitlistBtn"
+             href="https://docs.google.com/forms/d/e/1FAIpQLSd7aZ8okTdi2sr08p8l8HZ2r6oH09BsF3L_mJQtSc8q0nFRdw/viewform?usp=header"
+             target="_blank" rel="noopener noreferrer">
+            Join the waitlist
+          </a>
+          <button class="btn" id="okBtn" type="button">Not now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
+    // =========================
+    // Data source (TSV)
+    // =========================
     // TIP: Use TSV to avoid bugs with commas inside text (examples often contain commas).
     const dataUrl =
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vTLMG3zUFzaLSA82QS7T4E8IAHiung0H2LYRU8hoi_svBol2OoFWmTFBhGVhCPxK2xGtADv1sM9guDr/pub?output=tsv";
 
-    let data = [];
-    let current = 0;
+    // =========================
+    // Local storage keys
+    // =========================
+    const LS_PREFS = "db_wa_prefs_v1";
+    const LS_STATS = "db_wa_stats_v1";
+    const LS_MISTAKES = "db_wa_mistakes_v1";
+
+    // =========================
+    // App state
+    // =========================
+    let rawData = [];
+    let pool = [];
+    let currentIndex = 0;
+
+    // Session stats
     let correct = 0;
     let wrong = 0;
+    let streak = 0;
+    let score = 0;
 
-    const AUTO_SECONDS = 3;
+    // Settings / prefs
+    let selectedLevel = "A1"; // A1 or A2 (A2 includes A1)
+    let showTranslation = false;
+    let showPlural = true;
     let autoEnabled = true;
+    let autoSeconds = 3;
+    let maxErrors = 0; // 0 = off
+    let haptics = true;
+
+    // Countdown
     let countdownTimer = null;
     let remaining = 0;
 
-    function safeText(v) {
-      return (v ?? "").toString().trim();
+    // Input lock for feedback phase
+    let inputLocked = false;
+
+    // =========================
+    // Helpers
+    // =========================
+    function safeText(v){ return (v ?? "").toString().trim(); }
+
+    function todayISO(){
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
     }
 
-    async function loadData() {
-      try {
-        const res = await fetch(dataUrl + "&t=" + Date.now());
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        const text = await res.text();
-
-        const lines = text.trim().split("\n").slice(1);
-        data = lines
-          .map(line => line.split("\t"))
-          .map(cols => {
-            const [article, word, plural, example, italian] = cols;
-            return {
-              article: safeText(article),
-              word: safeText(word),
-              plural: safeText(plural),
-              example: safeText(example),
-              italian: safeText(italian)
-            };
-          })
-          .filter(item => item.word && item.article);
-
-        shuffle(data);
-        current = 0;
-        updateScore();
-        loadQuestion();
-      } catch (e) {
-        document.getElementById("word").textContent = "Fehler beim Laden 😕";
-        document.getElementById("result").textContent = "Bitte prüfe deine Verbindung und lade die Seite neu.";
-        console.error(e);
-      }
+    function parseLevel(s){
+      const v = safeText(s).toUpperCase();
+      if (v === "A1" || v === "A2" || v === "B1" || v === "B2") return v;
+      return ""; // unknown
     }
 
-    function shuffle(array) {
-      for (let i = array.length - 1; i > 0; i--) {
+    function vibrate(pattern){
+      if (!haptics) return;
+      if (navigator.vibrate) navigator.vibrate(pattern);
+    }
+
+    function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+
+    function shuffle(array){
+      for (let i = array.length - 1; i > 0; i--){
         const j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
       }
     }
 
-    function updateScore() {
+    function getPrefs(){
+      try{
+        return JSON.parse(localStorage.getItem(LS_PREFS) || "{}");
+      }catch{ return {}; }
+    }
+
+    function setPrefs(obj){
+      localStorage.setItem(LS_PREFS, JSON.stringify(obj));
+    }
+
+    function getStats(){
+      try{
+        return JSON.parse(localStorage.getItem(LS_STATS) || "{}");
+      }catch{ return {}; }
+    }
+
+    function setStats(obj){
+      localStorage.setItem(LS_STATS, JSON.stringify(obj));
+    }
+
+    function getMistakes(){
+      try{
+        return JSON.parse(localStorage.getItem(LS_MISTAKES) || "{}");
+      }catch{ return {}; }
+    }
+
+    function setMistakes(obj){
+      localStorage.setItem(LS_MISTAKES, JSON.stringify(obj));
+    }
+
+    function updateDailyStreak(){
+      const stats = getStats();
+      const today = todayISO();
+      const last = stats.lastPlayDate || "";
+
+      if (!stats.dailyStreak) stats.dailyStreak = 0;
+
+      if (last === today){
+        // already counted today
+        setStats(stats);
+        return;
+      }
+
+      // compare yesterday
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
+      const y = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+
+      if (last === y){
+        stats.dailyStreak += 1;
+      } else {
+        stats.dailyStreak = 1;
+      }
+
+      stats.lastPlayDate = today;
+      setStats(stats);
+    }
+
+    // =========================
+    // UI refs
+    // =========================
+    const setupEl = document.getElementById("setup");
+    const playAreaEl = document.getElementById("playArea");
+
+    const lvlA1Btn = document.getElementById("lvlA1");
+    const lvlA2Btn = document.getElementById("lvlA2");
+    const levelHint = document.getElementById("levelHint");
+
+    const startBtn = document.getElementById("startBtn");
+
+    const wordEl = document.getElementById("word");
+    const metaLineEl = document.getElementById("metaLine");
+    const optionsDiv = document.getElementById("options");
+    const resultDiv = document.getElementById("result");
+    const extraEl = document.getElementById("extra");
+    const countdownEl = document.getElementById("countdown");
+    const pauseBtn = document.getElementById("pauseBtn");
+    const resetBtn = document.getElementById("resetBtn");
+
+    const hudScoreEl = document.getElementById("hudScore");
+    const hudStreakEl = document.getElementById("hudStreak");
+    const hudAccEl = document.getElementById("hudAcc");
+    const hudMistakesEl = document.getElementById("hudMistakes");
+
+    const historyBody = document.getElementById("historyBody");
+    const answersSummary = document.getElementById("answersSummary");
+
+    const bestScoreEl = document.getElementById("bestScore");
+    const bestStreakEl = document.getElementById("bestStreak");
+    const dailyStreakEl = document.getElementById("dailyStreak");
+    const deviceStatsLine = document.getElementById("deviceStatsLine");
+
+    // Settings UI
+    const settingsBtn = document.getElementById("settingsBtn");
+    const settingsPanel = document.getElementById("settingsPanel");
+    const closeSettings = document.getElementById("closeSettings");
+    const saveSettingsBtn = document.getElementById("saveSettings");
+    const resetDeviceStatsBtn = document.getElementById("resetDeviceStats");
+
+    const showTranslationCb = document.getElementById("showTranslation");
+    const showPluralCb = document.getElementById("showPlural");
+    const autoAdvanceCb = document.getElementById("autoAdvance");
+    const autoSecondsSel = document.getElementById("autoSeconds");
+    const maxErrorsSel = document.getElementById("maxErrors");
+    const hapticsCb = document.getElementById("haptics");
+
+    // =========================
+    // Preferences init
+    // =========================
+    function loadPrefsToState(){
+      const p = getPrefs();
+      selectedLevel = (p.level === "A2") ? "A2" : "A1";
+      showTranslation = !!p.showTranslation;
+      showPlural = (p.showPlural !== undefined) ? !!p.showPlural : true;
+      autoEnabled = (p.autoEnabled !== undefined) ? !!p.autoEnabled : true;
+      autoSeconds = clamp(parseInt(p.autoSeconds || "3", 10) || 3, 2, 4);
+      maxErrors = clamp(parseInt(p.maxErrors || "0", 10) || 0, 0, 10);
+      haptics = (p.haptics !== undefined) ? !!p.haptics : true;
+    }
+
+    function saveStateToPrefs(){
+      setPrefs({
+        level: selectedLevel,
+        showTranslation,
+        showPlural,
+        autoEnabled,
+        autoSeconds,
+        maxErrors,
+        haptics
+      });
+    }
+
+    function syncPrefsToSettingsUI(){
+      showTranslationCb.checked = showTranslation;
+      showPluralCb.checked = showPlural;
+      autoAdvanceCb.checked = autoEnabled;
+      autoSecondsSel.value = String(autoSeconds);
+      maxErrorsSel.value = String(maxErrors);
+      hapticsCb.checked = haptics;
+    }
+
+    function syncLevelButtons(){
+      lvlA1Btn.setAttribute("aria-pressed", selectedLevel === "A1" ? "true" : "false");
+      lvlA2Btn.setAttribute("aria-pressed", selectedLevel === "A2" ? "true" : "false");
+      levelHint.textContent = selectedLevel === "A2"
+        ? "A2 automatically includes A1 words for more variety."
+        : "A1 uses beginner words only.";
+    }
+
+    // =========================
+    // Stats UI
+    // =========================
+    function updateHud(){
+      hudScoreEl.textContent = String(score);
+      hudStreakEl.textContent = String(streak);
+
       const total = correct + wrong;
-      const percentage = total > 0 ? Math.round((correct / total) * 100) : 0;
-      document.getElementById("score").textContent =
-        `✅ Richtig: ${correct} ❌ Falsch: ${wrong} 📊 ${percentage}% korrekt`;
+      const acc = total > 0 ? Math.round((correct / total) * 100) : 0;
+      hudAccEl.textContent = `${acc}%`;
+      hudMistakesEl.textContent = maxErrors > 0 ? `${wrong}/${maxErrors}` : `${wrong}`;
     }
 
-    function setCountdownText(text) {
-      document.getElementById("countdown").textContent = text || "";
+    function updateDeviceStatsUI(){
+      const stats = getStats();
+      bestScoreEl.textContent = String(stats.bestScore || 0);
+      bestStreakEl.textContent = String(stats.bestStreak || 0);
+      dailyStreakEl.textContent = String(stats.dailyStreak || 0);
+
+      const totalAnswered = stats.totalAnswered || 0;
+      const totalCorrect = stats.totalCorrect || 0;
+      const lifetimeAcc = totalAnswered > 0 ? Math.round((totalCorrect / totalAnswered) * 100) : 0;
+
+      deviceStatsLine.innerHTML =
+        `On this device: <strong>${stats.sessions || 0}</strong> sessions • ` +
+        `<strong>${lifetimeAcc}%</strong> lifetime accuracy • ` +
+        `<strong>${totalAnswered}</strong> answers total.`;
     }
 
-    function clearCountdown(keepRemaining = false) {
-      if (countdownTimer) {
+    // =========================
+    // Data loading & pool building
+    // =========================
+    async function loadData(){
+      try{
+        const res = await fetch(dataUrl + "&t=" + Date.now());
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const text = await res.text();
+
+        const lines = text.trim().split("\n");
+        const header = lines[0].split("\t").map(safeText);
+        const dataLines = lines.slice(1);
+
+        // Create a header map (robust to column order, but you said Level is at the end)
+        const idx = {};
+        header.forEach((h, i) => idx[h.toLowerCase()] = i);
+
+        // Expected keys (case-insensitive)
+        const iArticle = (idx["article"] ?? 0);
+        const iWord = (idx["word"] ?? 1);
+        const iPlural = (idx["plural"] ?? 2);
+        const iExample = (idx["example"] ?? 3);
+        // Your sheet currently uses "italian"; we surface it as "Translation"
+        const iTrans = (idx["italian"] ?? idx["translation"] ?? 4);
+        const iLevel = (idx["level"] ?? (header.length - 1));
+
+        rawData = dataLines
+          .map(line => line.split("\t"))
+          .map(cols => {
+            const article = safeText(cols[iArticle]);
+            const word = safeText(cols[iWord]);
+            const plural = safeText(cols[iPlural]);
+            const example = safeText(cols[iExample]);
+            const translation = safeText(cols[iTrans]);
+            const level = parseLevel(cols[iLevel]);
+
+            if (!word || !article) return null;
+
+            const key = `${article}|${word}`.toLowerCase(); // simple stable id
+            return { key, level, article, word, plural, example, translation };
+          })
+          .filter(Boolean);
+
+        if (!rawData.length){
+          throw new Error("No valid rows in dataset.");
+        }
+      }catch(e){
+        wordEl.textContent = "Loading failed 😕";
+        resultDiv.textContent = "Please check your connection and reload the page.";
+        console.error(e);
+        return;
+      }
+    }
+
+    function buildPool(){
+      // A2 includes A1 automatically
+      if (selectedLevel === "A2"){
+        pool = rawData.filter(it => it.level === "A1" || it.level === "A2" || !it.level);
+      } else {
+        pool = rawData.filter(it => it.level === "A1" || !it.level);
+      }
+
+      shuffle(pool);
+      currentIndex = 0;
+    }
+
+    // =========================
+    // Countdown
+    // =========================
+    function setCountdownText(text){ countdownEl.textContent = text || ""; }
+
+    function clearCountdown(keepRemaining=false){
+      if (countdownTimer){
         clearInterval(countdownTimer);
         countdownTimer = null;
       }
@@ -607,34 +1287,27 @@
       if (!keepRemaining) setCountdownText("");
     }
 
-    function nextQuestion() {
-      if (!data.length) return;
-      current = (current + 1) % data.length;
-      loadQuestion();
-    }
-
-    function startCountdown(seconds) {
+    function startCountdown(seconds){
       clearCountdown(false);
       remaining = seconds;
 
-      if (!autoEnabled) {
-        setCountdownText("Pausiert");
+      if (!autoEnabled){
+        setCountdownText("Paused");
         return;
       }
 
-      setCountdownText(`Nächstes Wort in ${remaining}…`);
+      setCountdownText(`Next word in ${remaining}…`);
 
       countdownTimer = setInterval(() => {
-        if (!autoEnabled) {
+        if (!autoEnabled){
           clearCountdown(true);
-          setCountdownText("Pausiert");
+          setCountdownText("Paused");
           return;
         }
 
         remaining -= 1;
-
-        if (remaining > 0) {
-          setCountdownText(`Nächstes Wort in ${remaining}…`);
+        if (remaining > 0){
+          setCountdownText(`Next word in ${remaining}…`);
         } else {
           clearCountdown(false);
           nextQuestion();
@@ -642,13 +1315,15 @@
       }, 1000);
     }
 
-    function startCountdownThenNext() {
-      startCountdown(AUTO_SECONDS);
+    // =========================
+    // History + extra
+    // =========================
+    function updateAnswersSummary(){
+      const n = historyBody.children.length;
+      answersSummary.textContent = `${n} item${n === 1 ? "" : "s"}`;
     }
 
-    function addHistoryRow(chosenArticle, word, isCorrect, correctArticle) {
-      const tbody = document.getElementById("historyBody");
-
+    function addHistoryRow(chosenArticle, word, isCorrect, correctArticle){
       const tr = document.createElement("tr");
 
       const tdChosen = document.createElement("td");
@@ -659,7 +1334,7 @@
       tdStatus.textContent = isCorrect ? "✓" : "✗";
 
       const tdRight = document.createElement("td");
-      if (isCorrect) {
+      if (isCorrect){
         tdRight.textContent = "—";
         tdRight.className = "mutedCell";
       } else {
@@ -670,23 +1345,28 @@
       tr.appendChild(tdStatus);
       tr.appendChild(tdRight);
 
-      tbody.prepend(tr);
+      historyBody.prepend(tr);
 
-      const MAX_ROWS = 200;
-      while (tbody.children.length > MAX_ROWS) {
-        tbody.removeChild(tbody.lastChild);
+      const MAX_ROWS = 50; // keep it snackable
+      while (historyBody.children.length > MAX_ROWS){
+        historyBody.removeChild(historyBody.lastChild);
       }
+
+      updateAnswersSummary();
     }
 
-    function renderExtra(item) {
-      const extra = document.getElementById("extra");
-      extra.innerHTML = ""; // clear safely
+    function renderExtra(item){
+      extraEl.innerHTML = "";
 
-      const rows = [
-        ["Plural:", item.plural],
-        ["Beispiel:", item.example],
-        ["Italienisch:", item.italian],
-      ];
+      const rows = [];
+      if (showPlural) rows.push(["Plural:", item.plural]);
+      rows.push(["Example:", item.example]);
+      if (showTranslation) rows.push(["Translation:", item.translation]);
+
+      if (!rows.length){
+        extraEl.textContent = "—";
+        return;
+      }
 
       rows.forEach(([label, value]) => {
         const line = document.createElement("div");
@@ -694,106 +1374,391 @@
         strong.textContent = label + " ";
         line.appendChild(strong);
         line.appendChild(document.createTextNode(value || "—"));
-        extra.appendChild(line);
+        extraEl.appendChild(line);
       });
     }
 
-    function loadQuestion() {
-      if (!data.length) return;
+    // =========================
+    // Mistakes store (saved locally; practice mode is Plus-only)
+    // =========================
+    function recordMistake(item){
+      const mistakes = getMistakes();
+      const key = item.key;
+      const entry = mistakes[key] || { word: item.word, article: item.article, level: item.level, wrongCount: 0, lastWrongAt: 0 };
+      entry.wrongCount += 1;
+      entry.lastWrongAt = Date.now();
+      mistakes[key] = entry;
+      setMistakes(mistakes);
+    }
 
+    // =========================
+    // Scoring rules
+    // =========================
+    function awardCorrect(){
+      // base + streak bonus (capped)
+      const bonus = clamp(streak, 0, 6); // small cap
+      score += (10 + bonus);
+    }
+
+    function penalizeWrong(){
+      score -= 5;
+    }
+
+    // =========================
+    // Game over / result screen
+    // =========================
+    function showGameOver(){
+      inputLocked = true;
       clearCountdown(false);
 
-      const item = data[current];
-      document.getElementById("word").textContent = item.word || "—";
+      // Disable buttons
+      Array.from(optionsDiv.querySelectorAll("button")).forEach(b => b.disabled = true);
 
-      const options = ["der", "die", "das"];
-      const optionsDiv = document.getElementById("options");
-      const resultDiv = document.getElementById("result");
+      resultDiv.textContent = "🛑 Game over — mistake limit reached.";
+      metaLineEl.textContent = "";
+      extraEl.innerHTML = `
+        <div><strong>Session summary</strong></div>
+        <div>Score: <strong>${score}</strong> • Correct: <strong>${correct}</strong> • Wrong: <strong>${wrong}</strong></div>
+        <div>Best streak this session: <strong>${getSessionBestStreak()}</strong></div>
+        <div style="margin-top:8px; color:var(--muted); font-size:0.95rem;">
+          Tip: Open Settings to adjust “Stop after mistakes”.
+        </div>
+      `;
 
-      optionsDiv.innerHTML = "";
-      resultDiv.textContent = "";
-      document.getElementById("extra").textContent = "";
       setCountdownText("");
 
+      // Update device stats (count session as played)
+      finalizeSessionToDeviceStats();
+
+      // Show setup again (quick restart)
+      setupEl.style.display = "";
+      playAreaEl.style.display = "none";
+      startBtn.textContent = "Retry";
+      startBtn.focus({ preventScroll: true });
+    }
+
+    let sessionBestStreak = 0;
+    function getSessionBestStreak(){ return sessionBestStreak; }
+
+    function finalizeSessionToDeviceStats(){
+      const stats = getStats();
+      stats.sessions = (stats.sessions || 0) + 1;
+
+      stats.totalAnswered = (stats.totalAnswered || 0) + (correct + wrong);
+      stats.totalCorrect = (stats.totalCorrect || 0) + correct;
+
+      stats.bestScore = Math.max(stats.bestScore || 0, score);
+      stats.bestStreak = Math.max(stats.bestStreak || 0, sessionBestStreak);
+
+      setStats(stats);
+      updateDailyStreak();
+      updateDeviceStatsUI();
+    }
+
+    // =========================
+    // Question rendering
+    // =========================
+    function loadQuestion(){
+      if (!pool.length){
+        wordEl.textContent = "No words available.";
+        resultDiv.textContent = "Try a different level.";
+        return;
+      }
+
+      inputLocked = false;
+      clearCountdown(false);
+
+      const item = pool[currentIndex];
+      wordEl.textContent = item.word || "—";
+      metaLineEl.textContent = item.level ? `Level: ${item.level}` : "";
+
+      resultDiv.textContent = "";
+      extraEl.textContent = "";
+      setCountdownText("");
+
+      optionsDiv.innerHTML = "";
+      const options = ["der","die","das"];
       options.forEach(opt => {
         const btn = document.createElement("button");
         btn.textContent = opt;
-
-        btn.onclick = () => {
-          Array.from(optionsDiv.querySelectorAll("button")).forEach(b => b.disabled = true);
-
-          const isCorrect = (opt === item.article);
-
-          if (isCorrect) {
-            correct++;
-            resultDiv.textContent = "✅ Richtig!";
-            if (navigator.vibrate) navigator.vibrate(10);
-          } else {
-            wrong++;
-            resultDiv.textContent = `❌ Falsch! Richtiger Artikel: "${item.article}"`;
-            if (navigator.vibrate) navigator.vibrate([30, 20, 30]);
-          }
-
-          renderExtra(item);
-          updateScore();
-          addHistoryRow(opt, item.word, isCorrect, item.article);
-
-          startCountdownThenNext();
-        };
-
+        btn.setAttribute("data-article", opt);
+        btn.type = "button";
+        btn.addEventListener("click", () => handleAnswer(opt, item));
         optionsDiv.appendChild(btn);
       });
     }
 
-    // Reset
-    document.getElementById("resetBtn").onclick = () => {
-      correct = 0;
-      wrong = 0;
-      current = 0;
-
-      shuffle(data);
-
-      document.getElementById("result").textContent = "";
-      document.getElementById("extra").textContent = "";
-      document.getElementById("historyBody").innerHTML = "";
-      clearCountdown(false);
-
-      updateScore();
+    function nextQuestion(){
+      if (!pool.length) return;
+      currentIndex = (currentIndex + 1) % pool.length;
       loadQuestion();
-    };
+    }
 
-    // Pause toggle
-    document.getElementById("pauseBtn").onclick = () => {
-      autoEnabled = !autoEnabled;
+    function handleAnswer(opt, item){
+      if (inputLocked) return;
+      inputLocked = true;
 
-      const btn = document.getElementById("pauseBtn");
-      btn.textContent = autoEnabled ? "Pause" : "Weiter";
+      // Disable all options immediately
+      Array.from(optionsDiv.querySelectorAll("button")).forEach(b => b.disabled = true);
 
-      if (!autoEnabled) {
-        if (countdownTimer) {
-          clearInterval(countdownTimer);
-          countdownTimer = null;
-        }
-        setCountdownText("Pausiert");
+      const isCorrect = (opt === item.article);
+
+      if (isCorrect){
+        correct += 1;
+        streak += 1;
+        sessionBestStreak = Math.max(sessionBestStreak, streak);
+
+        awardCorrect();
+        resultDiv.textContent = "✅ Correct!";
+        vibrate(10);
+      } else {
+        wrong += 1;
+        streak = 0;
+
+        penalizeWrong();
+        recordMistake(item);
+
+        resultDiv.textContent = `❌ Wrong — correct is "${item.article}"`;
+        vibrate([30, 20, 30]);
+      }
+
+      renderExtra(item);
+      addHistoryRow(opt, item.word, isCorrect, item.article);
+      updateHud();
+      updateDeviceStatsUI();
+
+      // Stop rule
+      if (maxErrors > 0 && wrong >= maxErrors){
+        showGameOver();
         return;
       }
 
-      if (remaining > 0) {
+      // Auto-advance or wait
+      if (autoEnabled){
+        startCountdown(autoSeconds);
+      } else {
+        setCountdownText("Paused");
+      }
+
+      // Unlock input shortly (but keep buttons disabled until next question)
+      setTimeout(() => { /* keep locked until next question */ }, 150);
+    }
+
+    // =========================
+    // Start / Reset session
+    // =========================
+    function resetSessionUIOnly(){
+      correct = 0;
+      wrong = 0;
+      streak = 0;
+      score = 0;
+      sessionBestStreak = 0;
+
+      historyBody.innerHTML = "";
+      updateAnswersSummary();
+
+      resultDiv.textContent = "";
+      extraEl.textContent = "";
+      clearCountdown(false);
+
+      updateHud();
+    }
+
+    async function startGame(){
+      // Ensure data is loaded
+      if (!rawData.length){
+        await loadData();
+      }
+
+      buildPool();
+
+      if (!pool.length){
+        setupEl.style.display = "";
+        playAreaEl.style.display = "none";
+        wordEl.textContent = "No words for this level yet.";
+        resultDiv.textContent = "Try A1, or add more items in your sheet.";
+        return;
+      }
+
+      resetSessionUIOnly();
+
+      setupEl.style.display = "none";
+      playAreaEl.style.display = "";
+      pauseBtn.textContent = autoEnabled ? "Pause" : "Resume";
+
+      loadQuestion();
+    }
+
+    // =========================
+    // Level selection (A2 includes A1; no Mix)
+    // =========================
+    lvlA1Btn.addEventListener("click", () => {
+      selectedLevel = "A1";
+      syncLevelButtons();
+      saveStateToPrefs();
+    });
+    lvlA2Btn.addEventListener("click", () => {
+      selectedLevel = "A2";
+      syncLevelButtons();
+      saveStateToPrefs();
+    });
+
+    startBtn.addEventListener("click", startGame);
+
+    // Reset session button (does not wipe device stats)
+    resetBtn.addEventListener("click", () => {
+      // show setup again
+      clearCountdown(false);
+      setupEl.style.display = "";
+      playAreaEl.style.display = "none";
+      startBtn.textContent = "Start";
+      resetSessionUIOnly();
+
+      // reshuffle pool for freshness
+      if (pool.length) shuffle(pool);
+    });
+
+    // Pause toggle
+    pauseBtn.addEventListener("click", () => {
+      autoEnabled = !autoEnabled;
+      pauseBtn.textContent = autoEnabled ? "Pause" : "Resume";
+      saveStateToPrefs();
+
+      if (!autoEnabled){
+        if (countdownTimer){
+          clearInterval(countdownTimer);
+          countdownTimer = null;
+        }
+        setCountdownText("Paused");
+        return;
+      }
+
+      // Resume countdown if there was time left
+      if (remaining > 0){
         startCountdown(remaining);
       } else {
         setCountdownText("");
       }
-    };
+    });
 
-    // Start
-    updateScore();
-    loadData();
+    // =========================
+    // Settings panel
+    // =========================
+    function openSettings(){
+      syncPrefsToSettingsUI();
+      settingsPanel.style.display = "flex";
+      settingsPanel.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+      closeSettings.focus({ preventScroll: true });
+    }
 
-    // Splash hide
-    setTimeout(() => {
-      const splash = document.getElementById("splash");
-      if (splash) splash.style.display = "none";
-    }, 1000);
+    function closeSettingsPanel(){
+      settingsPanel.style.display = "none";
+      settingsPanel.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
+
+    settingsBtn.addEventListener("click", openSettings);
+    closeSettings.addEventListener("click", closeSettingsPanel);
+    settingsPanel.addEventListener("click", (e) => {
+      if (e.target === settingsPanel) closeSettingsPanel();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && settingsPanel.style.display === "flex") closeSettingsPanel();
+    });
+
+    saveSettingsBtn.addEventListener("click", () => {
+      showTranslation = showTranslationCb.checked;
+      showPlural = showPluralCb.checked;
+      autoEnabled = autoAdvanceCb.checked;
+      autoSeconds = clamp(parseInt(autoSecondsSel.value, 10) || 3, 2, 4);
+      maxErrors = clamp(parseInt(maxErrorsSel.value, 10) || 0, 0, 10);
+      haptics = !!hapticsCb.checked;
+
+      saveStateToPrefs();
+      updateHud();
+      closeSettingsPanel();
+    });
+
+    resetDeviceStatsBtn.addEventListener("click", () => {
+      const ok = confirm("This will clear your local device stats for this game (best score/streak, daily streak). Continue?");
+      if (!ok) return;
+      localStorage.removeItem(LS_STATS);
+      updateDeviceStatsUI();
+    });
+
+    // =========================
+    // Init
+    // =========================
+    (function init(){
+      loadPrefsToState();
+      syncLevelButtons();
+      updateHud();
+      updateDeviceStatsUI();
+      syncPrefsToSettingsUI();
+      updateAnswersSummary();
+
+      // Preload data (non-blocking start)
+      loadData();
+
+      // Splash hide
+      setTimeout(() => {
+        const splash = document.getElementById("splash");
+        if (splash) splash.style.display = "none";
+      }, 900);
+    })();
+
+  </script>
+
+  <!-- Plus modal script (EXACT CODE FROM INDEX) -->
+  <script>
+    const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSd7aZ8okTdi2sr08p8l8HZ2r6oH09BsF3L_mJQtSc8q0nFRdw/viewform?usp=header";
+
+    const modal = document.getElementById("plusModal");
+    const closeModalBtn = document.getElementById("closeModal");
+    const okBtn = document.getElementById("okBtn");
+    const plusText = document.getElementById("plusText");
+    const waitlistBtn = document.getElementById("waitlistBtn");
+
+    function openModal(moduleName){
+      plusText.innerHTML =
+        `The <strong>${moduleName}</strong> is part of <strong>DeutschBuddy Plus</strong> and will be available soon.<br>` +
+        `Want early access and updates?`;
+      waitlistBtn.href = formUrl; // keep it simple (no prefill)
+      modal.style.display = "flex";
+      modal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeModal(){
+      modal.style.display = "none";
+      modal.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
+
+    // Open modal on locked cards
+    document.querySelectorAll(".gameCard.locked").forEach(card => {
+      const name = card.getAttribute("data-plus") || "This game";
+      card.addEventListener("click", () => openModal(name));
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openModal(name);
+        }
+      });
+    });
+
+    closeModalBtn.addEventListener("click", closeModal);
+    okBtn.addEventListener("click", closeModal);
+
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal.style.display === "flex") closeModal();
+    });
   </script>
 </body>
 </html>
+
