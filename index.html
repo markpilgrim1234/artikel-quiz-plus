@@ -17,12 +17,10 @@
       --border:#e5e7eb;
       --card:#ffffff;
       --shadow: 0 14px 40px rgba(15,23,42,.08);
-      --radius: 18px;
 
       --blue:#169BD7;
       --blueHover:#1287BC;
 
-      --softBlue:#eaf6ff;
       --softYellow:#fff6db;
       --softRed:#ffe7e3;
 
@@ -31,6 +29,8 @@
     }
 
     *{box-sizing:border-box}
+    html, body{ width:100%; overflow-x:hidden; }
+
     body{
       margin:0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
@@ -38,6 +38,8 @@
       background:var(--bg);
       line-height:1.55;
     }
+
+    img{ max-width:100%; height:auto; }
 
     header{
       border-bottom:1px solid var(--border);
@@ -119,51 +121,70 @@
       box-shadow: 0 10px 28px rgba(15,23,42,.06);
     }
 
-    /* Removed the top pill (Deutsch lernen – ohne Stress) */
+    .heroLogo{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom: 12px;
+    }
+    .heroLogo img{
+      width: 92px;
+      height: 92px;
+      border-radius: 26px;
+      box-shadow: 0 14px 34px rgba(15,23,42,.12);
+      background:#fff;
+      border: 1px solid rgba(229,231,235,.9);
+      padding: 8px;
+    }
+    @media (max-width: 420px){
+      .heroLogo img{ width: 78px; height: 78px; border-radius: 24px; padding: 7px; }
+    }
 
     .hero h1{
       margin: 6px 0 12px;
-      font-size: clamp(1.35rem, 2.35vw, 1.85rem); /* smaller + simpler */
+      font-size: clamp(1.35rem, 2.35vw, 1.85rem);
       line-height: 1.15;
       letter-spacing: -0.01em;
       font-weight: 900;
     }
     .hero .sub{
       margin: 0 0 10px;
-      font-size: 1.25rem; /* bigger */
+      font-size: 1.25rem;
       color: #0f172a;
       font-weight: 900;
       line-height: 1.25;
     }
-    .hero .mini{
-      margin:0 0 16px;
-      color: var(--muted);
-      font-size: 1rem;
-      font-weight: 700;
-    }
 
-    .chips{
+    /* Highlight line (replaces the chips) */
+    .highlight{
       display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-top: 6px;
-    }
-    .chip{
-      display:inline-flex;
       align-items:center;
-      gap:10px;
-      padding: 10px 14px;
+      gap:12px;
+      padding: 12px 14px;
       border-radius: 999px;
       border: 1px solid rgba(229,231,235,.9);
       background: rgba(255,255,255,.9);
-      font-weight: 800;
+      font-weight: 900;
       color:#111827;
+      width: fit-content;
+      max-width: 100%;
     }
-    .chip .cDot{
+    .highlight .cDot{
       width:12px;height:12px;border-radius:50%;
       background:#fbbf24;
       box-shadow: 0 0 0 5px rgba(251,191,36,.14);
       flex: 0 0 auto;
+    }
+    .highlight span{
+      font-weight: 900;
+      color: #111827;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    @media (max-width: 520px){
+      .highlight{ width: 100%; }
+      .highlight span{ white-space: normal; }
     }
 
     /* RIGHT PANEL */
@@ -195,9 +216,7 @@
     }
 
     /* Scrollable game list + subtle bottom fade */
-    .cardsWrap{
-      position: relative;
-    }
+    .cardsWrap{ position: relative; }
     .cards{
       display:flex;
       flex-direction:column;
@@ -240,6 +259,7 @@
       box-shadow: 0 14px 34px rgba(15,23,42,.10);
       border-color: #d1d5db;
     }
+
     .left{
       display:flex;
       align-items:center;
@@ -326,12 +346,11 @@
       background: #f3f4f6;
       color:#64748b;
     }
-
+    /* Make PLUS/locked game icons grayscale */
     .gameCard.locked .gIcon img{
       filter: grayscale(100%);
       opacity: .65;
     }
-
 
     /* Teaser (non-clickable) */
     .teaser{
@@ -515,18 +534,19 @@
       <!-- LEFT / HERO -->
       <section class="hero" aria-label="DeutschBuddy Intro">
         <div class="heroInner">
-          <!-- Shorter + simpler German headline -->
+          <!-- Big logo inside hero -->
+          <div class="heroLogo" aria-hidden="true">
+            <img src="db.png" alt="">
+          </div>
+
           <h1>Deutsch üben – kurz &amp; spielerisch.</h1>
 
-          <!-- Bigger subtitle -->
           <p class="sub">Build German skills in a few minutes a day — by having fun!</p>
 
-          <p class="mini">Clear, fast, and motivating.</p>
-
-          <div class="chips" aria-label="Key benefits">
-            <div class="chip"><span class="cDot"></span> No sign-up</div>
-            <div class="chip"><span class="cDot"></span> Clear &amp; quick</div>
-            <div class="chip"><span class="cDot"></span> Mobile-friendly</div>
+          <!-- Highlight instead of chips -->
+          <div class="highlight" aria-label="Key message">
+            <span class="cDot" aria-hidden="true"></span>
+            <span>Clear, fast, and motivating.</span>
           </div>
         </div>
       </section>
@@ -571,7 +591,6 @@
             <div class="gameCard locked" data-plus="Präsens Trainer" role="button" tabindex="0" aria-label="Präsens Trainer (Coming soon)">
               <div class="left">
                 <div class="gIcon" aria-hidden="true">
-                  <!-- Use prasens.png -->
                   <img src="prasens.png" alt="">
                 </div>
                 <div class="gText">
@@ -686,7 +705,7 @@
       document.body.style.overflow = "";
     }
 
-    // Open modal on locked cards only (teaser is non-clickable)
+    // Open modal on locked cards only
     document.querySelectorAll(".gameCard.locked").forEach(card => {
       const name = card.getAttribute("data-plus") || "This game";
       card.addEventListener("click", () => openModal(name));
