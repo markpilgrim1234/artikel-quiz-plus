@@ -35,6 +35,9 @@
       --primary: #169BD7;
       --primaryHover: #1287BC;
 
+      --start: #16a34a;        /* green */
+      --startHover: #15803d;
+
       --resetBg: #f3f4f6;
       --resetHover: #e5e7eb;
 
@@ -42,6 +45,9 @@
       --bad: #b91c1c;
 
       --focus: rgba(22,155,215,0.35);
+
+      --a1plusBg: #2563eb;     /* blue solid for A1+ (not Plus) */
+      --a1plusText: #ffffff;
     }
 
     *{ box-sizing: border-box; }
@@ -155,6 +161,17 @@
       border-color: var(--primaryHover);
     }
 
+    .btnStart{
+      background: var(--start);
+      border-color: var(--start);
+      color: #fff;
+      box-shadow: 0 6px 18px rgba(22,163,74,0.22);
+    }
+    .btnStart:hover{
+      background: var(--startHover);
+      border-color: var(--startHover);
+    }
+
     .btnSmall{
       padding: 7px 10px;
       font-size: 0.9rem;
@@ -199,18 +216,52 @@
       background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
       box-shadow: var(--shadow);
     }
+
+    .heroTitleRow{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
     .heroTitle{
-      margin: 0 0 6px;
+      margin: 0;
       font-size: 1.35rem;
       letter-spacing: 0.2px;
       font-weight: 900;
     }
+
     .heroSub{
-      margin: 0;
+      margin: 6px 0 0;
       color: var(--muted);
       font-size: 1rem;
     }
     .heroSub span[lang="de"]{ font-weight: 900; }
+
+    .iconBtn{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      cursor: pointer;
+      font-weight: 900;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+      white-space: nowrap;
+    }
+    .iconBtn:hover{
+      border-color: #d1d5db;
+      background: #fafafa;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    }
+    .iconBtn:focus-visible{
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
 
     .card{
       background: var(--card);
@@ -331,6 +382,17 @@
       color: #1d4ed8;
     }
 
+    .includeTag{
+      margin-left: 6px;
+      font-size: 0.75rem;
+      font-weight: 900;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.35);
+      background: var(--a1plusBg);
+      color: var(--a1plusText);
+    }
+
     .miniNote{
       color: var(--muted);
       font-size: 0.95rem;
@@ -340,15 +402,15 @@
       font-size: 2.2rem;
       text-align: center;
       font-weight: 900;
-      margin: 10px 0 14px;
+      margin: 10px 0 10px;
       letter-spacing: 0.2px;
     }
+
     .metaLine{
       text-align: center;
       color: var(--muted);
       font-weight: 800;
-      margin-top: -6px;
-      margin-bottom: 10px;
+      margin: 0 0 12px;
     }
 
     .options{
@@ -431,27 +493,7 @@
       margin: 14px 0;
     }
 
-    .howItWorks{
-      padding: 14px 16px 16px;
-      border-top: 1px solid var(--border);
-      background: linear-gradient(180deg, #fff 0%, #fafafa 100%);
-    }
-    .howItWorks h3{
-      margin: 0 0 6px;
-      font-size: 1.05rem;
-      font-weight: 900;
-    }
-    .howItWorks p{
-      margin: 0;
-      color: var(--muted);
-    }
-    .howItWorks ul{
-      margin: 10px 0 0;
-      padding-left: 18px;
-      color: #374151;
-    }
-
-    /* History table (wrapped in details for mobile) */
+    /* Answers table (collapsible) */
     details.answersDetails{
       border-top: 1px solid var(--border);
     }
@@ -548,7 +590,7 @@
       flex-wrap: wrap;
     }
 
-    /* Settings (simple modal-ish card) */
+    /* Settings panel */
     .settingsPanel{
       display: none;
       position: fixed;
@@ -610,6 +652,18 @@
       padding: 10px 12px;
       font-weight: 800;
       background: #fff;
+    }
+
+    /* How it works modal (same visual language as Settings) */
+    .howModal{
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.32);
+      z-index: 55;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
     }
 
     /* ========= Plus modal styles (kept compatible with Index) ========= */
@@ -690,6 +744,7 @@
       <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
         <a class="btn" href="index.html" aria-label="Go to home">Home</a>
         <a class="btn" href="artikelregeln.html" aria-label="Open rules">Rules</a>
+        <!-- same .btn sizing as others -->
         <button class="btn" id="settingsBtn" type="button" aria-label="Open settings">Settings</button>
       </div>
     </div>
@@ -697,10 +752,14 @@
 
   <div class="wrap">
     <section class="hero" aria-label="Game intro">
-      <h2 class="heroTitle">Choose the correct article.</h2>
+      <div class="heroTitleRow">
+        <h2 class="heroTitle">Choose the correct article.</h2>
+        <button class="iconBtn" id="howBtn" type="button" aria-label="How it works">How it works</button>
+      </div>
+
       <p class="heroSub">
         Tap <span lang="de">der</span>, <span lang="de">die</span> or <span lang="de">das</span>.
-        Instant feedback — the next word loads automatically.
+        Instant feedback — the next word loads automatically (4 seconds).
       </p>
     </section>
 
@@ -722,7 +781,7 @@
         </div>
 
         <div class="content">
-          <!-- Setup (shown before first start, and after reset) -->
+          <!-- Setup -->
           <div class="setup" id="setup">
             <div class="levelRow" aria-label="Level selection">
               <div class="levelLabel">Level:</div>
@@ -730,7 +789,7 @@
               <button class="levelBtn" type="button" id="lvlA1" aria-pressed="true" aria-label="Select A1">A1</button>
 
               <button class="levelBtn" type="button" id="lvlA2" aria-pressed="false" aria-label="Select A2 (includes A1)">
-                A2 <span class="plusTag" title="Includes A1">A1+</span>
+                A2 <span class="includeTag" title="Includes A1">A1+</span>
               </button>
 
               <!-- Locked levels: use same selector as Index script -->
@@ -748,7 +807,7 @@
             </div>
 
             <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-              <button class="btn btnPrimary" id="startBtn" type="button">Start</button>
+              <button class="btn btnStart" id="startBtn" type="button">Start</button>
 
               <!-- Plus-only feature entry point -->
               <div class="btn gameCard locked" role="button" tabindex="0" data-plus="Fehler üben (Practice mistakes)">
@@ -766,6 +825,7 @@
           <!-- Playing UI -->
           <div id="playArea" style="display:none;">
             <div class="word" id="word">Loading words…</div>
+            <!-- Translation shown BEFORE choosing (when enabled) -->
             <div class="metaLine" id="metaLine"></div>
 
             <div class="options" id="options" aria-label="Answer options"></div>
@@ -782,24 +842,10 @@
           </div>
         </div>
 
-        <!-- How it works (in-page, SEO-friendly) -->
-        <div class="howItWorks">
-          <h3>How it works</h3>
-          <p>
-            You’ll see a German noun. Choose the correct article:
-            <span lang="de">der</span> / <span lang="de">die</span> / <span lang="de">das</span>.
-          </p>
-          <ul>
-            <li>Instant feedback and quick info (translation/plural) if you enable it in Settings.</li>
-            <li>Set a “stop after mistakes” rule (e.g., 5 or 10) to keep sessions short.</li>
-            <li>Your progress is stored locally on this device (no account).</li>
-          </ul>
-        </div>
-
-        <!-- Answers on the same card (collapsible) -->
+        <!-- Answers -->
         <details class="answersDetails" id="answersDetails">
           <summary>
-            <span>Answers (click for details) ▾</span>
+            <span>Answers (Click for details) ▾</span>
             <span style="color:var(--muted); font-weight:900;" id="answersSummary">0 items</span>
           </summary>
           <div class="historyWrap">
@@ -817,12 +863,12 @@
         </details>
       </section>
 
-      <!-- RIGHT: Session summary / quick stats -->
+      <!-- RIGHT: Device stats -->
       <aside class="card" aria-label="Session and device stats">
         <div class="cardHead">
           <div class="cardHeadLeft">
             <p class="title">Stats</p>
-            <p class="subtitle">Session + device progress (local)</p>
+            <p class="subtitle">Device progress (local)</p>
           </div>
         </div>
 
@@ -861,7 +907,7 @@
 
     <footer>
       <div class="footerRow">
-        <span>by Marco P // Ver. 2.0 // 2026</span>
+        <span>by Marco P // Ver. 2.1 // 2026</span>
         <a class="btn btnSmall" href="ueber-mich.html" aria-label="About">About</a>
       </div>
     </footer>
@@ -879,7 +925,6 @@
         <div class="row">
           <label for="showTranslation">Show translation</label>
           <input id="showTranslation" type="checkbox" />
-          <div class="hint">Uses the “Italian/Translation” column from your sheet (labelled as “Translation” in the UI).</div>
         </div>
 
         <div class="row">
@@ -888,18 +933,9 @@
         </div>
 
         <div class="row">
-          <label for="autoAdvance">Auto-advance</label>
+          <label for="autoAdvance">Auto-advance (4 seconds)</label>
           <input id="autoAdvance" type="checkbox" />
-          <div class="hint">If enabled, the next word loads after a short countdown.</div>
-        </div>
-
-        <div class="row">
-          <label for="autoSeconds">Auto-advance delay</label>
-          <select id="autoSeconds">
-            <option value="2">2 seconds</option>
-            <option value="3" selected>3 seconds</option>
-            <option value="4">4 seconds</option>
-          </select>
+          <div class="hint">If enabled, the next word loads automatically after 4 seconds.</div>
         </div>
 
         <div class="row">
@@ -912,14 +948,34 @@
           <div class="hint">When you reach the limit, the session ends with “Game over”.</div>
         </div>
 
-        <div class="row">
-          <label for="haptics">Haptics (vibration)</label>
-          <input id="haptics" type="checkbox" />
-        </div>
-
         <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; margin-top:6px;">
           <button class="btn btnResetSmall" id="resetDeviceStats" type="button" title="Clear local stats">Reset device stats</button>
           <button class="btn btnPrimary" id="saveSettings" type="button">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- How it works modal -->
+  <div class="howModal" id="howModal" aria-hidden="true">
+    <div class="settingsCard" role="dialog" aria-modal="true" aria-labelledby="howTitle">
+      <div class="settingsHead">
+        <h3 id="howTitle">How it works</h3>
+        <button class="closeBtn" id="closeHow" aria-label="Close how it works">✕</button>
+      </div>
+      <div class="settingsBody">
+        <div style="color:var(--muted); font-weight:800;">
+          Short, snackable practice for <span lang="de">der/die/das</span>.
+        </div>
+        <ul style="margin:0; padding-left:18px; color:#374151;">
+          <li>You’ll see a German noun — tap the correct article.</li>
+          <li>Enable <strong>translation</strong> or <strong>plural</strong> in Settings.</li>
+          <li>Use “Stop after mistakes” (5 or 10) to keep sessions short.</li>
+          <li>Progress is stored locally on this device (no account).</li>
+        </ul>
+        <div style="display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap;">
+          <a class="btn" href="artikelregeln.html">Read the rules</a>
+          <button class="btn btnPrimary" id="gotItHow" type="button">Got it</button>
         </div>
       </div>
     </div>
@@ -956,15 +1012,14 @@
     // =========================
     // Data source (TSV)
     // =========================
-    // TIP: Use TSV to avoid bugs with commas inside text (examples often contain commas).
     const dataUrl =
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vTLMG3zUFzaLSA82QS7T4E8IAHiung0H2LYRU8hoi_svBol2OoFWmTFBhGVhCPxK2xGtADv1sM9guDr/pub?output=tsv";
 
     // =========================
     // Local storage keys
     // =========================
-    const LS_PREFS = "db_wa_prefs_v1";
-    const LS_STATS = "db_wa_stats_v1";
+    const LS_PREFS = "db_wa_prefs_v2";
+    const LS_STATS = "db_wa_stats_v2";
     const LS_MISTAKES = "db_wa_mistakes_v1";
 
     // =========================
@@ -985,15 +1040,14 @@
     let showTranslation = false;
     let showPlural = true;
     let autoEnabled = true;
-    let autoSeconds = 3;
+    const AUTO_SECONDS = 4; // fixed
     let maxErrors = 0; // 0 = off
-    let haptics = true;
 
     // Countdown
     let countdownTimer = null;
     let remaining = 0;
 
-    // Input lock for feedback phase
+    // Input lock
     let inputLocked = false;
 
     // =========================
@@ -1012,12 +1066,7 @@
     function parseLevel(s){
       const v = safeText(s).toUpperCase();
       if (v === "A1" || v === "A2" || v === "B1" || v === "B2") return v;
-      return ""; // unknown
-    }
-
-    function vibrate(pattern){
-      if (!haptics) return;
-      if (navigator.vibrate) navigator.vibrate(pattern);
+      return "";
     }
 
     function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
@@ -1030,58 +1079,40 @@
     }
 
     function getPrefs(){
-      try{
-        return JSON.parse(localStorage.getItem(LS_PREFS) || "{}");
-      }catch{ return {}; }
+      try{ return JSON.parse(localStorage.getItem(LS_PREFS) || "{}"); }
+      catch{ return {}; }
     }
-
-    function setPrefs(obj){
-      localStorage.setItem(LS_PREFS, JSON.stringify(obj));
-    }
+    function setPrefs(obj){ localStorage.setItem(LS_PREFS, JSON.stringify(obj)); }
 
     function getStats(){
-      try{
-        return JSON.parse(localStorage.getItem(LS_STATS) || "{}");
-      }catch{ return {}; }
+      try{ return JSON.parse(localStorage.getItem(LS_STATS) || "{}"); }
+      catch{ return {}; }
     }
-
-    function setStats(obj){
-      localStorage.setItem(LS_STATS, JSON.stringify(obj));
-    }
+    function setStats(obj){ localStorage.setItem(LS_STATS, JSON.stringify(obj)); }
 
     function getMistakes(){
-      try{
-        return JSON.parse(localStorage.getItem(LS_MISTAKES) || "{}");
-      }catch{ return {}; }
+      try{ return JSON.parse(localStorage.getItem(LS_MISTAKES) || "{}"); }
+      catch{ return {}; }
     }
-
-    function setMistakes(obj){
-      localStorage.setItem(LS_MISTAKES, JSON.stringify(obj));
-    }
+    function setMistakes(obj){ localStorage.setItem(LS_MISTAKES, JSON.stringify(obj)); }
 
     function updateDailyStreak(){
       const stats = getStats();
       const today = todayISO();
       const last = stats.lastPlayDate || "";
-
       if (!stats.dailyStreak) stats.dailyStreak = 0;
 
       if (last === today){
-        // already counted today
         setStats(stats);
         return;
       }
 
-      // compare yesterday
       const d = new Date();
       d.setDate(d.getDate() - 1);
       const y = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 
-      if (last === y){
-        stats.dailyStreak += 1;
-      } else {
-        stats.dailyStreak = 1;
-      }
+      if (last === y) stats.dailyStreak += 1;
+      else stats.dailyStreak = 1;
 
       stats.lastPlayDate = today;
       setStats(stats);
@@ -1131,9 +1162,13 @@
     const showTranslationCb = document.getElementById("showTranslation");
     const showPluralCb = document.getElementById("showPlural");
     const autoAdvanceCb = document.getElementById("autoAdvance");
-    const autoSecondsSel = document.getElementById("autoSeconds");
     const maxErrorsSel = document.getElementById("maxErrors");
-    const hapticsCb = document.getElementById("haptics");
+
+    // How it works UI
+    const howBtn = document.getElementById("howBtn");
+    const howModal = document.getElementById("howModal");
+    const closeHow = document.getElementById("closeHow");
+    const gotItHow = document.getElementById("gotItHow");
 
     // =========================
     // Preferences init
@@ -1144,9 +1179,7 @@
       showTranslation = !!p.showTranslation;
       showPlural = (p.showPlural !== undefined) ? !!p.showPlural : true;
       autoEnabled = (p.autoEnabled !== undefined) ? !!p.autoEnabled : true;
-      autoSeconds = clamp(parseInt(p.autoSeconds || "3", 10) || 3, 2, 4);
       maxErrors = clamp(parseInt(p.maxErrors || "0", 10) || 0, 0, 10);
-      haptics = (p.haptics !== undefined) ? !!p.haptics : true;
     }
 
     function saveStateToPrefs(){
@@ -1155,9 +1188,7 @@
         showTranslation,
         showPlural,
         autoEnabled,
-        autoSeconds,
-        maxErrors,
-        haptics
+        maxErrors
       });
     }
 
@@ -1165,9 +1196,7 @@
       showTranslationCb.checked = showTranslation;
       showPluralCb.checked = showPlural;
       autoAdvanceCb.checked = autoEnabled;
-      autoSecondsSel.value = String(autoSeconds);
       maxErrorsSel.value = String(maxErrors);
-      hapticsCb.checked = haptics;
     }
 
     function syncLevelButtons(){
@@ -1220,16 +1249,13 @@
         const header = lines[0].split("\t").map(safeText);
         const dataLines = lines.slice(1);
 
-        // Create a header map (robust to column order, but you said Level is at the end)
         const idx = {};
         header.forEach((h, i) => idx[h.toLowerCase()] = i);
 
-        // Expected keys (case-insensitive)
         const iArticle = (idx["article"] ?? 0);
         const iWord = (idx["word"] ?? 1);
         const iPlural = (idx["plural"] ?? 2);
         const iExample = (idx["example"] ?? 3);
-        // Your sheet currently uses "italian"; we surface it as "Translation"
         const iTrans = (idx["italian"] ?? idx["translation"] ?? 4);
         const iLevel = (idx["level"] ?? (header.length - 1));
 
@@ -1245,14 +1271,12 @@
 
             if (!word || !article) return null;
 
-            const key = `${article}|${word}`.toLowerCase(); // simple stable id
+            const key = `${article}|${word}`.toLowerCase();
             return { key, level, article, word, plural, example, translation };
           })
           .filter(Boolean);
 
-        if (!rawData.length){
-          throw new Error("No valid rows in dataset.");
-        }
+        if (!rawData.length) throw new Error("No valid rows in dataset.");
       }catch(e){
         wordEl.textContent = "Loading failed 😕";
         resultDiv.textContent = "Please check your connection and reload the page.";
@@ -1262,13 +1286,11 @@
     }
 
     function buildPool(){
-      // A2 includes A1 automatically
       if (selectedLevel === "A2"){
         pool = rawData.filter(it => it.level === "A1" || it.level === "A2" || !it.level);
       } else {
         pool = rawData.filter(it => it.level === "A1" || !it.level);
       }
-
       shuffle(pool);
       currentIndex = 0;
     }
@@ -1347,7 +1369,7 @@
 
       historyBody.prepend(tr);
 
-      const MAX_ROWS = 50; // keep it snackable
+      const MAX_ROWS = 50;
       while (historyBody.children.length > MAX_ROWS){
         historyBody.removeChild(historyBody.lastChild);
       }
@@ -1361,7 +1383,6 @@
       const rows = [];
       if (showPlural) rows.push(["Plural:", item.plural]);
       rows.push(["Example:", item.example]);
-      if (showTranslation) rows.push(["Translation:", item.translation]);
 
       if (!rows.length){
         extraEl.textContent = "—";
@@ -1395,42 +1416,33 @@
     // Scoring rules
     // =========================
     function awardCorrect(){
-      // base + streak bonus (capped)
-      const bonus = clamp(streak, 0, 6); // small cap
+      const bonus = clamp(streak, 0, 6);
       score += (10 + bonus);
     }
-
     function penalizeWrong(){
       score -= 5;
     }
 
     // =========================
-    // Game over / result screen
+    // Game over / result
     // =========================
     function showGameOver(){
       inputLocked = true;
       clearCountdown(false);
 
-      // Disable buttons
       Array.from(optionsDiv.querySelectorAll("button")).forEach(b => b.disabled = true);
 
       resultDiv.textContent = "🛑 Game over — mistake limit reached.";
-      metaLineEl.textContent = "";
       extraEl.innerHTML = `
         <div><strong>Session summary</strong></div>
         <div>Score: <strong>${score}</strong> • Correct: <strong>${correct}</strong> • Wrong: <strong>${wrong}</strong></div>
         <div>Best streak this session: <strong>${getSessionBestStreak()}</strong></div>
-        <div style="margin-top:8px; color:var(--muted); font-size:0.95rem;">
-          Tip: Open Settings to adjust “Stop after mistakes”.
-        </div>
       `;
 
       setCountdownText("");
 
-      // Update device stats (count session as played)
       finalizeSessionToDeviceStats();
 
-      // Show setup again (quick restart)
       setupEl.style.display = "";
       playAreaEl.style.display = "none";
       startBtn.textContent = "Retry";
@@ -1458,10 +1470,21 @@
     // =========================
     // Question rendering
     // =========================
+    function renderMetaLine(item){
+      const parts = [];
+      if (item.level) parts.push(`Level: ${item.level}`);
+      if (showTranslation){
+        const t = item.translation ? item.translation : "—";
+        parts.push(`Translation: ${t}`);
+      }
+      metaLineEl.textContent = parts.join("  •  ");
+    }
+
     function loadQuestion(){
       if (!pool.length){
         wordEl.textContent = "No words available.";
         resultDiv.textContent = "Try a different level.";
+        metaLineEl.textContent = "";
         return;
       }
 
@@ -1470,7 +1493,7 @@
 
       const item = pool[currentIndex];
       wordEl.textContent = item.word || "—";
-      metaLineEl.textContent = item.level ? `Level: ${item.level}` : "";
+      renderMetaLine(item);
 
       resultDiv.textContent = "";
       extraEl.textContent = "";
@@ -1498,7 +1521,6 @@
       if (inputLocked) return;
       inputLocked = true;
 
-      // Disable all options immediately
       Array.from(optionsDiv.querySelectorAll("button")).forEach(b => b.disabled = true);
 
       const isCorrect = (opt === item.article);
@@ -1510,7 +1532,6 @@
 
         awardCorrect();
         resultDiv.textContent = "✅ Correct!";
-        vibrate(10);
       } else {
         wrong += 1;
         streak = 0;
@@ -1519,7 +1540,6 @@
         recordMistake(item);
 
         resultDiv.textContent = `❌ Wrong — correct is "${item.article}"`;
-        vibrate([30, 20, 30]);
       }
 
       renderExtra(item);
@@ -1527,25 +1547,20 @@
       updateHud();
       updateDeviceStatsUI();
 
-      // Stop rule
       if (maxErrors > 0 && wrong >= maxErrors){
         showGameOver();
         return;
       }
 
-      // Auto-advance or wait
       if (autoEnabled){
-        startCountdown(autoSeconds);
+        startCountdown(AUTO_SECONDS);
       } else {
         setCountdownText("Paused");
       }
-
-      // Unlock input shortly (but keep buttons disabled until next question)
-      setTimeout(() => { /* keep locked until next question */ }, 150);
     }
 
     // =========================
-    // Start / Reset session
+    // Start / Reset
     // =========================
     function resetSessionUIOnly(){
       correct = 0;
@@ -1565,7 +1580,6 @@
     }
 
     async function startGame(){
-      // Ensure data is loaded
       if (!rawData.length){
         await loadData();
       }
@@ -1577,6 +1591,7 @@
         playAreaEl.style.display = "none";
         wordEl.textContent = "No words for this level yet.";
         resultDiv.textContent = "Try A1, or add more items in your sheet.";
+        metaLineEl.textContent = "";
         return;
       }
 
@@ -1590,7 +1605,7 @@
     }
 
     // =========================
-    // Level selection (A2 includes A1; no Mix)
+    // Level selection (no Mix)
     // =========================
     lvlA1Btn.addEventListener("click", () => {
       selectedLevel = "A1";
@@ -1605,20 +1620,15 @@
 
     startBtn.addEventListener("click", startGame);
 
-    // Reset session button (does not wipe device stats)
     resetBtn.addEventListener("click", () => {
-      // show setup again
       clearCountdown(false);
       setupEl.style.display = "";
       playAreaEl.style.display = "none";
       startBtn.textContent = "Start";
       resetSessionUIOnly();
-
-      // reshuffle pool for freshness
       if (pool.length) shuffle(pool);
     });
 
-    // Pause toggle
     pauseBtn.addEventListener("click", () => {
       autoEnabled = !autoEnabled;
       pauseBtn.textContent = autoEnabled ? "Pause" : "Resume";
@@ -1633,7 +1643,6 @@
         return;
       }
 
-      // Resume countdown if there was time left
       if (remaining > 0){
         startCountdown(remaining);
       } else {
@@ -1663,20 +1672,22 @@
     settingsPanel.addEventListener("click", (e) => {
       if (e.target === settingsPanel) closeSettingsPanel();
     });
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && settingsPanel.style.display === "flex") closeSettingsPanel();
-    });
 
     saveSettingsBtn.addEventListener("click", () => {
       showTranslation = showTranslationCb.checked;
       showPlural = showPluralCb.checked;
       autoEnabled = autoAdvanceCb.checked;
-      autoSeconds = clamp(parseInt(autoSecondsSel.value, 10) || 3, 2, 4);
       maxErrors = clamp(parseInt(maxErrorsSel.value, 10) || 0, 0, 10);
-      haptics = !!hapticsCb.checked;
 
       saveStateToPrefs();
       updateHud();
+
+      // Update translation line immediately if playing
+      if (playAreaEl.style.display !== "none" && pool.length){
+        const item = pool[currentIndex];
+        renderMetaLine(item);
+      }
+
       closeSettingsPanel();
     });
 
@@ -1685,6 +1696,33 @@
       if (!ok) return;
       localStorage.removeItem(LS_STATS);
       updateDeviceStatsUI();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && settingsPanel.style.display === "flex") closeSettingsPanel();
+      if (e.key === "Escape" && howModal.style.display === "flex") closeHowModal();
+    });
+
+    // =========================
+    // How it works modal
+    // =========================
+    function openHowModal(){
+      howModal.style.display = "flex";
+      howModal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+      closeHow.focus({ preventScroll: true });
+    }
+    function closeHowModal(){
+      howModal.style.display = "none";
+      howModal.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
+
+    howBtn.addEventListener("click", openHowModal);
+    closeHow.addEventListener("click", closeHowModal);
+    gotItHow.addEventListener("click", closeHowModal);
+    howModal.addEventListener("click", (e) => {
+      if (e.target === howModal) closeHowModal();
     });
 
     // =========================
@@ -1698,16 +1736,13 @@
       syncPrefsToSettingsUI();
       updateAnswersSummary();
 
-      // Preload data (non-blocking start)
       loadData();
 
-      // Splash hide
       setTimeout(() => {
         const splash = document.getElementById("splash");
         if (splash) splash.style.display = "none";
       }, 900);
     })();
-
   </script>
 
   <!-- Plus modal script (EXACT CODE FROM INDEX) -->
@@ -1761,4 +1796,5 @@
   </script>
 </body>
 </html>
+
 
