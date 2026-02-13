@@ -98,7 +98,8 @@
       gap:18px;
     }
     @media (min-width: 980px){
-      .grid{ grid-template-columns: 1.15fr 0.85fr; align-items:start; }
+      /* 2/5 left + 3/5 right */
+      .grid{ grid-template-columns: 2fr 3fr; align-items:start; }
     }
 
     /* HERO */
@@ -118,40 +119,27 @@
       box-shadow: 0 10px 28px rgba(15,23,42,.06);
     }
 
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(229,231,235,.9);
-      background: rgba(255,255,255,.9);
-      color: #111827;
-      font-weight: 800;
-      font-size: .95rem;
-    }
-    .dot{
-      width:12px;height:12px;border-radius:50%;
-      background:#ef4444;
-      box-shadow: 0 0 0 4px rgba(239,68,68,.12);
-    }
+    /* Removed the top pill (Deutsch lernen – ohne Stress) */
 
     .hero h1{
-      margin: 14px 0 10px;
-      font-size: clamp(2rem, 4vw, 3rem);
-      line-height: 1.08;
-      letter-spacing: -0.02em;
+      margin: 6px 0 12px;
+      font-size: clamp(1.35rem, 2.35vw, 1.85rem); /* smaller + simpler */
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+      font-weight: 900;
     }
     .hero .sub{
-      margin: 0 0 12px;
-      font-size: 1.05rem;
+      margin: 0 0 10px;
+      font-size: 1.25rem; /* bigger */
       color: #0f172a;
-      font-weight: 700;
+      font-weight: 900;
+      line-height: 1.25;
     }
     .hero .mini{
       margin:0 0 16px;
       color: var(--muted);
       font-size: 1rem;
+      font-weight: 700;
     }
 
     .chips{
@@ -195,7 +183,7 @@
     }
     .panelHead h2{
       margin:0;
-      font-size: 1.45rem; /* bigger */
+      font-size: 1.45rem;
       font-weight: 900;
       letter-spacing: -0.01em;
     }
@@ -206,10 +194,33 @@
       font-size: .95rem;
     }
 
+    /* Scrollable game list + subtle bottom fade */
+    .cardsWrap{
+      position: relative;
+    }
     .cards{
       display:flex;
       flex-direction:column;
       gap: 12px;
+
+      /* show a bit of the 5th card */
+      max-height: 360px;
+      overflow-y: auto;
+      padding-right: 6px;
+      scroll-behavior: smooth;
+    }
+    @media (min-width: 980px){
+      .cards{ max-height: 420px; }
+    }
+    .cardsWrap::after{
+      content:"";
+      position:absolute;
+      left:0; right:0; bottom:0;
+      height: 46px;
+      pointer-events:none;
+      background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1));
+      border-bottom-left-radius: 18px;
+      border-bottom-right-radius: 18px;
     }
 
     .gameCard{
@@ -314,6 +325,20 @@
     .locked .ctaPill{
       background: #f3f4f6;
       color:#64748b;
+    }
+
+    /* Teaser (non-clickable) */
+    .teaser{
+      cursor: default;
+      pointer-events: none;
+      opacity: .75;
+      background: #fbfbfc;
+      border-style: dashed;
+    }
+    .teaser:hover{
+      transform:none;
+      box-shadow:none;
+      border-color: rgba(229,231,235,.95);
     }
 
     /* Donate */
@@ -470,7 +495,6 @@
   <header>
     <div class="topbar">
       <a class="brand" href="index.html" aria-label="DeutschBuddy Home">
-        <!-- Replace this with your new logo file if you want -->
         <img src="db.png" alt="DeutschBuddy Logo">
         <div class="brandText">
           <strong>DeutschBuddy</strong>
@@ -485,11 +509,12 @@
       <!-- LEFT / HERO -->
       <section class="hero" aria-label="DeutschBuddy Intro">
         <div class="heroInner">
-          <div class="pill"><span class="dot"></span> Deutsch lernen – ohne Stress</div>
+          <!-- Shorter + simpler German headline -->
+          <h1>Deutsch üben – kurz &amp; spielerisch.</h1>
 
-          <h1>Trainiere Deutsch – spielerisch, kurz und effektiv.</h1>
-
+          <!-- Bigger subtitle -->
           <p class="sub">Build German skills in a few minutes a day — by having fun!</p>
+
           <p class="mini">Clear, fast, and motivating.</p>
 
           <div class="chips" aria-label="Key benefits">
@@ -507,74 +532,89 @@
           <p class="hint">tap to play</p>
         </div>
 
-        <div class="cards">
-          <!-- FREE / ACTIVE -->
-          <a class="gameCard" href="artikel-quiz.html" style="text-decoration:none; color:inherit;" aria-label="Start Article Trainer">
-            <div class="left">
-              <div class="gIcon" aria-hidden="true">
-                <!-- Keep your existing game icon here if you prefer -->
-                <img src="icon.png" alt="">
-              </div>
-              <div class="gText">
-                <p class="gTitle">Welcher Artikel?</p>
-                <p class="gSub">Der / Die / Das — the best quiz.</p>
-              </div>
-            </div>
-            <div class="ctaPill">Play</div>
-          </a>
-
-          <!-- PLUS / COMING SOON -->
-          <div class="gameCard locked" data-plus="Plural Trainer" role="button" tabindex="0" aria-label="Plural Trainer (Coming soon)">
-            <div class="left">
-              <div class="gIcon" aria-hidden="true">
-                <img src="plural.png" alt="">
-              </div>
-              <div class="gText">
-                <p class="gTitle">Plural Trainer</p>
-                <p class="gSub">Plus • Coming soon</p>
-              </div>
-            </div>
-            <div class="badge badgePlus">Plus</div>
-          </div>
-
-          <div class="gameCard locked" data-plus="Präsens Trainer" role="button" tabindex="0" aria-label="Präsens Trainer (Coming soon)">
-            <div class="left">
-              <div class="gIcon" aria-hidden="true">
-                <!-- No image provided: clean placeholder -->
-                <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-weight:1000;color:#64748b;background:#fff;border-radius:16px;">
-                  P
+        <div class="cardsWrap" aria-label="Games list (scrollable)">
+          <div class="cards">
+            <!-- FREE / ACTIVE -->
+            <a class="gameCard" href="artikel-quiz.html" style="text-decoration:none; color:inherit;" aria-label="Start Article Trainer">
+              <div class="left">
+                <div class="gIcon" aria-hidden="true">
+                  <img src="icon.png" alt="">
+                </div>
+                <div class="gText">
+                  <p class="gTitle">Welcher Artikel?</p>
+                  <p class="gSub">Der / Die / Das — the best quiz.</p>
                 </div>
               </div>
-              <div class="gText">
-                <p class="gTitle">Präsens Trainer</p>
-                <p class="gSub">Plus • Coming soon</p>
-              </div>
-            </div>
-            <div class="badge badgePlus">Plus</div>
-          </div>
+              <div class="ctaPill">Play</div>
+            </a>
 
-          <div class="gameCard locked" data-plus="Perfekt Trainer" role="button" tabindex="0" aria-label="Perfekt Trainer (Coming soon)">
-            <div class="left">
-              <div class="gIcon" aria-hidden="true">
-                <img src="perfekt.png" alt="">
+            <!-- PLUS / COMING SOON -->
+            <div class="gameCard locked" data-plus="Plural Trainer" role="button" tabindex="0" aria-label="Plural Trainer (Coming soon)">
+              <div class="left">
+                <div class="gIcon" aria-hidden="true">
+                  <img src="plural.png" alt="">
+                </div>
+                <div class="gText">
+                  <p class="gTitle">Plural Trainer</p>
+                  <p class="gSub">Plus • Coming soon</p>
+                </div>
               </div>
-              <div class="gText">
-                <p class="gTitle">Perfekt Trainer</p>
-                <p class="gSub">Plus • Coming soon</p>
-              </div>
+              <div class="badge badgePlus">Plus</div>
             </div>
-            <div class="badge badgePlus">Plus</div>
-          </div>
 
+            <div class="gameCard locked" data-plus="Präsens Trainer" role="button" tabindex="0" aria-label="Präsens Trainer (Coming soon)">
+              <div class="left">
+                <div class="gIcon" aria-hidden="true">
+                  <!-- Use prasens.png -->
+                  <img src="prasens.png" alt="">
+                </div>
+                <div class="gText">
+                  <p class="gTitle">Präsens Trainer</p>
+                  <p class="gSub">Plus • Coming soon</p>
+                </div>
+              </div>
+              <div class="badge badgePlus">Plus</div>
+            </div>
+
+            <div class="gameCard locked" data-plus="Perfekt Trainer" role="button" tabindex="0" aria-label="Perfekt Trainer (Coming soon)">
+              <div class="left">
+                <div class="gIcon" aria-hidden="true">
+                  <img src="perfekt.png" alt="">
+                </div>
+                <div class="gText">
+                  <p class="gTitle">Perfekt Trainer</p>
+                  <p class="gSub">Plus • Coming soon</p>
+                </div>
+              </div>
+              <div class="badge badgePlus">Plus</div>
+            </div>
+
+            <!-- TEASER (non-clickable) -->
+            <div class="gameCard teaser" aria-label="More games coming soon (teaser)">
+              <div class="left">
+                <div class="gIcon" aria-hidden="true">
+                  <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-weight:1000;color:#94a3b8;background:#fff;border-radius:16px;">
+                    …
+                  </div>
+                </div>
+                <div class="gText">
+                  <p class="gTitle">More games coming</p>
+                  <p class="gSub">New mini-games are on the way</p>
+                </div>
+              </div>
+              <div class="badge">Soon</div>
+            </div>
+
+          </div>
         </div>
       </aside>
     </div>
   </main>
 
-  <!-- Donate (NO background bar behind the text) -->
+  <!-- Donate -->
   <div class="donateWrap">
     <div class="donateRow" aria-label="Donate">
-      <div class="donateText">Gefällt dir DeutschBuddy? Unterstütze das Projekt.</div>
+      <div class="donateText">Like DeutschBuddy? Support the project.</div>
       <a class="btnDonate" href="https://www.paypal.com/donate/?hosted_button_id=5HNZSM7VZTNA6" target="_blank" rel="noopener noreferrer">
         Projekt unterstützen / Donate
       </a>
@@ -616,9 +656,6 @@
   </div>
 
   <script>
-    // If your Article quiz file has a different name, change this:
-    // e.g. "index.html" (quiz) or "artikel-quiz.html"
-    // The rest is for the Plus popup.
     const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSd7aZ8okTdi2sr08p8l8HZ2r6oH09BsF3L_mJQtSc8q0nFRdw/viewform?usp=header";
 
     const modal = document.getElementById("plusModal");
@@ -631,7 +668,7 @@
       plusText.innerHTML =
         `The <strong>${moduleName}</strong> is part of <strong>DeutschBuddy Plus</strong> and will be available soon.<br>` +
         `Want early access and updates?`;
-      waitlistBtn.href = formUrl; // keep it simple (no prefill)
+      waitlistBtn.href = formUrl;
       modal.style.display = "flex";
       modal.setAttribute("aria-hidden", "false");
       document.body.style.overflow = "hidden";
@@ -643,7 +680,7 @@
       document.body.style.overflow = "";
     }
 
-    // Open modal on locked cards
+    // Open modal on locked cards only (teaser is non-clickable)
     document.querySelectorAll(".gameCard.locked").forEach(card => {
       const name = card.getAttribute("data-plus") || "This game";
       card.addEventListener("click", () => openModal(name));
@@ -668,4 +705,5 @@
   </script>
 </body>
 </html>
+
 
