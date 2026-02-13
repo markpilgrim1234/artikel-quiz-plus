@@ -65,10 +65,14 @@
     .brand img{
       width:42px;
       height:42px;
+      object-fit: contain;
+      padding: 4px;
       border-radius:14px;
       box-shadow: 0 8px 20px rgba(0,0,0,.08);
       background:#fff;
+      display:block;
     }
+
     .brandText{
       display:flex;
       flex-direction:column;
@@ -535,9 +539,7 @@
       <section class="hero" aria-label="DeutschBuddy Intro">
         <div class="heroInner">
           <!-- Big logo inside hero -->
-          <div class="heroLogo" aria-hidden="true">
-            <img src="db.png" alt="">
-          </div>
+
 
           <h1>Deutsch üben – kurz &amp; spielerisch.</h1>
 
