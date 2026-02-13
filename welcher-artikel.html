@@ -35,7 +35,7 @@
       --primary: #169BD7;
       --primaryHover: #1287BC;
 
-      --start: #16a34a;        /* green */
+      --start: #16a34a;
       --startHover: #15803d;
 
       --resetBg: #f3f4f6;
@@ -46,12 +46,11 @@
 
       --focus: rgba(22,155,215,0.35);
 
-      --a1plusBg: #2563eb;     /* blue solid for A1+ (not Plus) */
+      --a1plusBg: #2563eb;
       --a1plusText: #ffffff;
     }
 
     *{ box-sizing: border-box; }
-
     body{
       margin: 0;
       background: var(--bg);
@@ -60,7 +59,6 @@
       line-height: 1.55;
       overflow-x: hidden;
     }
-
     a{ color: inherit; }
 
     header{
@@ -200,7 +198,6 @@
       display: grid;
       gap: 14px;
     }
-
     @media (min-width: 980px){
       .grid{
         grid-template-columns: 1.25fr 0.9fr;
@@ -232,12 +229,12 @@
       font-weight: 900;
     }
 
-    .heroSub{
-      margin: 6px 0 0;
-      color: var(--muted);
-      font-size: 1rem;
+    .heroActions{
+      display: inline-flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
     }
-    .heroSub span[lang="de"]{ font-weight: 900; }
 
     .iconBtn{
       display: inline-flex;
@@ -262,6 +259,13 @@
       outline: 3px solid var(--focus);
       outline-offset: 2px;
     }
+
+    .heroSub{
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+    .heroSub span[lang="de"]{ font-weight: 900; }
 
     .card{
       background: var(--card);
@@ -324,13 +328,23 @@
     }
     .pill span{ color: var(--muted); font-weight: 800; }
 
-    .content{
-      padding: 16px;
-    }
+    .content{ padding: 16px; }
 
-    .setup{
-      display: grid;
-      gap: 12px;
+    .setup{ display: grid; gap: 12px; }
+
+    .banner{
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid #fde68a;
+      background: #fffbeb;
+      color: #92400e;
+      font-weight: 900;
+    }
+    .banner small{
+      display: block;
+      margin-top: 6px;
+      font-weight: 800;
+      color: rgba(146,64,14,0.85);
     }
 
     .levelRow{
@@ -339,11 +353,7 @@
       flex-wrap: wrap;
       align-items: center;
     }
-
-    .levelLabel{
-      font-weight: 900;
-      color: var(--text);
-    }
+    .levelLabel{ font-weight: 900; color: var(--text); }
 
     .levelBtn{
       border: 1px solid var(--border);
@@ -393,10 +403,7 @@
       color: var(--a1plusText);
     }
 
-    .miniNote{
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
+    .miniNote{ color: var(--muted); font-size: 0.95rem; }
 
     .word{
       font-size: 2.2rem;
@@ -438,11 +445,9 @@
       outline: 3px solid var(--focus);
       outline-offset: 2px;
     }
-
     .options button[data-article="der"]{ background: var(--der); }
     .options button[data-article="die"]{ background: var(--die); }
     .options button[data-article="das"]{ background: var(--das); color: #111; }
-
     .options button:disabled{
       opacity: 0.6;
       cursor: not-allowed;
@@ -478,7 +483,6 @@
       min-height: 40px;
       flex-wrap: wrap;
     }
-
     #countdown{
       font-weight: 900;
       color: var(--muted);
@@ -487,16 +491,7 @@
       white-space: nowrap;
     }
 
-    .divider{
-      height: 1px;
-      background: var(--border);
-      margin: 14px 0;
-    }
-
-    /* Answers table (collapsible) */
-    details.answersDetails{
-      border-top: 1px solid var(--border);
-    }
+    details.answersDetails{ border-top: 1px solid var(--border); }
     details.answersDetails > summary{
       cursor: pointer;
       list-style: none;
@@ -542,7 +537,6 @@
     .bad{ color: var(--bad); }
     .mutedCell{ color: var(--muted); }
 
-    /* Support */
     .donateBar{
       margin-top: 14px;
       display: flex;
@@ -555,7 +549,6 @@
       text-align: center;
     }
 
-    /* Splash */
     #splash{
       position: fixed;
       top: 0; left: 0;
@@ -567,14 +560,8 @@
       justify-content: center;
       z-index: 9999;
     }
-    #splash h1{
-      font-size: 2rem;
-      margin: 0 0 1rem;
-    }
-    #splash img{
-      width: 260px;
-      height: 260px;
-    }
+    #splash h1{ font-size: 2rem; margin: 0 0 1rem; }
+    #splash img{ width: 260px; height: 260px; }
 
     footer{
       margin-top: 18px;
@@ -617,11 +604,7 @@
       justify-content: space-between;
       gap: 10px;
     }
-    .settingsHead h3{
-      margin: 0;
-      font-size: 1.05rem;
-      font-weight: 900;
-    }
+    .settingsHead h3{ margin: 0; font-size: 1.05rem; font-weight: 900; }
     .settingsBody{
       padding: 14px 16px 16px;
       display: grid;
@@ -634,18 +617,14 @@
       gap: 12px;
       flex-wrap: wrap;
     }
-    .row label{
-      font-weight: 900;
-    }
+    .row label{ font-weight: 900; }
     .row .hint{
       width: 100%;
       color: var(--muted);
       font-size: 0.9rem;
       margin-top: -6px;
     }
-    select, input[type="checkbox"]{
-      cursor: pointer;
-    }
+    select, input[type="checkbox"]{ cursor: pointer; }
     select{
       border: 1px solid var(--border);
       border-radius: 12px;
@@ -654,7 +633,7 @@
       background: #fff;
     }
 
-    /* How it works modal (same visual language as Settings) */
+    /* How it works modal */
     .howModal{
       display: none;
       position: fixed;
@@ -693,11 +672,7 @@
       justify-content: space-between;
       gap: 10px;
     }
-    .modalHead h3{
-      margin: 0;
-      font-size: 1.05rem;
-      font-weight: 900;
-    }
+    .modalHead h3{ margin: 0; font-size: 1.05rem; font-weight: 900; }
     .closeBtn{
       border: 1px solid var(--border);
       background: #fff;
@@ -728,7 +703,7 @@
     <img src="icon.png" alt="DeutschBuddy Logo" />
   </div>
 
-  <!-- Top bar -->
+  <!-- Top bar (no Settings here anymore) -->
   <header>
     <div class="topbar">
       <div class="brand">
@@ -744,8 +719,6 @@
       <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
         <a class="btn" href="index.html" aria-label="Go to home">Home</a>
         <a class="btn" href="artikelregeln.html" aria-label="Open rules">Rules</a>
-        <!-- same .btn sizing as others -->
-        <button class="btn" id="settingsBtn" type="button" aria-label="Open settings">Settings</button>
       </div>
     </div>
   </header>
@@ -754,12 +727,15 @@
     <section class="hero" aria-label="Game intro">
       <div class="heroTitleRow">
         <h2 class="heroTitle">Choose the correct article.</h2>
-        <button class="iconBtn" id="howBtn" type="button" aria-label="How it works">How it works</button>
+        <div class="heroActions">
+          <button class="iconBtn" id="howBtn" type="button" aria-label="How it works">How it works</button>
+          <button class="iconBtn" id="settingsBtn" type="button" aria-label="Open settings">Settings</button>
+        </div>
       </div>
 
       <p class="heroSub">
         Tap <span lang="de">der</span>, <span lang="de">die</span> or <span lang="de">das</span>.
-        Instant feedback — the next word loads automatically (3 seconds).
+        Instant feedback — the next word loads automatically (<span id="delayLabel">1</span> second<span id="delayPlural">s</span>).
       </p>
     </section>
 
@@ -783,6 +759,11 @@
         <div class="content">
           <!-- Setup -->
           <div class="setup" id="setup">
+            <div class="banner" id="endBanner" style="display:none;">
+              Game finished.
+              <small id="endBannerSub">You reached the mistake limit.</small>
+            </div>
+
             <div class="levelRow" aria-label="Level selection">
               <div class="levelLabel">Level:</div>
 
@@ -802,9 +783,7 @@
               </div>
             </div>
 
-            <div class="miniNote" id="levelHint">
-              A2 automatically includes A1 words for more variety.
-            </div>
+            <div class="miniNote" id="levelHint">A2 automatically includes A1 words for more variety.</div>
 
             <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
               <button class="btn btnStart" id="startBtn" type="button">Start</button>
@@ -815,17 +794,14 @@
               </div>
             </div>
 
-            <div class="divider"></div>
+            <div style="height:1px; background: var(--border); margin: 14px 0;"></div>
 
-            <div class="miniNote" id="deviceStatsLine">
-              Loading your device stats…
-            </div>
+            <div class="miniNote" id="deviceStatsLine">Loading your device stats…</div>
           </div>
 
           <!-- Playing UI -->
           <div id="playArea" style="display:none;">
             <div class="word" id="word">Loading words…</div>
-            <!-- Translation shown BEFORE choosing (when enabled) -->
             <div class="metaLine" id="metaLine"></div>
 
             <div class="options" id="options" aria-label="Answer options"></div>
@@ -864,7 +840,7 @@
       </section>
 
       <!-- RIGHT: Device stats -->
-      <aside class="card" aria-label="Session and device stats">
+      <aside class="card" aria-label="Device stats">
         <div class="cardHead">
           <div class="cardHeadLeft">
             <p class="title">Stats</p>
@@ -886,10 +862,10 @@
             <strong id="dailyStreak">0</strong>
           </div>
 
-          <div class="divider"></div>
+          <div style="height:1px; background: var(--border);"></div>
 
           <div style="color:var(--muted); font-size:0.95rem;">
-            Tip: Choose <strong>A2</strong> for more variety — it includes A1 words automatically.
+            Default: <strong>1s</strong> auto-advance and <strong>5 mistakes</strong> stop rule. You can change both in Settings.
           </div>
         </div>
       </aside>
@@ -907,7 +883,7 @@
 
     <footer>
       <div class="footerRow">
-        <span>by Marco P // Ver. 2.1 // 2026</span>
+        <span>by Marco P // Ver. 2.2 // 2026</span>
         <a class="btn btnSmall" href="ueber-mich.html" aria-label="About">About</a>
       </div>
     </footer>
@@ -933,19 +909,27 @@
         </div>
 
         <div class="row">
-          <label for="autoAdvance">Auto-advance (3 seconds)</label>
+          <label for="autoAdvance">Auto-advance</label>
           <input id="autoAdvance" type="checkbox" />
-          <div class="hint">If enabled, the next word loads automatically after 3 seconds.</div>
+          <div class="hint">Loads the next word automatically after the delay.</div>
+        </div>
+
+        <div class="row">
+          <label for="autoSeconds">Auto-advance delay</label>
+          <select id="autoSeconds">
+            <option value="1">1 second (default)</option>
+            <option value="3">3 seconds</option>
+          </select>
         </div>
 
         <div class="row">
           <label for="maxErrors">Stop after mistakes</label>
           <select id="maxErrors">
-            <option value="0">Off</option>
-            <option value="5">5 mistakes</option>
+            <option value="5">5 mistakes (default)</option>
             <option value="10">10 mistakes</option>
+            <option value="0">Infinite</option>
           </select>
-          <div class="hint">When you reach the limit, the session ends with “Game over”.</div>
+          <div class="hint">When enabled, the session ends when you reach the limit.</div>
         </div>
 
         <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; margin-top:6px;">
@@ -970,8 +954,8 @@
         <ul style="margin:0; padding-left:18px; color:#374151;">
           <li>You’ll see a German noun — tap the correct article.</li>
           <li>Enable <strong>translation</strong> or <strong>plural</strong> in Settings.</li>
-          <li>Use “Stop after mistakes” (5 or 10) to keep sessions short.</li>
-          <li>Progress is stored locally on this device (no account).</li>
+          <li>Default stop rule is <strong>5 mistakes</strong> (change to infinite if you want).</li>
+          <li>Your progress is stored locally on this device (no account).</li>
         </ul>
         <div style="display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap;">
           <a class="btn" href="artikelregeln.html">Read the rules</a>
@@ -1018,57 +1002,39 @@
     // =========================
     // Local storage keys
     // =========================
-    const LS_PREFS = "db_wa_prefs_v2";
-    const LS_STATS = "db_wa_stats_v2";
+    const LS_PREFS = "db_wa_prefs_v3";
+    const LS_STATS = "db_wa_stats_v3";
     const LS_MISTAKES = "db_wa_mistakes_v1";
 
     // =========================
-    // App state
+    // State
     // =========================
     let rawData = [];
     let pool = [];
     let currentIndex = 0;
 
-    // Session stats
     let correct = 0;
     let wrong = 0;
     let streak = 0;
     let score = 0;
 
-    // Settings / prefs
-    let selectedLevel = "A1"; // A1 or A2 (A2 includes A1)
+    let selectedLevel = "A1";
     let showTranslation = false;
     let showPlural = true;
-    let autoEnabled = true;
-    const AUTO_SECONDS = 3; // fixed
-    let maxErrors = 0; // 0 = off
 
-    // Countdown
+    let autoEnabled = true;
+    let autoSeconds = 1;     // default 1 second, options: 1 or 3
+
+    let maxErrors = 5;       // default 5, options: 5/10/Infinite(0)
+
     let countdownTimer = null;
     let remaining = 0;
-
-    // Input lock
     let inputLocked = false;
 
     // =========================
     // Helpers
     // =========================
     function safeText(v){ return (v ?? "").toString().trim(); }
-
-    function todayISO(){
-      const d = new Date();
-      const yyyy = d.getFullYear();
-      const mm = String(d.getMonth() + 1).padStart(2, "0");
-      const dd = String(d.getDate()).padStart(2, "0");
-      return `${yyyy}-${mm}-${dd}`;
-    }
-
-    function parseLevel(s){
-      const v = safeText(s).toUpperCase();
-      if (v === "A1" || v === "A2" || v === "B1" || v === "B2") return v;
-      return "";
-    }
-
     function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
 
     function shuffle(array){
@@ -1076,6 +1042,17 @@
         const j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
       }
+    }
+
+    function todayISO(){
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    }
+
+    function parseLevel(s){
+      const v = safeText(s).toUpperCase();
+      if (v === "A1" || v === "A2" || v === "B1" || v === "B2") return v;
+      return "";
     }
 
     function getPrefs(){
@@ -1111,9 +1088,7 @@
       d.setDate(d.getDate() - 1);
       const y = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 
-      if (last === y) stats.dailyStreak += 1;
-      else stats.dailyStreak = 1;
-
+      stats.dailyStreak = (last === y) ? (stats.dailyStreak + 1) : 1;
       stats.lastPlayDate = today;
       setStats(stats);
     }
@@ -1127,8 +1102,10 @@
     const lvlA1Btn = document.getElementById("lvlA1");
     const lvlA2Btn = document.getElementById("lvlA2");
     const levelHint = document.getElementById("levelHint");
-
     const startBtn = document.getElementById("startBtn");
+
+    const endBanner = document.getElementById("endBanner");
+    const endBannerSub = document.getElementById("endBannerSub");
 
     const wordEl = document.getElementById("word");
     const metaLineEl = document.getElementById("metaLine");
@@ -1152,6 +1129,10 @@
     const dailyStreakEl = document.getElementById("dailyStreak");
     const deviceStatsLine = document.getElementById("deviceStatsLine");
 
+    // hero delay label
+    const delayLabel = document.getElementById("delayLabel");
+    const delayPlural = document.getElementById("delayPlural");
+
     // Settings UI
     const settingsBtn = document.getElementById("settingsBtn");
     const settingsPanel = document.getElementById("settingsPanel");
@@ -1162,6 +1143,7 @@
     const showTranslationCb = document.getElementById("showTranslation");
     const showPluralCb = document.getElementById("showPlural");
     const autoAdvanceCb = document.getElementById("autoAdvance");
+    const autoSecondsSel = document.getElementById("autoSeconds");
     const maxErrorsSel = document.getElementById("maxErrors");
 
     // How it works UI
@@ -1171,15 +1153,21 @@
     const gotItHow = document.getElementById("gotItHow");
 
     // =========================
-    // Preferences init
+    // Prefs init
     // =========================
     function loadPrefsToState(){
       const p = getPrefs();
+
       selectedLevel = (p.level === "A2") ? "A2" : "A1";
       showTranslation = !!p.showTranslation;
       showPlural = (p.showPlural !== undefined) ? !!p.showPlural : true;
+
       autoEnabled = (p.autoEnabled !== undefined) ? !!p.autoEnabled : true;
-      maxErrors = clamp(parseInt(p.maxErrors || "0", 10) || 0, 0, 10);
+      autoSeconds = (p.autoSeconds === 3) ? 3 : 1;
+
+      // default 5; allow 10; allow infinite (0)
+      const me = parseInt(p.maxErrors ?? 5, 10);
+      maxErrors = (me === 0 || me === 10 || me === 5) ? me : 5;
     }
 
     function saveStateToPrefs(){
@@ -1188,6 +1176,7 @@
         showTranslation,
         showPlural,
         autoEnabled,
+        autoSeconds,
         maxErrors
       });
     }
@@ -1196,19 +1185,25 @@
       showTranslationCb.checked = showTranslation;
       showPluralCb.checked = showPlural;
       autoAdvanceCb.checked = autoEnabled;
+      autoSecondsSel.value = String(autoSeconds);
       maxErrorsSel.value = String(maxErrors);
+    }
+
+    function syncDelayLabel(){
+      delayLabel.textContent = String(autoSeconds);
+      delayPlural.textContent = (autoSeconds === 1) ? "" : "s";
     }
 
     function syncLevelButtons(){
       lvlA1Btn.setAttribute("aria-pressed", selectedLevel === "A1" ? "true" : "false");
       lvlA2Btn.setAttribute("aria-pressed", selectedLevel === "A2" ? "true" : "false");
-      levelHint.textContent = selectedLevel === "A2"
+      levelHint.textContent = (selectedLevel === "A2")
         ? "A2 automatically includes A1 words for more variety."
         : "A1 uses beginner words only.";
     }
 
     // =========================
-    // Stats UI
+    // HUD + device stats
     // =========================
     function updateHud(){
       hudScoreEl.textContent = String(score);
@@ -1217,7 +1212,9 @@
       const total = correct + wrong;
       const acc = total > 0 ? Math.round((correct / total) * 100) : 0;
       hudAccEl.textContent = `${acc}%`;
-      hudMistakesEl.textContent = maxErrors > 0 ? `${wrong}/${maxErrors}` : `${wrong}`;
+
+      if (maxErrors > 0) hudMistakesEl.textContent = `${wrong}/${maxErrors}`;
+      else hudMistakesEl.textContent = `${wrong}`;
     }
 
     function updateDeviceStatsUI(){
@@ -1237,7 +1234,7 @@
     }
 
     // =========================
-    // Data loading & pool building
+    // Data loading
     // =========================
     async function loadData(){
       try{
@@ -1264,24 +1261,23 @@
           .map(cols => {
             const article = safeText(cols[iArticle]);
             const word = safeText(cols[iWord]);
+            if (!word || !article) return null;
+
             const plural = safeText(cols[iPlural]);
             const example = safeText(cols[iExample]);
             const translation = safeText(cols[iTrans]);
             const level = parseLevel(cols[iLevel]);
-
-            if (!word || !article) return null;
 
             const key = `${article}|${word}`.toLowerCase();
             return { key, level, article, word, plural, example, translation };
           })
           .filter(Boolean);
 
-        if (!rawData.length) throw new Error("No valid rows in dataset.");
+        if (!rawData.length) throw new Error("No valid rows.");
       }catch(e){
         wordEl.textContent = "Loading failed 😕";
         resultDiv.textContent = "Please check your connection and reload the page.";
         console.error(e);
-        return;
       }
     }
 
@@ -1318,7 +1314,12 @@
         return;
       }
 
-      setCountdownText(`Next word in ${remaining}…`);
+      // If 1 second, keep it lightweight
+      if (remaining <= 1){
+        setCountdownText("Next…");
+      } else {
+        setCountdownText(`Next word in ${remaining}…`);
+      }
 
       countdownTimer = setInterval(() => {
         if (!autoEnabled){
@@ -1328,8 +1329,10 @@
         }
 
         remaining -= 1;
+
         if (remaining > 0){
-          setCountdownText(`Next word in ${remaining}…`);
+          if (remaining <= 1) setCountdownText("Next…");
+          else setCountdownText(`Next word in ${remaining}…`);
         } else {
           clearCountdown(false);
           nextQuestion();
@@ -1404,53 +1407,26 @@
     // =========================
     function recordMistake(item){
       const mistakes = getMistakes();
-      const key = item.key;
-      const entry = mistakes[key] || { word: item.word, article: item.article, level: item.level, wrongCount: 0, lastWrongAt: 0 };
+      const entry = mistakes[item.key] || { word: item.word, article: item.article, level: item.level, wrongCount: 0, lastWrongAt: 0 };
       entry.wrongCount += 1;
       entry.lastWrongAt = Date.now();
-      mistakes[key] = entry;
+      mistakes[item.key] = entry;
       setMistakes(mistakes);
     }
 
     // =========================
-    // Scoring rules
+    // Scoring
     // =========================
     function awardCorrect(){
       const bonus = clamp(streak, 0, 6);
       score += (10 + bonus);
     }
-    function penalizeWrong(){
-      score -= 5;
-    }
+    function penalizeWrong(){ score -= 5; }
 
     // =========================
-    // Game over / result
+    // Session finalize
     // =========================
-    function showGameOver(){
-      inputLocked = true;
-      clearCountdown(false);
-
-      Array.from(optionsDiv.querySelectorAll("button")).forEach(b => b.disabled = true);
-
-      resultDiv.textContent = "🛑 Game over — mistake limit reached.";
-      extraEl.innerHTML = `
-        <div><strong>Session summary</strong></div>
-        <div>Score: <strong>${score}</strong> • Correct: <strong>${correct}</strong> • Wrong: <strong>${wrong}</strong></div>
-        <div>Best streak this session: <strong>${getSessionBestStreak()}</strong></div>
-      `;
-
-      setCountdownText("");
-
-      finalizeSessionToDeviceStats();
-
-      setupEl.style.display = "";
-      playAreaEl.style.display = "none";
-      startBtn.textContent = "Retry";
-      startBtn.focus({ preventScroll: true });
-    }
-
     let sessionBestStreak = 0;
-    function getSessionBestStreak(){ return sessionBestStreak; }
 
     function finalizeSessionToDeviceStats(){
       const stats = getStats();
@@ -1465,6 +1441,36 @@
       setStats(stats);
       updateDailyStreak();
       updateDeviceStatsUI();
+    }
+
+    function showFinishedBanner(reason){
+      endBanner.style.display = "";
+      endBannerSub.textContent = reason;
+    }
+
+    function showGameOver(){
+      inputLocked = true;
+      clearCountdown(false);
+
+      Array.from(optionsDiv.querySelectorAll("button")).forEach(b => b.disabled = true);
+
+      resultDiv.textContent = "🛑 Game over — mistake limit reached.";
+      extraEl.innerHTML = `
+        <div><strong>Session summary</strong></div>
+        <div>Score: <strong>${score}</strong> • Correct: <strong>${correct}</strong> • Wrong: <strong>${wrong}</strong></div>
+        <div>Best streak this session: <strong>${sessionBestStreak}</strong></div>
+      `;
+
+      setCountdownText("");
+
+      finalizeSessionToDeviceStats();
+
+      // Bring user back to setup + show an explicit finished message
+      showFinishedBanner("You reached the maximum number of mistakes.");
+      setupEl.style.display = "";
+      playAreaEl.style.display = "none";
+      startBtn.textContent = "Retry";
+      startBtn.focus({ preventScroll: true });
     }
 
     // =========================
@@ -1500,8 +1506,7 @@
       setCountdownText("");
 
       optionsDiv.innerHTML = "";
-      const options = ["der","die","das"];
-      options.forEach(opt => {
+      ["der","die","das"].forEach(opt => {
         const btn = document.createElement("button");
         btn.textContent = opt;
         btn.setAttribute("data-article", opt);
@@ -1529,16 +1534,13 @@
         correct += 1;
         streak += 1;
         sessionBestStreak = Math.max(sessionBestStreak, streak);
-
         awardCorrect();
         resultDiv.textContent = "✅ Correct!";
       } else {
         wrong += 1;
         streak = 0;
-
         penalizeWrong();
         recordMistake(item);
-
         resultDiv.textContent = `❌ Wrong — correct is "${item.article}"`;
       }
 
@@ -1547,13 +1549,14 @@
       updateHud();
       updateDeviceStatsUI();
 
+      // Stop rule (if infinite, maxErrors = 0)
       if (maxErrors > 0 && wrong >= maxErrors){
         showGameOver();
         return;
       }
 
       if (autoEnabled){
-        startCountdown(AUTO_SECONDS);
+        startCountdown(autoSeconds);
       } else {
         setCountdownText("Paused");
       }
@@ -1580,6 +1583,9 @@
     }
 
     async function startGame(){
+      // hide finished banner when starting again
+      endBanner.style.display = "none";
+
       if (!rawData.length){
         await loadData();
       }
@@ -1677,15 +1683,19 @@
       showTranslation = showTranslationCb.checked;
       showPlural = showPluralCb.checked;
       autoEnabled = autoAdvanceCb.checked;
-      maxErrors = clamp(parseInt(maxErrorsSel.value, 10) || 0, 0, 10);
+
+      autoSeconds = (parseInt(autoSecondsSel.value, 10) === 3) ? 3 : 1;
+
+      const me = parseInt(maxErrorsSel.value, 10);
+      maxErrors = (me === 0 || me === 10 || me === 5) ? me : 5;
 
       saveStateToPrefs();
+      syncDelayLabel();
       updateHud();
 
-      // Update translation line immediately if playing
+      // update meta line immediately if playing
       if (playAreaEl.style.display !== "none" && pool.length){
-        const item = pool[currentIndex];
-        renderMetaLine(item);
+        renderMetaLine(pool[currentIndex]);
       }
 
       closeSettingsPanel();
@@ -1696,11 +1706,6 @@
       if (!ok) return;
       localStorage.removeItem(LS_STATS);
       updateDeviceStatsUI();
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && settingsPanel.style.display === "flex") closeSettingsPanel();
-      if (e.key === "Escape" && howModal.style.display === "flex") closeHowModal();
     });
 
     // =========================
@@ -1725,12 +1730,19 @@
       if (e.target === howModal) closeHowModal();
     });
 
+    // Global ESC
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && settingsPanel.style.display === "flex") closeSettingsPanel();
+      if (e.key === "Escape" && howModal.style.display === "flex") closeHowModal();
+    });
+
     // =========================
     // Init
     // =========================
     (function init(){
       loadPrefsToState();
       syncLevelButtons();
+      syncDelayLabel();
       updateHud();
       updateDeviceStatsUI();
       syncPrefsToSettingsUI();
@@ -1796,5 +1808,6 @@
   </script>
 </body>
 </html>
+
 
 
