@@ -37,6 +37,7 @@
       color:var(--text);
       background:var(--bg);
       line-height:1.55;
+      overflow-x: hidden;
     }
 
     img{ max-width:100%; height:auto; }
@@ -565,6 +566,10 @@
   .ctaPill, .badge{
     margin-left: auto;
   }
+}
+
+.cards{
+  padding-right: 0;   /* toglie la causa più comune di overflow */
 }
 
   
