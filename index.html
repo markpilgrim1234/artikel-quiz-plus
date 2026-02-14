@@ -517,6 +517,43 @@
       box-shadow: 0 10px 26px rgba(22,155,215,.20);
     }
     .btnPrimary:hover{ background: var(--blueHover); border-color: var(--blueHover); }
+
+    /* Mobile compact (most phones) */
+  @media (max-width: 520px){
+    .topbar{ padding: 12px 14px; }
+    .wrap{ padding: 14px 14px 0; }
+  
+    .grid{ gap: 14px; }
+  
+    .hero{ padding: 14px; border-radius: 18px; }
+    .heroInner{ padding: 14px 14px 12px; border-radius: 16px; }
+  
+    .hero h1{
+      margin: 4px 0 10px;
+      font-size: 1.25rem;   /* smaller on phones */
+      line-height: 1.18;
+    }
+    .hero .sub{
+      font-size: 1.06rem;   /* smaller on phones */
+      margin: 0 0 10px;
+      line-height: 1.28;
+    }
+  
+    .highlight{
+      padding: 10px 12px;
+      font-size: .98rem;
+      width: 100%;
+    }
+  
+    .panel{ padding: 14px; border-radius: 18px; }
+    .panelHead{ margin-bottom: 10px; }
+    .panelHead h2{ font-size: 1.25rem; }
+  
+    /* Make the list feel reachable; still shows scroll hint */
+    .cards{ max-height: 320px; }
+  }
+
+  
   </style>
 </head>
 
