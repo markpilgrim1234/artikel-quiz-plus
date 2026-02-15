@@ -73,6 +73,12 @@
     .options button:disabled{opacity:.95;cursor:not-allowed}
     .result{margin-top:10px;font-weight:900;text-align:center;font-size:1.1rem;min-height:1.5em}
     .finish{margin-top:12px;padding:12px;border-radius:12px;border:1px dashed #d1d5db;background:#fbfbfb;display:none}
+    details.answersDetails{margin-top:12px;border-top:1px solid var(--border)}
+    details.answersDetails > summary{cursor:pointer;list-style:none;padding:12px 2px;font-weight:900;display:flex;justify-content:space-between;gap:10px}
+    .historyWrap{max-height:280px;overflow:auto}
+    table{width:100%;border-collapse:collapse;font-size:.95rem}
+    th,td{padding:8px;border-bottom:1px solid var(--border);text-align:left}
+    td.status{text-align:center;width:70px;font-weight:900}
 
     footer{margin-top:18px;border-top:1px solid var(--border);text-align:center;color:#64748b;font-size:.9rem;padding-top:14px}
     .footerRow{display:inline-flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;padding-bottom:12px}
@@ -125,6 +131,7 @@
             <div class="pill" title="Streak"><span>🔥</span><div id="hudStreak">0</div></div>
             <div class="pill" title="Accuracy"><span>📊</span><div id="hudAcc">0%</div></div>
             <div class="pill" title="Mistakes"><span>❌</span><div id="hudMistakes">0/3</div></div>
+            <div class="pill" title="Timer"><span>⏱️</span><div id="hudTimer">60s</div></div>
           </div>
         </div>
         <div class="content">
@@ -138,17 +145,6 @@
               <div class="levelBtn locked gameCard" role="button" tabindex="0" data-plus="C1 level">C1</div>
             </div>
             <div id="levelHint" style="color:var(--muted);font-size:.95rem;">A1 active: beginner words only.</div>
-
-            <div class="settingsRow">
-              <label for="modeSel" style="font-weight:900;">Mode</label>
-              <select id="modeSel">
-                <option value="timed">60s</option>
-                <option value="streak">Streak</option>
-                <option value="maxErrors">3 errors</option>
-              </select>
-              <label for="delaySel" style="font-weight:900;">Delay</label>
-              <select id="delaySel"><option value="1000">1s</option><option value="3000">3s</option></select>
-            </div>
 
             <button class="btn btnStart" id="startBtn" type="button">Start the game now!</button>
           </div>
@@ -166,8 +162,20 @@
                 <button class="btn" id="changeLevelBtn" type="button">Change level</button>
                 <div class="btn gameCard locked" role="button" tabindex="0" data-plus="Review mistakes">Review mistakes</div>
               </div>
+                      </div>
+
+          <details class="answersDetails">
+            <summary>
+              <span>Answers history</span>
+              <span id="answersSummary">0 items</span>
+            </summary>
+            <div class="historyWrap">
+              <table aria-label="Answers table">
+                <thead><tr><th>Your answer</th><th class="status">Result</th><th>Correct</th></tr></thead>
+                <tbody id="historyBody"></tbody>
+              </table>
             </div>
-          </div>
+          </details>
         </div>
       </section>
 
@@ -195,7 +203,21 @@
   <div class="settingsPanel" id="settingsPanel" aria-hidden="true">
     <div class="settingsCard" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
       <div class="settingsHead"><h3 id="settingsTitle">Settings</h3><button class="closeBtn" id="closeSettings">✕</button></div>
-      <div class="settingsBody"><div style="color:var(--muted)">Choose mode and answer delay from the setup area, then press Start.</div></div>
+            <div class="settingsBody">
+        <div class="settingsRow">
+          <label for="modeSel" style="font-weight:900;">Mode</label>
+          <select id="modeSel">
+            <option value="timed">60s</option>
+            <option value="streak">Streak</option>
+            <option value="maxErrors">3 errors</option>
+          </select>
+        </div>
+        <div class="settingsRow">
+          <label for="delaySel" style="font-weight:900;">Delay</label>
+          <select id="delaySel"><option value="1000">1s</option><option value="3000">3s</option></select>
+        </div>
+        <div style="color:var(--muted)">Save is automatic. Close and press Start.</div>
+      </div>
     </div>
   </div>
 
@@ -234,8 +256,9 @@
     const modeSel=document.getElementById('modeSel'), delaySel=document.getElementById('delaySel');
     const startBtn=document.getElementById('startBtn'), setupEl=document.getElementById('setup'), playArea=document.getElementById('playArea');
     const wordEl=document.getElementById('word'), optionsEl=document.getElementById('options'), resultEl=document.getElementById('result');
-    const hudScore=document.getElementById('hudScore'), hudStreak=document.getElementById('hudStreak'), hudAcc=document.getElementById('hudAcc'), hudMistakes=document.getElementById('hudMistakes');
+    const hudScore=document.getElementById('hudScore'), hudStreak=document.getElementById('hudStreak'), hudAcc=document.getElementById('hudAcc'), hudMistakes=document.getElementById('hudMistakes'), hudTimer=document.getElementById('hudTimer');
     const finishBox=document.getElementById('finishBox'), finishSummary=document.getElementById('finishSummary'), deviceStatsLine=document.getElementById('deviceStatsLine');
+    const historyBody=document.getElementById('historyBody'), answersSummary=document.getElementById('answersSummary');
     const bestScoreEl=document.getElementById('bestScore'), bestStreakEl=document.getElementById('bestStreak'), lifetimeLine=document.getElementById('lifetimeLine');
 
     const settingsBtn=document.getElementById('settingsBtn'), settingsPanel=document.getElementById('settingsPanel'), closeSettings=document.getElementById('closeSettings');
@@ -330,9 +353,27 @@
       const acc=answersTotal?Math.round((correct/answersTotal)*100):0;
       hudAcc.textContent=`${acc}%`;
       hudMistakes.textContent=mode==='maxErrors'?`${wrong}/3`:String(wrong);
+      hudTimer.textContent = mode==='timed' ? `${timeLeft}s` : '—';
     }
 
-    function showQuestion(){
+    
+    function updateAnswersSummary(){
+      const n=historyBody.children.length;
+      answersSummary.textContent = `${n} item${n===1?'':'s'}`;
+    }
+
+    function addHistoryRow(chosen, isCorrect, correctAns){
+      const tr=document.createElement('tr');
+      const td1=document.createElement('td'); td1.textContent=chosen;
+      const td2=document.createElement('td'); td2.className='status'; td2.textContent=isCorrect?'✓':'✗';
+      const td3=document.createElement('td'); td3.textContent=isCorrect?'—':correctAns;
+      tr.append(td1,td2,td3);
+      historyBody.prepend(tr);
+      while(historyBody.children.length>60) historyBody.removeChild(historyBody.lastChild);
+      updateAnswersSummary();
+    }
+
+function showQuestion(){
       if(!pool.length){ wordEl.textContent='No words available.'; return; }
       current=pickPrompt(); if(!current){ wordEl.textContent='No words available.'; return; }
       recentQueue.push(current.key); if(recentQueue.length>30) recentQueue=recentQueue.slice(-30); setRecent(recentQueue);
@@ -351,6 +392,7 @@
       const buttons=[...optionsEl.querySelectorAll('button')]; buttons.forEach(b=>b.disabled=true);
       answersTotal++;
       const ok=opt===current.translation;
+      addHistoryRow(opt, ok, current.translation);
       if(ok){correct++;streak++;bestStreakSession=Math.max(bestStreakSession,streak);score+=1;btn.classList.add('correct');resultEl.textContent='✓ Correct';}
       else{wrong++;streak=0;btn.classList.add('wrong');const right=buttons.find(b=>b.textContent===current.translation);if(right) right.classList.add('correct');resultEl.textContent='✗ Wrong';}
       updateHud();
@@ -360,7 +402,7 @@
 
     function startTimer(){
       clearInterval(timer); timeLeft=60;
-      timer=setInterval(()=>{ timeLeft--; if(timeLeft<=0){clearInterval(timer); finishGame();}},1000);
+      timer=setInterval(()=>{ timeLeft--; updateHud(); if(timeLeft<=0){clearInterval(timer); finishGame();}},1000);
     }
 
     function updateDeviceStats(){
@@ -384,7 +426,8 @@
     }
 
     function startGame(){
-      score=0;streak=0;bestStreakSession=0;correct=0;wrong=0;answersTotal=0;finishBox.style.display='none';
+      score=0;streak=0;bestStreakSession=0;correct=0;wrong=0;answersTotal=0;timeLeft=60;finishBox.style.display='none';
+      historyBody.innerHTML=''; updateAnswersSummary();
       mode=modeSel.value; delayMs=parseInt(delaySel.value,10); savePrefs();
       buildPool(); updateHud(); setupEl.style.display='none'; playArea.style.display=''; showQuestion();
       if(mode==='timed') startTimer(); else clearInterval(timer);
@@ -405,7 +448,7 @@
     document.getElementById('changeLevelBtn').addEventListener('click',()=>{clearInterval(timer); playArea.style.display='none'; setupEl.style.display='grid';});
 
     (async function init(){
-      loadPrefs(); syncLevelButtons(); recentQueue=getRecent(); updateDeviceStats(); updateHud();
+      loadPrefs(); syncLevelButtons(); recentQueue=getRecent(); updateDeviceStats(); updateHud(); updateAnswersSummary();
       await loadData();
     })();
   </script>
