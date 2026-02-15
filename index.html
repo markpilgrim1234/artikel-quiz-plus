@@ -738,54 +738,8 @@
     </div>
   </div>
 
-  <script>
-    const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSd7aZ8okTdi2sr08p8l8HZ2r6oH09BsF3L_mJQtSc8q0nFRdw/viewform?usp=header";
-
-    const modal = document.getElementById("plusModal");
-    const closeModalBtn = document.getElementById("closeModal");
-    const okBtn = document.getElementById("okBtn");
-    const plusText = document.getElementById("plusText");
-    const waitlistBtn = document.getElementById("waitlistBtn");
-
-    function openModal(moduleName){
-      plusText.innerHTML =
-        `The <strong>${moduleName}</strong> is part of <strong>DeutschBuddy Plus</strong> and will be available soon.<br>` +
-        `Want early access and updates?`;
-      waitlistBtn.href = formUrl;
-      modal.style.display = "flex";
-      modal.setAttribute("aria-hidden", "false");
-      document.body.style.overflow = "hidden";
-    }
-
-    function closeModal(){
-      modal.style.display = "none";
-      modal.setAttribute("aria-hidden", "true");
-      document.body.style.overflow = "";
-    }
-
-    // Open modal on locked cards only
-    document.querySelectorAll(".gameCard.locked").forEach(card => {
-      const name = card.getAttribute("data-plus") || "This game";
-      card.addEventListener("click", () => openModal(name));
-      card.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          openModal(name);
-        }
-      });
-    });
-
-    closeModalBtn.addEventListener("click", closeModal);
-    okBtn.addEventListener("click", closeModal);
-
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) closeModal();
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && modal.style.display === "flex") closeModal();
-    });
-  </script>
+  <script src="assets/js/components/plus-modal.js" defer></script>
+  <script src="assets/js/pages/index-plus-modal-init.js" defer></script>
 </body>
 </html>
 
