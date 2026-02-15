@@ -257,6 +257,8 @@
       background: #fff;
       cursor: pointer;
       font-weight: 900;
+      font-size: 0.92rem;
+      line-height: 1;
       box-shadow: 0 2px 10px rgba(0,0,0,0.04);
       white-space: nowrap;
     }
@@ -271,6 +273,7 @@
     }
     .iconBtnGrammar{
       text-decoration: none;
+      font-size: inherit;
     }
 
     .heroSub{
@@ -826,8 +829,8 @@
                 B2
               </div>
 
-              <div class="levelBtn locked gameCard" role="button" tabindex="0" data-plus="C2 level" aria-label="C2 Plus (locked)">
-                C2
+              <div class="levelBtn locked gameCard" role="button" tabindex="0" data-plus="C1 level" aria-label="C1 Plus (locked)">
+                C1
               </div>
             </div>
 
@@ -1008,6 +1011,8 @@
           <li>You’ll see a German noun — tap the correct article.</li>
           <li>Enable <strong>translation</strong> or <strong>plural</strong> in Settings.</li>
           <li>Default stop rule is <strong>5 mistakes</strong> (change to infinite if you want).</li>
+          <li>HUD icons explained: ⭐ <strong>Score</strong>, 🔥 <strong>Streak</strong>, 📊 <strong>Accuracy</strong>, ❌ <strong>Mistakes</strong>.</li>
+          <li><strong>Score</strong> increases with correct answers, while <strong>Streak</strong> tracks consecutive correct answers.</li>
           <li>Each level has around <strong>1000 words</strong> and includes the key words you need to study.</li>
           <li>Your progress is stored locally on this device (no account).</li>
         </ul>
@@ -1105,7 +1110,7 @@
 
     function parseLevel(s){
       const v = safeText(s).toUpperCase();
-      if (v === "A1" || v === "A2" || v === "B1" || v === "B2" || v === "C2") return v;
+      if (v === "A1" || v === "A2" || v === "B1" || v === "B2" || v === "C1") return v;
       return "";
     }
 
