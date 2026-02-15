@@ -826,10 +826,6 @@
                 B2
               </div>
 
-              <div class="levelBtn locked gameCard" role="button" tabindex="0" data-plus="C1 level" aria-label="C1 Plus (locked)">
-                C1
-              </div>
-
               <div class="levelBtn locked gameCard" role="button" tabindex="0" data-plus="C2 level" aria-label="C2 Plus (locked)">
                 C2
               </div>
@@ -1109,7 +1105,7 @@
 
     function parseLevel(s){
       const v = safeText(s).toUpperCase();
-      if (v === "A1" || v === "A2" || v === "B1" || v === "B2" || v === "C1" || v === "C2") return v;
+      if (v === "A1" || v === "A2" || v === "B1" || v === "B2" || v === "C2") return v;
       return "";
     }
 
