@@ -373,8 +373,15 @@
     }
     .levelBtn:active{ transform: translateY(1px); }
     .levelBtn[aria-pressed="true"]{
-      border-color: rgba(22,155,215,0.55);
-      box-shadow: 0 8px 22px rgba(22,155,215,0.18);
+      border-color: var(--primary);
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 8px 22px rgba(22,155,215,0.28);
+    }
+    .levelBtn.locked{
+      background: #f3f4f6;
+      color: #64748b;
+      border-style: dashed;
     }
     .levelBtn:focus-visible{
       outline: 3px solid var(--focus);
@@ -769,21 +776,27 @@
 
               <button class="levelBtn" type="button" id="lvlA1" aria-pressed="true" aria-label="Select A1">A1</button>
 
-              <button class="levelBtn" type="button" id="lvlA2" aria-pressed="false" aria-label="Select A2 (includes A1)">
-                A2 <span class="includeTag" title="Includes A1">A1+</span>
-              </button>
+              <button class="levelBtn" type="button" id="lvlA2" aria-pressed="false" aria-label="Select A2">A2</button>
 
               <!-- Locked levels: use same selector as Index script -->
-              <div class="levelBtn gameCard locked" role="button" tabindex="0" data-plus="B1 level" aria-label="B1 Plus (locked)">
+              <div class="levelBtn locked gameCard" role="button" tabindex="0" data-plus="B1 level" aria-label="B1 Plus (locked)">
                 B1 <span class="plusTag">Plus</span>
               </div>
 
-              <div class="levelBtn gameCard locked" role="button" tabindex="0" data-plus="B2 level" aria-label="B2 Plus (locked)">
+              <div class="levelBtn locked gameCard" role="button" tabindex="0" data-plus="B2 level" aria-label="B2 Plus (locked)">
                 B2 <span class="plusTag">Plus</span>
+              </div>
+
+              <div class="levelBtn locked gameCard" role="button" tabindex="0" data-plus="C1 level" aria-label="C1 Plus (locked)">
+                C1 <span class="plusTag">Plus</span>
+              </div>
+
+              <div class="levelBtn locked gameCard" role="button" tabindex="0" data-plus="C2 level" aria-label="C2 Plus (locked)">
+                C2 <span class="plusTag">Plus</span>
               </div>
             </div>
 
-            <div class="miniNote" id="levelHint">A2 automatically includes A1 words for more variety.</div>
+            <div class="miniNote" id="levelHint">Tip: you can activate A1 and A2 together for a combined training set.</div>
 
             <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
               <button class="btn btnStart" id="startBtn" type="button">Start</button>
@@ -955,6 +968,7 @@
           <li>You’ll see a German noun — tap the correct article.</li>
           <li>Enable <strong>translation</strong> or <strong>plural</strong> in Settings.</li>
           <li>Default stop rule is <strong>5 mistakes</strong> (change to infinite if you want).</li>
+          <li>Each level has around <strong>1000 words</strong> and includes the key words you need to study.</li>
           <li>Your progress is stored locally on this device (no account).</li>
         </ul>
         <div style="display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap;">
@@ -1018,7 +1032,7 @@
     let streak = 0;
     let score = 0;
 
-    let selectedLevel = "A1";
+    let selectedLevels = ["A1"];
     let showTranslation = false;
     let showPlural = true;
 
@@ -1051,7 +1065,7 @@
 
     function parseLevel(s){
       const v = safeText(s).toUpperCase();
-      if (v === "A1" || v === "A2" || v === "B1" || v === "B2") return v;
+      if (v === "A1" || v === "A2" || v === "B1" || v === "B2" || v === "C1" || v === "C2") return v;
       return "";
     }
 
@@ -1158,7 +1172,12 @@
     function loadPrefsToState(){
       const p = getPrefs();
 
-      selectedLevel = (p.level === "A2") ? "A2" : "A1";
+      if (Array.isArray(p.levels)) {
+        selectedLevels = p.levels.filter(l => l === "A1" || l === "A2");
+      } else {
+        selectedLevels = (p.level === "A2") ? ["A2"] : ["A1"];
+      }
+      if (!selectedLevels.length) selectedLevels = ["A1"];
       showTranslation = !!p.showTranslation;
       showPlural = (p.showPlural !== undefined) ? !!p.showPlural : true;
 
@@ -1172,7 +1191,7 @@
 
     function saveStateToPrefs(){
       setPrefs({
-        level: selectedLevel,
+        levels: selectedLevels,
         showTranslation,
         showPlural,
         autoEnabled,
@@ -1195,11 +1214,19 @@
     }
 
     function syncLevelButtons(){
-      lvlA1Btn.setAttribute("aria-pressed", selectedLevel === "A1" ? "true" : "false");
-      lvlA2Btn.setAttribute("aria-pressed", selectedLevel === "A2" ? "true" : "false");
-      levelHint.textContent = (selectedLevel === "A2")
-        ? "A2 automatically includes A1 words for more variety."
-        : "A1 uses beginner words only.";
+      const hasA1 = selectedLevels.includes("A1");
+      const hasA2 = selectedLevels.includes("A2");
+
+      lvlA1Btn.setAttribute("aria-pressed", hasA1 ? "true" : "false");
+      lvlA2Btn.setAttribute("aria-pressed", hasA2 ? "true" : "false");
+
+      if (hasA1 && hasA2) {
+        levelHint.textContent = "A1 + A2 active: mixed beginner/intermediate pool.";
+      } else if (hasA2) {
+        levelHint.textContent = "A2 active: intermediate words only.";
+      } else {
+        levelHint.textContent = "A1 active: beginner words only.";
+      }
     }
 
     // =========================
@@ -1282,11 +1309,11 @@
     }
 
     function buildPool(){
-      if (selectedLevel === "A2"){
-        pool = rawData.filter(it => it.level === "A1" || it.level === "A2" || !it.level);
-      } else {
-        pool = rawData.filter(it => it.level === "A1" || !it.level);
-      }
+      const levelSet = new Set(selectedLevels);
+      pool = rawData.filter(it => {
+        if (!it.level) return levelSet.has("A1");
+        return levelSet.has(it.level);
+      });
       shuffle(pool);
       currentIndex = 0;
     }
@@ -1611,18 +1638,24 @@
     }
 
     // =========================
-    // Level selection (no Mix)
+    // Level selection (A1/A2 multi-select)
     // =========================
-    lvlA1Btn.addEventListener("click", () => {
-      selectedLevel = "A1";
+    function toggleBaseLevel(level){
+      const hasLevel = selectedLevels.includes(level);
+      if (hasLevel && selectedLevels.length === 1) return;
+
+      if (hasLevel) {
+        selectedLevels = selectedLevels.filter(l => l !== level);
+      } else {
+        selectedLevels = [...selectedLevels, level].sort();
+      }
+
       syncLevelButtons();
       saveStateToPrefs();
-    });
-    lvlA2Btn.addEventListener("click", () => {
-      selectedLevel = "A2";
-      syncLevelButtons();
-      saveStateToPrefs();
-    });
+    }
+
+    lvlA1Btn.addEventListener("click", () => toggleBaseLevel("A1"));
+    lvlA2Btn.addEventListener("click", () => toggleBaseLevel("A2"));
 
     startBtn.addEventListener("click", startGame);
 
@@ -1757,57 +1790,7 @@
     })();
   </script>
 
-  <!-- Plus modal script (EXACT CODE FROM INDEX) -->
-  <script>
-    const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSd7aZ8okTdi2sr08p8l8HZ2r6oH09BsF3L_mJQtSc8q0nFRdw/viewform?usp=header";
-
-    const modal = document.getElementById("plusModal");
-    const closeModalBtn = document.getElementById("closeModal");
-    const okBtn = document.getElementById("okBtn");
-    const plusText = document.getElementById("plusText");
-    const waitlistBtn = document.getElementById("waitlistBtn");
-
-    function openModal(moduleName){
-      plusText.innerHTML =
-        `The <strong>${moduleName}</strong> is part of <strong>DeutschBuddy Plus</strong> and will be available soon.<br>` +
-        `Want early access and updates?`;
-      waitlistBtn.href = formUrl; // keep it simple (no prefill)
-      modal.style.display = "flex";
-      modal.setAttribute("aria-hidden", "false");
-      document.body.style.overflow = "hidden";
-    }
-
-    function closeModal(){
-      modal.style.display = "none";
-      modal.setAttribute("aria-hidden", "true");
-      document.body.style.overflow = "";
-    }
-
-    // Open modal on locked cards
-    document.querySelectorAll(".gameCard.locked").forEach(card => {
-      const name = card.getAttribute("data-plus") || "This game";
-      card.addEventListener("click", () => openModal(name));
-      card.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          openModal(name);
-        }
-      });
-    });
-
-    closeModalBtn.addEventListener("click", closeModal);
-    okBtn.addEventListener("click", closeModal);
-
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) closeModal();
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && modal.style.display === "flex") closeModal();
-    });
-  </script>
+  <script src="assets/js/components/plus-modal.js" defer></script>
+  <script src="assets/js/pages/quiz-plus-modal-init.js" defer></script>
 </body>
 </html>
-
-
-
