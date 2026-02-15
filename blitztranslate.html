@@ -210,6 +210,7 @@
             <option value="timed">60s</option>
             <option value="streak">Streak</option>
             <option value="maxErrors">3 errors</option>
+            <option value="unlimited">Unlimited</option>
           </select>
         </div>
         <div class="settingsRow">
@@ -217,6 +218,9 @@
           <select id="delaySel"><option value="1000">1s</option><option value="3000">3s</option></select>
         </div>
         <div style="color:var(--muted)">Save is automatic. Close and press Start.</div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;">
+          <a class="btn" href="index.html">Done</a>
+        </div>
       </div>
     </div>
   </div>
@@ -229,7 +233,7 @@
           <li>You’ll see one German singular word from the dataset and 3 English options.</li>
           <li>Tap the correct translation as fast as possible.</li>
           <li>HUD icons: ⭐ Score, 🔥 Streak, 📊 Accuracy, ❌ Mistakes.</li>
-          <li>Modes: 60s timer, Streak, or 3 errors and finish.</li>
+          <li>Modes: 60s timer, Streak, 3 errors, or Unlimited.</li>
         </ul>
       </div>
     </div>
@@ -251,6 +255,7 @@
     let rawData=[], pool=[], recentQueue=[];
     let selectedLevels=["A1"], mode="timed", delayMs=1000;
     let score=0, streak=0, bestStreakSession=0, correct=0, wrong=0, answersTotal=0, timeLeft=60, timer=null, inputLocked=false, current=null;
+    let gameActive=false, nextQuestionTimeout=null;
 
     const lvlA1Btn=document.getElementById('lvlA1'), lvlA2Btn=document.getElementById('lvlA2'), levelHint=document.getElementById('levelHint');
     const modeSel=document.getElementById('modeSel'), delaySel=document.getElementById('delaySel');
@@ -279,7 +284,7 @@
     function loadPrefs(){
       const p=getPrefs();
       if(Array.isArray(p.levels)){selectedLevels=p.levels.filter(l=>l==="A1"||l==="A2"); if(!selectedLevels.length) selectedLevels=["A1"];}
-      mode=(p.mode==="streak"||p.mode==="maxErrors")?p.mode:"timed";
+      mode=(p.mode==="streak"||p.mode==="maxErrors"||p.mode==="unlimited")?p.mode:"timed";
       delayMs=(p.delayMs===3000)?3000:1000;
       modeSel.value=mode; delaySel.value=String(delayMs);
     }
@@ -373,7 +378,15 @@
       updateAnswersSummary();
     }
 
+function stopGameFlow(){
+      gameActive=false;
+      clearInterval(timer);
+      if(nextQuestionTimeout){ clearTimeout(nextQuestionTimeout); nextQuestionTimeout=null; }
+      const buttons=[...optionsEl.querySelectorAll('button')]; buttons.forEach(b=>b.disabled=true);
+    }
+
 function showQuestion(){
+      if(!gameActive) return;
       if(!pool.length){ wordEl.textContent='No words available.'; return; }
       current=pickPrompt(); if(!current){ wordEl.textContent='No words available.'; return; }
       recentQueue.push(current.key); if(recentQueue.length>30) recentQueue=recentQueue.slice(-30); setRecent(recentQueue);
@@ -388,7 +401,9 @@ function showQuestion(){
     }
 
     function answer(btn,opt){
-      if(inputLocked || !current) return; inputLocked=true;
+      if(!gameActive || inputLocked || !current) return;
+      if(mode==='timed' && timeLeft<=0){ finishGame(); return; }
+      inputLocked=true;
       const buttons=[...optionsEl.querySelectorAll('button')]; buttons.forEach(b=>b.disabled=true);
       answersTotal++;
       const ok=opt===current.translation;
@@ -396,13 +411,22 @@ function showQuestion(){
       if(ok){correct++;streak++;bestStreakSession=Math.max(bestStreakSession,streak);score+=1;btn.classList.add('correct');resultEl.textContent='✓ Correct';}
       else{wrong++;streak=0;btn.classList.add('wrong');const right=buttons.find(b=>b.textContent===current.translation);if(right) right.classList.add('correct');resultEl.textContent='✗ Wrong';}
       updateHud();
-      if((mode==='maxErrors' && wrong>=3) || (mode==='streak' && wrong>=1)) return setTimeout(finishGame, delayMs);
-      setTimeout(showQuestion, delayMs);
+      if((mode==='maxErrors' && wrong>=3) || (mode==='streak' && wrong>=1)) {
+        nextQuestionTimeout=setTimeout(finishGame, delayMs);
+        return;
+      }
+      nextQuestionTimeout=setTimeout(showQuestion, delayMs);
     }
 
     function startTimer(){
       clearInterval(timer); timeLeft=60;
-      timer=setInterval(()=>{ timeLeft--; updateHud(); if(timeLeft<=0){clearInterval(timer); finishGame();}},1000);
+      updateHud();
+      timer=setInterval(()=>{
+        if(!gameActive){ clearInterval(timer); return; }
+        timeLeft--;
+        if(timeLeft<=0){ timeLeft=0; updateHud(); finishGame(); return; }
+        updateHud();
+      },1000);
     }
 
     function updateDeviceStats(){
@@ -414,7 +438,8 @@ function showQuestion(){
     }
 
     function finishGame(){
-      clearInterval(timer);
+      if(!gameActive && finishBox.style.display==='block') return;
+      stopGameFlow();
       const acc=answersTotal?Math.round((correct/answersTotal)*100):0;
       finishSummary.innerHTML=`Score <strong>${score}</strong> • Accuracy <strong>${acc}%</strong> • Correct <strong>${correct}</strong> • Wrong <strong>${wrong}</strong> • Best streak <strong>${bestStreakSession}</strong>`;
       const s=getStats();
@@ -428,6 +453,8 @@ function showQuestion(){
     function startGame(){
       score=0;streak=0;bestStreakSession=0;correct=0;wrong=0;answersTotal=0;timeLeft=60;finishBox.style.display='none';
       historyBody.innerHTML=''; updateAnswersSummary();
+      if(nextQuestionTimeout){ clearTimeout(nextQuestionTimeout); nextQuestionTimeout=null; }
+      gameActive=true;
       mode=modeSel.value; delayMs=parseInt(delaySel.value,10); savePrefs();
       buildPool(); updateHud(); setupEl.style.display='none'; playArea.style.display=''; showQuestion();
       if(mode==='timed') startTimer(); else clearInterval(timer);
@@ -445,7 +472,7 @@ function showQuestion(){
     lvlA2Btn.addEventListener('click',()=>toggleLevel('A2'));
     startBtn.addEventListener('click',startGame);
     document.getElementById('playAgainBtn').addEventListener('click',startGame);
-    document.getElementById('changeLevelBtn').addEventListener('click',()=>{clearInterval(timer); playArea.style.display='none'; setupEl.style.display='grid';});
+    document.getElementById('changeLevelBtn').addEventListener('click',()=>{stopGameFlow(); playArea.style.display='none'; setupEl.style.display='grid';});
 
     (async function init(){
       loadPrefs(); syncLevelButtons(); recentQueue=getRecent(); updateDeviceStats(); updateHud(); updateAnswersSummary();
