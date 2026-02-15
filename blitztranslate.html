@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DeutschBuddy — BlitzTranslate</title>
+  <meta name="description" content="BlitzTranslate: 3-choice DE → EN mini-game for 1–3 minute sessions." />
+  <link rel="icon" type="image/png" href="db.png" />
+  <style>
+    :root{
+      --bg:#ffffff; --text:#0f172a; --muted:#64748b; --border:#e5e7eb; --card:#fff;
+      --primary:#169BD7; --primaryHover:#1287BC; --ok:#16a34a; --bad:#dc2626;
+      --shadow:0 12px 30px rgba(15,23,42,.08);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    header{border-bottom:1px solid var(--border);background:#fff;position:sticky;top:0;z-index:5}
+    .topbar{max-width:960px;margin:0 auto;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;font-weight:900}
+    .brand img{width:34px;height:34px;border-radius:10px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:#fff;text-decoration:none;color:#111827;font-weight:800;cursor:pointer}
+    .btn:hover{background:#fafafa}
+    .wrap{max-width:960px;margin:0 auto;padding:16px}
+    .hero{border:1px solid var(--border);border-radius:16px;background:linear-gradient(180deg,#fff,#fafafa);box-shadow:var(--shadow);padding:16px}
+    .hero h1{margin:0;font-size:1.5rem}
+    .tools{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+    .card{margin-top:14px;border:1px solid var(--border);border-radius:16px;background:#fff;box-shadow:var(--shadow);overflow:hidden}
+    .cardHead{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+    .pill{padding:7px 10px;border:1px solid var(--border);border-radius:999px;font-weight:800;color:#334155;background:#fff;font-size:.92rem}
+    .content{padding:16px;display:grid;gap:12px}
+    .settings{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .settings label{font-weight:800;font-size:.95rem}
+    select{border:1px solid var(--border);border-radius:10px;padding:9px 10px;font-weight:700;background:#fff}
+    .startBtn{padding:12px 18px;border-radius:12px;border:1px solid var(--primary);background:var(--primary);color:#fff;font-weight:900;cursor:pointer}
+    .startBtn:hover{background:var(--primaryHover)}
+    .prompt{font-size:2rem;font-weight:900;text-align:center;margin:6px 0 4px}
+    .answers{display:grid;gap:10px}
+    .answerBtn{width:100%;text-align:left;padding:14px;border-radius:12px;border:1px solid var(--border);background:#fff;font-size:1rem;font-weight:800;cursor:pointer}
+    .answerBtn:hover{background:#f8fafc}
+    .answerBtn.correct{background:#dcfce7;border-color:#86efac;color:#14532d}
+    .answerBtn.wrong{background:#fee2e2;border-color:#fca5a5;color:#7f1d1d}
+    .answerBtn:disabled{cursor:not-allowed}
+    .hud{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+    .result{text-align:center;font-weight:900;min-height:1.5em}
+    .finish{border:1px dashed #cbd5e1;background:#f8fafc;border-radius:12px;padding:12px;display:none}
+    .finish h3{margin:0 0 8px}
+    footer{margin-top:16px;border-top:1px solid var(--border);padding-top:12px;text-align:center;color:var(--muted)}
+    footer .links{display:flex;flex-direction:column;gap:8px;align-items:center}
+    footer a{text-decoration:none;color:#111827;font-weight:800}
+  </style>
+</head>
+<body>
+<header>
+  <div class="topbar">
+    <a class="brand" href="index.html" aria-label="Go to home"><img src="db.png" alt="DeutschBuddy"><span>DeutschBuddy</span></a>
+    <a class="btn" href="index.html">Home</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <h1>BlitzTranslate</h1>
+    <div class="tools">
+      <a class="btn" href="artikelregeln.html">Grammar</a>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="cardHead">
+      <div class="pill" id="modeTag">Mode: 60s</div>
+      <div class="hud">
+        <div class="pill" id="scorePill">Score: 0</div>
+        <div class="pill" id="streakPill">Streak: 0</div>
+        <div class="pill" id="errorPill">Errors: 0/3</div>
+        <div class="pill" id="timerPill">Timer: 60</div>
+      </div>
+    </div>
+
+    <div class="content" id="setup">
+      <div class="settings">
+        <label>Level
+          <select id="levelSel">
+            <option>A1</option><option>A2</option><option>B1</option><option>B2</option><option>C2</option>
+          </select>
+        </label>
+        <label>POS
+          <select id="posSel">
+            <option value="all">All</option><option value="nouns">Nouns</option><option value="verbs">Verbs</option><option value="mixed">Mixed</option>
+          </select>
+        </label>
+        <label>Mode
+          <select id="modeSel">
+            <option value="timed">60s</option><option value="streak">Streak</option><option value="maxErrors">3 errors</option>
+          </select>
+        </label>
+        <label>Delay
+          <select id="delaySel"><option value="1000">1s</option><option value="3000">3s</option></select>
+        </label>
+      </div>
+      <button class="startBtn" id="startBtn">Start the game now!</button>
+    </div>
+
+    <div class="content" id="play" style="display:none;">
+      <div class="prompt" id="prompt">—</div>
+      <div class="answers" id="answers"></div>
+      <div class="result" id="result"></div>
+
+      <div class="finish" id="finishBox">
+        <h3>Game finished</h3>
+        <div id="finishSummary"></div>
+        <div id="deviceStats" style="margin:6px 0 10px;color:#475569"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn" id="againBtn">Play again</button>
+          <button class="btn" id="changeBtn">Change level</button>
+          <div class="btn gameCard locked" role="button" tabindex="0" data-plus="Review mistakes">Review mistakes</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div>DeutschBuddy • Ver. 1.0</div>
+    <div class="links">
+      <a href="datenschutz.html">Datenschutz</a>
+      <a href="impressum.html">Impressum</a>
+      <a href="ueber-mich.html">About</a>
+    </div>
+  </footer>
+</main>
+
+<div class="modalOverlay" id="plusModal" aria-hidden="true" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,.55);align-items:center;justify-content:center;padding:18px;z-index:9999;">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="plusTitle" style="width:min(520px,100%);background:#fff;border-radius:20px;border:1px solid rgba(229,231,235,.95);box-shadow:0 22px 60px rgba(15,23,42,.22);overflow:hidden;">
+    <div class="modalHead" style="padding:16px 16px 10px;display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid rgba(229,231,235,.95);">
+      <h3 id="plusTitle" style="margin:0;font-size:1.12rem;font-weight:900;">DeutschBuddy Plus — Coming soon</h3>
+      <button class="closeBtn" id="closeModal" aria-label="Close" style="border:1px solid rgba(229,231,235,.95);background:#fff;border-radius:12px;padding:8px 10px;cursor:pointer;font-weight:900;">✕</button>
+    </div>
+    <div class="modalBody" style="padding:14px 16px 16px;color:#0f172a;">
+      <p id="plusText" style="margin:0 0 12px;color:#64748b;font-weight:700;">This game is part of <strong>DeutschBuddy Plus</strong> and will be available soon. Want early access and updates?</p>
+      <div class="modalActions" style="display:flex;gap:10px;flex-wrap:wrap;">
+        <a class="btn" id="waitlistBtn" href="https://docs.google.com/forms/d/e/1FAIpQLSd7aZ8okTdi2sr08p8l8HZ2r6oH09BsF3L_mJQtSc8q0nFRdw/viewform?usp=header" target="_blank" rel="noopener noreferrer">Join the waitlist</a>
+        <button class="btn" id="okBtn" type="button">Not now</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/js/components/plus-modal.js" defer></script>
+<script src="assets/js/pages/quiz-plus-modal-init.js" defer></script>
+<script>
+const dataUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTLMG3zUFzaLSA82QS7T4E8IAHiung0H2LYRU8hoi_svBol2OoFWmTFBhGVhCPxK2xGtADv1sM9guDr/pub?output=tsv";
+const LS_STATS = "db_bt_stats_v1";
+const LS_RECENT = "db_bt_recent_v1";
+const LEVELS = ["A1","A2","B1","B2","C2"];
+let rows = [], pool = [], recentQueue = [], current = null, timer = null, timeLeft = 60, inputLocked=false;
+let score=0, streak=0, bestStreak=0, correct=0, wrong=0, answersTotal=0, sessions=0;
+
+const el = (id)=>document.getElementById(id);
+const setup=el('setup'), play=el('play'), promptEl=el('prompt'), answersEl=el('answers'), resultEl=el('result');
+const scorePill=el('scorePill'), streakPill=el('streakPill'), errorPill=el('errorPill'), timerPill=el('timerPill'), modeTag=el('modeTag');
+const finishBox=el('finishBox'), finishSummary=el('finishSummary'), deviceStats=el('deviceStats');
+const levelSel=el('levelSel'), posSel=el('posSel'), modeSel=el('modeSel'), delaySel=el('delaySel');
+
+function safe(v){return (v??"").toString().trim();}
+function lvlRank(l){return LEVELS.indexOf((l||"A1").toUpperCase());}
+function parseLevel(v){const x=safe(v).toUpperCase(); return LEVELS.includes(x)?x:"A1";}
+function loadRecent(){try{return JSON.parse(localStorage.getItem(LS_RECENT)||"[]")}catch{return []}}
+function saveRecent(){localStorage.setItem(LS_RECENT, JSON.stringify(recentQueue.slice(-30)));}
+function loadStats(){try{return JSON.parse(localStorage.getItem(LS_STATS)||"{}")}catch{return {}}}
+function saveStats(s){localStorage.setItem(LS_STATS, JSON.stringify(s));}
+
+async function loadData(){
+  const res=await fetch(dataUrl+"&t="+Date.now());
+  const text=await res.text();
+  const lines=text.trim().split("\n");
+  const header=lines.shift().split("\t").map(h=>safe(h).toLowerCase());
+  const idx=(...names)=>names.map(n=>header.indexOf(n)).find(i=>i>=0);
+  const iArt=idx('article'); const iWord=idx('word'); const iLevel=idx('level'); const iPos=idx('pos','part of speech');
+  const iEn=idx('singular translation','english','translation');
+  rows=lines.map(line=>line.split('\t')).map(c=>{
+    const word=safe(c[iWord]); const article=safe(c[iArt]); const english=safe(c[iEn]);
+    if(!word||!english) return null;
+    const posRaw=safe(c[iPos]).toLowerCase();
+    let pos='other';
+    if(['der','die','das'].includes(article.toLowerCase()) || posRaw.includes('noun')) pos='noun';
+    else if(posRaw.includes('verb')) pos='verb';
+    return {word,article,english,level:parseLevel(c[iLevel]),pos,key:`${article}|${word}|${pos}`};
+  }).filter(Boolean);
+}
+
+function makePool(){
+  const maxRank=lvlRank(levelSel.value);
+  let p=rows.filter(r=>lvlRank(r.level)<=maxRank);
+  if(posSel.value==='nouns') p=p.filter(r=>r.pos==='noun');
+  if(posSel.value==='verbs') p=p.filter(r=>r.pos==='verb');
+  if(posSel.value==='mixed') p=p.filter(r=>r.pos==='noun'||r.pos==='verb');
+  pool=p;
+}
+
+function pickPrompt(){
+  for(let i=0;i<120;i++){
+    const c=pool[Math.floor(Math.random()*pool.length)];
+    if(!c) break;
+    if(!recentQueue.includes(c.key)) return c;
+  }
+  return pool[Math.floor(Math.random()*pool.length)]||null;
+}
+
+function nearbyLevels(level){
+  const r=lvlRank(level);
+  return LEVELS.filter(l=>Math.abs(lvlRank(l)-r)<=1);
+}
+
+function pickDistractors(correctRow){
+  const diff=(arr)=>arr.filter(r=>r.english && r.english!==correctRow.english);
+  let base=pool.filter(r=>r.pos===correctRow.pos);
+  let candidates=diff(base.filter(r=>r.level===correctRow.level));
+  if(candidates.length<2){
+    const near=nearbyLevels(correctRow.level);
+    candidates=diff(base.filter(r=>near.includes(r.level)));
+  }
+  if(candidates.length<2) candidates=diff(base);
+  if(candidates.length<2) candidates=diff(rows.filter(r=>r.pos===correctRow.pos));
+
+  const opts=[]; const used=new Set([correctRow.english]);
+  for(const c of candidates.sort(()=>Math.random()-0.5)){
+    if(used.has(c.english)) continue;
+    used.add(c.english); opts.push(c.english);
+    if(opts.length===2) break;
+  }
+  if(opts.length<2){
+    for(const c of rows.sort(()=>Math.random()-0.5)){
+      if(!c.english||used.has(c.english)) continue;
+      used.add(c.english); opts.push(c.english);
+      if(opts.length===2) break;
+    }
+  }
+  return opts;
+}
+
+function updateHud(){
+  scorePill.textContent=`Score: ${score}`;
+  streakPill.textContent=`Streak: ${streak}`;
+  errorPill.textContent=`Errors: ${wrong}/3`;
+  timerPill.textContent=(modeSel.value==='timed')?`Timer: ${timeLeft}`:'Timer: —';
+  modeTag.textContent=`Mode: ${modeSel.options[modeSel.selectedIndex].text}`;
+}
+
+function showQuestion(){
+  if(!pool.length){ resultEl.textContent='No words available for this filter.'; return; }
+  current=pickPrompt();
+  if(!current){ resultEl.textContent='No words available.'; return; }
+  recentQueue.push(current.key); if(recentQueue.length>30) recentQueue=recentQueue.slice(-30); saveRecent();
+  promptEl.textContent=(current.pos==='noun' && current.article)?`${current.article} ${current.word}`:current.word;
+  const opts=[current.english, ...pickDistractors(current)].filter(Boolean);
+  const unique=[...new Set(opts)].slice(0,3);
+  while(unique.length<3){ unique.push('—'); }
+  unique.sort(()=>Math.random()-0.5);
+  answersEl.innerHTML=''; resultEl.textContent=''; inputLocked=false;
+  unique.forEach(opt=>{
+    const b=document.createElement('button');
+    b.className='answerBtn'; b.textContent=opt; b.disabled=(opt==='—');
+    b.addEventListener('click',()=>submitAnswer(b,opt));
+    answersEl.appendChild(b);
+  });
+}
+
+function submitAnswer(btn,opt){
+  if(inputLocked||!current) return; inputLocked=true;
+  const all=[...answersEl.querySelectorAll('.answerBtn')]; all.forEach(b=>b.disabled=true);
+  const isCorrect = opt===current.english;
+  answersTotal++;
+  if(isCorrect){
+    correct++; streak++; bestStreak=Math.max(bestStreak,streak); score+=1; if(streak%5===0) score+=2;
+    btn.classList.add('correct'); resultEl.textContent='✓ Correct';
+  } else {
+    wrong++; streak=0; btn.classList.add('wrong');
+    const right=all.find(b=>b.textContent===current.english); if(right) right.classList.add('correct');
+    resultEl.textContent='✗ Wrong';
+  }
+  updateHud();
+  const mode=modeSel.value;
+  if(mode==='maxErrors' && wrong>=3){
+    return setTimeout(finishGame, Number(delaySel.value));
+  }
+  setTimeout(showQuestion, Number(delaySel.value));
+}
+
+function startTimer(){
+  clearInterval(timer); timeLeft=60; updateHud();
+  timer=setInterval(()=>{
+    timeLeft--; updateHud();
+    if(timeLeft<=0){ clearInterval(timer); finishGame(); }
+  },1000);
+}
+
+function finishGame(){
+  clearInterval(timer);
+  const acc = answersTotal?Math.round((correct/answersTotal)*100):0;
+  finishSummary.innerHTML=`Score <strong>${score}</strong> • Accuracy <strong>${acc}%</strong> • Correct <strong>${correct}</strong> • Wrong <strong>${wrong}</strong> • Best streak <strong>${bestStreak}</strong>`;
+
+  const s=loadStats();
+  s.sessions=(s.sessions||0)+1; s.totalAnswers=(s.totalAnswers||0)+answersTotal; s.totalCorrect=(s.totalCorrect||0)+correct;
+  const lifeAcc=s.totalAnswers?Math.round((s.totalCorrect/s.totalAnswers)*100):0;
+  saveStats(s);
+  deviceStats.innerHTML=`On this device: <strong>${s.sessions}</strong> sessions • <strong>${lifeAcc}%</strong> lifetime accuracy • <strong>${s.totalAnswers}</strong> answers total`;
+
+  finishBox.style.display='block';
+}
+
+function startGame(){
+  sessions++;
+  score=0; streak=0; bestStreak=0; correct=0; wrong=0; answersTotal=0;
+  finishBox.style.display='none';
+  setup.style.display='none'; play.style.display='grid';
+  makePool(); updateHud(); showQuestion();
+  if(modeSel.value==='timed') startTimer(); else { clearInterval(timer); timeLeft=60; updateHud(); }
+}
+
+el('startBtn').addEventListener('click',startGame);
+el('againBtn').addEventListener('click',startGame);
+el('changeBtn').addEventListener('click',()=>{clearInterval(timer); play.style.display='none'; setup.style.display='grid';});
+modeSel.addEventListener('change', updateHud);
+
+(async function init(){
+  recentQueue=loadRecent();
+  await loadData();
+  updateHud();
+})();
+</script>
+</body>
+</html>
