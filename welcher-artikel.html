@@ -164,7 +164,7 @@
       border-color: var(--start);
       color: #fff;
       box-shadow: 0 6px 18px rgba(22,163,74,0.22);
-      min-width: 170px;
+      min-width: 255px;
       padding: 13px 20px;
       font-size: 1.04rem;
     }
@@ -270,15 +270,7 @@
       outline-offset: 2px;
     }
     .iconBtnGrammar{
-      background: #16a34a;
-      border-color: #16a34a;
-      color: #fff;
-      box-shadow: 0 6px 18px rgba(22,163,74,0.22);
       text-decoration: none;
-    }
-    .iconBtnGrammar:hover{
-      background: #15803d;
-      border-color: #15803d;
     }
 
     .heroSub{
@@ -782,8 +774,8 @@
       <div class="heroToolsBox" aria-label="Quick actions">
         <div class="heroActions">
           <a class="iconBtn iconBtnGrammar" href="artikelregeln.html" aria-label="Open grammar rules">Grammar</a>
-          <button class="iconBtn" id="howBtn" type="button" aria-label="How to play">How to play</button>
-          <button class="iconBtn" id="settingsBtn" type="button" aria-label="Open game settings">Games settings</button>
+          <button class="iconBtn" id="howBtn" type="button" aria-label="Game rules">Game rules</button>
+          <button class="iconBtn" id="settingsBtn" type="button" aria-label="Open settings">Settings</button>
         </div>
       </div>
 
@@ -854,7 +846,7 @@
             </div>
 
             <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-              <button class="btn btnStart" id="startBtn" type="button">Start</button>
+              <button class="btn btnStart" id="startBtn" type="button">Start the game now!</button>
             </div>
 
             <div style="height:1px; background: var(--border); margin: 14px 0;"></div>
@@ -958,7 +950,7 @@
   <div class="settingsPanel" id="settingsPanel" aria-hidden="true">
     <div class="settingsCard" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
       <div class="settingsHead">
-        <h3 id="settingsTitle">Games settings</h3>
+        <h3 id="settingsTitle">Settings</h3>
         <button class="closeBtn" id="closeSettings" aria-label="Close settings">✕</button>
       </div>
 
@@ -1009,7 +1001,7 @@
   <div class="howModal" id="howModal" aria-hidden="true">
     <div class="settingsCard" role="dialog" aria-modal="true" aria-labelledby="howTitle">
       <div class="settingsHead">
-        <h3 id="howTitle">How to play</h3>
+        <h3 id="howTitle">Game rules</h3>
         <button class="closeBtn" id="closeHow" aria-label="Close how it works">✕</button>
       </div>
       <div class="settingsBody">
