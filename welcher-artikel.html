@@ -500,18 +500,6 @@
       min-height: 1.6em;
     }
 
-    .extra{
-      margin-top: 10px;
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px dashed #d1d5db;
-      background: #fbfbfb;
-      text-align: center;
-      color: #374151;
-      font-size: 1.05rem;
-      min-height: 1.2em;
-    }
-
     .countdownRow{
       margin-top: 12px;
       display: flex;
@@ -862,7 +850,6 @@
 
             <div class="result" id="result" aria-live="polite"></div>
 
-            <div class="extra" id="extra" aria-live="polite"></div>
 
             <div class="countdownRow">
               <div id="countdown"></div>
@@ -1228,7 +1215,6 @@ async function loadSheetRows(url){
     const metaLineEl = document.getElementById("metaLine");
     const optionsDiv = document.getElementById("options");
     const resultDiv = document.getElementById("result");
-    const extraEl = document.getElementById("extra");
     const countdownEl = document.getElementById("countdown");
     const pauseBtn = document.getElementById("pauseBtn");
     const resetBtn = document.getElementById("resetBtn");
@@ -1522,26 +1508,6 @@ async function loadSheetRows(url){
       updateAnswersSummary();
     }
 
-    function renderExtra(item){
-      extraEl.innerHTML = "";
-
-      const rows = [];
-
-      if (!rows.length){
-        extraEl.textContent = "—";
-        return;
-      }
-
-      rows.forEach(([label, value]) => {
-        const line = document.createElement("div");
-        const strong = document.createElement("strong");
-        strong.textContent = label + " ";
-        line.appendChild(strong);
-        line.appendChild(document.createTextNode(value || "—"));
-        extraEl.appendChild(line);
-      });
-    }
-
     // =========================
     // Mistakes store (saved locally; practice mode is Plus-only)
     // =========================
@@ -1595,12 +1561,6 @@ async function loadSheetRows(url){
       Array.from(optionsDiv.querySelectorAll("button")).forEach(b => b.disabled = true);
 
       resultDiv.textContent = "🛑 Game over — mistake limit reached.";
-      extraEl.innerHTML = `
-        <div><strong>Session summary</strong></div>
-        <div>Score: <strong>${score}</strong> • Correct: <strong>${correct}</strong> • Wrong: <strong>${wrong}</strong></div>
-        <div>Best streak this session: <strong>${sessionBestStreak}</strong></div>
-      `;
-
       setCountdownText("");
 
       finalizeSessionToDeviceStats();
@@ -1642,7 +1602,6 @@ async function loadSheetRows(url){
       renderMetaLine(item);
 
       resultDiv.textContent = "";
-      extraEl.textContent = "";
       setCountdownText("");
 
       optionsDiv.innerHTML = "";
@@ -1684,7 +1643,6 @@ async function loadSheetRows(url){
         resultDiv.textContent = `❌ Wrong — correct is "${item.article}"`;
       }
 
-      renderExtra(item);
       addHistoryRow(opt, item.word, isCorrect, item.article);
       updateHud();
       updateDeviceStatsUI();
@@ -1716,7 +1674,6 @@ async function loadSheetRows(url){
       updateAnswersSummary();
 
       resultDiv.textContent = "";
-      extraEl.textContent = "";
       clearCountdown(false);
 
       updateHud();
