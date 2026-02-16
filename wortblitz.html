@@ -140,9 +140,9 @@
               <div class="levelLabel">Level:</div>
               <button class="levelBtn" type="button" id="lvlA1" aria-pressed="true">A1</button>
               <button class="levelBtn" type="button" id="lvlA2" aria-pressed="false">A2</button>
-              <div class="levelBtn locked gameCard" role="button" tabindex="0" data-plus="B1 level">B1</div>
-              <div class="levelBtn locked gameCard" role="button" tabindex="0" data-plus="B2 level">B2</div>
-              <div class="levelBtn locked gameCard" role="button" tabindex="0" data-plus="C1 level">C1</div>
+              <button class="levelBtn locked gameCard" type="button" id="lvlB1" aria-pressed="false" data-plus="B1 level">B1</button>
+              <button class="levelBtn locked gameCard" type="button" id="lvlB2" aria-pressed="false" data-plus="B2 level">B2</button>
+              <button class="levelBtn locked gameCard" type="button" id="lvlC1" aria-pressed="false" data-plus="C1 level">C1</button>
             </div>
             <div id="levelHint" style="color:var(--muted);font-size:.95rem;">A1 active: beginner words only.</div>
 
@@ -270,7 +270,7 @@
     let score=0, streak=0, bestStreakSession=0, correct=0, wrong=0, answersTotal=0, timeLeft=60, timer=null, inputLocked=false, current=null;
     let gameActive=false, nextQuestionTimeout=null;
 
-    const lvlA1Btn=document.getElementById('lvlA1'), lvlA2Btn=document.getElementById('lvlA2'), levelHint=document.getElementById('levelHint');
+    const lvlA1Btn=document.getElementById('lvlA1'), lvlA2Btn=document.getElementById('lvlA2'), lvlB1Btn=document.getElementById('lvlB1'), lvlB2Btn=document.getElementById('lvlB2'), lvlC1Btn=document.getElementById('lvlC1'), levelHint=document.getElementById('levelHint');
     const modeSel=document.getElementById('modeSel'), delaySel=document.getElementById('delaySel'), categorySel=document.getElementById('categorySel');
     const startBtn=document.getElementById('startBtn'), setupEl=document.getElementById('setup'), playArea=document.getElementById('playArea');
     const wordEl=document.getElementById('word'), optionsEl=document.getElementById('options'), resultEl=document.getElementById('result');
@@ -353,7 +353,7 @@
 
     function loadPrefs(){
       const p=getPrefs();
-      if(Array.isArray(p.levels)){selectedLevels=p.levels.filter(l=>l==="A1"||l==="A2"); if(!selectedLevels.length) selectedLevels=["A1"];}
+      if(Array.isArray(p.levels)){selectedLevels=p.levels.filter(l=>["A1","A2","B1","B2","C1"].includes(l)); if(!selectedLevels.length) selectedLevels=["A1"];}
       selectedCategory = "All";
       mode=(p.mode==="streak"||p.mode==="maxErrors"||p.mode==="unlimited")?p.mode:"timed";
       delayMs=(p.delayMs===3000)?3000:1000;
@@ -362,13 +362,16 @@
     function savePrefs(){ setPrefs({levels:selectedLevels, category:selectedCategory, mode, delayMs}); }
 
     function syncLevelButtons(){
-      const hasA1=selectedLevels.includes("A1"), hasA2=selectedLevels.includes("A2");
-      lvlA1Btn.setAttribute('aria-pressed', hasA1?'true':'false');
-      lvlA2Btn.setAttribute('aria-pressed', hasA2?'true':'false');
-      levelHint.textContent = hasA1&&hasA2 ? 'A1 + A2 active: mixed pool.' : (hasA2 ? 'A2 active: intermediate words only.' : 'A1 active: beginner words only.');
+      const levels=[['A1',lvlA1Btn],['A2',lvlA2Btn],['B1',lvlB1Btn],['B2',lvlB2Btn],['C1',lvlC1Btn]];
+      levels.forEach(([lvl,btn])=>{ if(btn) btn.setAttribute('aria-pressed', selectedLevels.includes(lvl)?'true':'false'); });
+      levelHint.textContent = `${selectedLevels.join(' + ')} active.`;
     }
 
     function toggleLevel(level){
+      const isPlusLevel = ["B1","B2","C1"].includes(level);
+      if (isPlusLevel && !(window.DeutschBuddyPlusModal && window.DeutschBuddyPlusModal.hasAllAccess && window.DeutschBuddyPlusModal.hasAllAccess())) {
+        return;
+      }
       const has=selectedLevels.includes(level);
       if(has && selectedLevels.length===1) return;
       selectedLevels = has ? selectedLevels.filter(x=>x!==level) : [...selectedLevels, level].sort();
@@ -576,6 +579,9 @@ function showQuestion(){
 
     lvlA1Btn.addEventListener('click',()=>toggleLevel('A1'));
     lvlA2Btn.addEventListener('click',()=>toggleLevel('A2'));
+    lvlB1Btn.addEventListener('click',()=>toggleLevel('B1'));
+    lvlB2Btn.addEventListener('click',()=>toggleLevel('B2'));
+    lvlC1Btn.addEventListener('click',()=>toggleLevel('C1'));
     categorySel.addEventListener('change',()=>{ selectedCategory=categorySel.value||'All'; savePrefs(); buildPool(); });
     startBtn.addEventListener('click',startGame);
     document.getElementById('playAgainBtn').addEventListener('click',startGame);

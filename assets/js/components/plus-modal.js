@@ -16,16 +16,16 @@
   }
 
   function getUnlocks(){
-    try { return JSON.parse(localStorage.getItem(LS_UNLOCKS) || "{}"); }
+    try { return JSON.parse(sessionStorage.getItem(LS_UNLOCKS) || "{}"); }
     catch { return {}; }
   }
-  function setUnlocks(v){ localStorage.setItem(LS_UNLOCKS, JSON.stringify(v)); }
+  function setUnlocks(v){ sessionStorage.setItem(LS_UNLOCKS, JSON.stringify(v)); }
 
   function getValidCodes(){
-    try { return JSON.parse(localStorage.getItem(LS_VALID_CODES) || "[]"); }
+    try { return JSON.parse(sessionStorage.getItem(LS_VALID_CODES) || "[]"); }
     catch { return []; }
   }
-  function setValidCodes(v){ localStorage.setItem(LS_VALID_CODES, JSON.stringify(v)); }
+  function setValidCodes(v){ sessionStorage.setItem(LS_VALID_CODES, JSON.stringify(v)); }
 
   function parseSheet(text){
     const lines = text.trim().split(/\r?\n/).filter(Boolean);
@@ -185,6 +185,7 @@
   }
 
   global.DeutschBuddyPlusModal = {
-    initPlusModal
+    initPlusModal,
+    hasAllAccess
   };
 })(window);
