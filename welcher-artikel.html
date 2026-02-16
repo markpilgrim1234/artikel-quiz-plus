@@ -1056,7 +1056,7 @@
     // Data source (TSV)
     // =========================
     const dataUrl =
-      "https://drive.google.com/uc?export=download&id=1b6uUewXffILu9u-emyvt9lY1HdMHrv-R";
+      "https://drive.google.com/file/d/1b6uUewXffILu9u-emyvt9lY1HdMHrv-R/view?usp=drive_link";
 
     // =========================
     // Local storage keys
@@ -1097,22 +1097,63 @@
     function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
 
 async function fetchTextFromUrl(url){
-      const cacheBust = (u)=>u+(u.includes("?")?"&":"?")+"t="+Date.now();
-      const proxies = [
-        u => cacheBust(u),
-        u => `https://api.allorigins.win/raw?url=${encodeURIComponent(cacheBust(u))}`,
-        u => `https://r.jina.ai/http://${cacheBust(u).replace(/^https?:\/\//,'')}`
-      ];
+      function extractDriveFileId(v){
+        const u = String(v || "");
+        const m = u.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || u.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        return m ? m[1] : "";
+      }
+
+      function buildSourceCandidates(v){
+        const out = [v];
+        const id = extractDriveFileId(v);
+        if (id){
+          out.push(
+            `https://drive.google.com/uc?export=download&id=${id}`,
+            `https://drive.google.com/uc?id=${id}&export=download`,
+            `https://drive.usercontent.google.com/download?id=${id}&export=download&confirm=t`
+          );
+        }
+        return [...new Set(out.filter(Boolean))];
+      }
+
+      function looksLikeHtml(text){
+        return /^\s*<!doctype html>/i.test(text || "") || /^\s*<html/i.test(text || "");
+      }
+
+      async function tryFetchText(v){
+        const res = await fetch(v);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const text = await res.text();
+        if (!text) throw new Error("Empty response");
+
+        if (looksLikeHtml(text)){
+          const dl = text.match(/"downloadUrl":"([^"]+)"/i);
+          if (dl && dl[1]){
+            const real = dl[1].replace(/\u003d/g, "=").replace(/\u0026/g, "&");
+            const r2 = await fetch(real);
+            if (!r2.ok) throw new Error(`HTTP ${r2.status}`);
+            const t2 = await r2.text();
+            if (!looksLikeHtml(t2) && t2.trim()) return t2;
+          }
+          throw new Error("Non-TSV response");
+        }
+        return text;
+      }
+
+      const cacheBust = (v)=>v+(v.includes("?")?"&":"?")+"t="+Date.now();
+      const sources = buildSourceCandidates(url);
+      const attempts = [];
+
+      for (const src of sources){
+        attempts.push(cacheBust(src));
+        attempts.push(`https://api.allorigins.win/raw?url=${encodeURIComponent(cacheBust(src))}`);
+        attempts.push(`https://r.jina.ai/http://${cacheBust(src).replace(/^https?:\/\//,"")}`);
+      }
 
       let lastErr = null;
-      for (const build of proxies){
-        try{
-          const res = await fetch(build(url));
-          if (!res.ok) throw new Error("HTTP " + res.status);
-          const text = await res.text();
-          if (!text || /^<!doctype html>/i.test(text.trim())) throw new Error("Non-TSV response");
-          return text;
-        }catch(e){ lastErr = e; }
+      for (const candidate of attempts){
+        try{ return await tryFetchText(candidate); }
+        catch(e){ lastErr = e; }
       }
       throw lastErr || new Error("Fetch failed");
     }
