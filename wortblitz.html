@@ -283,8 +283,8 @@
     const howBtn=document.getElementById('howBtn'), howModal=document.getElementById('howModal'), closeHow=document.getElementById('closeHow');
 
     function safe(v){return (v??'').toString().trim();}
-    function parseLevel(v){const x=safe(v).toUpperCase(); return ["A1","A2","B1","B2","C1"].includes(x)?x:"A1";}
-    function levelRank(l){return ["A1","A2","B1","B2","C1"].indexOf(l||"A1");}
+    function parseLevel(v){const x=safe(v).toUpperCase(); return ["A1","A2","B1","B2","C1","C2"].includes(x)?x:"";}
+    function levelRank(l){return ["A1","A2","B1","B2","C1","C2"].indexOf(l||"A1");}
     function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}}
 
 
@@ -426,7 +426,7 @@
     function buildPool(){
       const set=new Set(selectedLevels);
       pool=rawData.filter(r=>{
-        const levelOk = set.has(r.level) || (!r.level && set.has('A1'));
+        const levelOk = set.has(r.level);
         const categoryOk = selectedCategory==='All' || r.category===selectedCategory;
         return levelOk && categoryOk;
       });
