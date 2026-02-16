@@ -34,13 +34,13 @@
     const iCodeNum = header.findIndex(h => h === "code number" || h === "code_number" || h === "code");
     const iCodeVal = header.findIndex(h => h === "code value" || h === "code_value");
     const iAssign = header.findIndex(h => h === "assignment");
-    if (iCodeNum < 0) return [];
+    if (iCodeVal < 0) return [];
 
     return lines.slice(1).map(line => line.split(delimiter)).map(cols => ({
       codeNumber: (cols[iCodeNum] || "").trim(),
       codeValue: iCodeVal >= 0 ? (cols[iCodeVal] || "").trim() : "",
       assignment: iAssign >= 0 ? (cols[iAssign] || "").trim() : ""
-    })).filter(r => r.codeNumber);
+    })).filter(r => r.codeValue);
   }
 
   async function validateCodeWithSheet({ codeSheetUrl, codeInput, moduleName }){
@@ -55,7 +55,7 @@
       const rows = parseSheet(txt);
       const normalized = codeInput.trim().toLowerCase();
 
-      const match = rows.find(r => r.codeNumber.trim().toLowerCase() === normalized);
+      const match = rows.find(r => r.codeValue.trim().toLowerCase() === normalized);
       if (!match) return { ok: false, message: "Invalid code." };
 
       const assignment = (match.assignment || "").toLowerCase();
