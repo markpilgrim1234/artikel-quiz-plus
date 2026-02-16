@@ -139,12 +139,12 @@
             <div class="levelRow" aria-label="Level selection">
               <div class="levelLabel">Level:</div>
               <button class="levelBtn" type="button" id="lvlA1" aria-pressed="true">A1</button>
-              <button class="levelBtn" type="button" id="lvlA2" aria-pressed="false">A2</button>
+              <button class="levelBtn locked gameCard" type="button" id="lvlA2" aria-pressed="false" data-plus="A2 level">A2</button>
               <button class="levelBtn locked gameCard" type="button" id="lvlB1" aria-pressed="false" data-plus="B1 level">B1</button>
               <button class="levelBtn locked gameCard" type="button" id="lvlB2" aria-pressed="false" data-plus="B2 level">B2</button>
               <button class="levelBtn locked gameCard" type="button" id="lvlC1" aria-pressed="false" data-plus="C1 level">C1</button>
             </div>
-            <div id="levelHint" style="color:var(--muted);font-size:.95rem;">A1 active: beginner words only.</div>
+            <div id="levelHint" style="color:var(--muted);font-size:.95rem;">A1 active: beginner words only (free).</div>
 
             <div class="settingsRow" aria-label="Category selection">
               <label for="categorySel" style="font-weight:900;">Category</label>
@@ -351,9 +351,17 @@
     function getRecent(){try{return JSON.parse(localStorage.getItem(LS_RECENT)||"[]")}catch{return []}}
     function setRecent(v){localStorage.setItem(LS_RECENT, JSON.stringify(v.slice(-30)));}
 
+    function hasPlusAccess(){
+      try{
+        const unlocks = JSON.parse(sessionStorage.getItem('db_plus_unlocks_v1') || '{}');
+        return !!unlocks.__all_plus__;
+      }catch{ return false; }
+    }
+
     function loadPrefs(){
       const p=getPrefs();
       if(Array.isArray(p.levels)){selectedLevels=p.levels.filter(l=>["A1","A2","B1","B2","C1"].includes(l)); if(!selectedLevels.length) selectedLevels=["A1"];}
+      if(!hasPlusAccess()) selectedLevels=['A1'];
       selectedCategory = "All";
       mode=(p.mode==="streak"||p.mode==="maxErrors"||p.mode==="unlimited")?p.mode:"timed";
       delayMs=(p.delayMs===3000)?3000:1000;
@@ -364,11 +372,26 @@
     function syncLevelButtons(){
       const levels=[['A1',lvlA1Btn],['A2',lvlA2Btn],['B1',lvlB1Btn],['B2',lvlB2Btn],['C1',lvlC1Btn]];
       levels.forEach(([lvl,btn])=>{ if(btn) btn.setAttribute('aria-pressed', selectedLevels.includes(lvl)?'true':'false'); });
-      levelHint.textContent = `${selectedLevels.join(' + ')} active.`;
+
+      const hasA1 = selectedLevels.includes('A1');
+      const hasA2 = selectedLevels.includes('A2');
+      const hasB1 = selectedLevels.includes('B1');
+      const hasB2 = selectedLevels.includes('B2');
+      const hasC1 = selectedLevels.includes('C1');
+
+      if (hasA2 && !hasB1 && !hasB2 && !hasC1) {
+        levelHint.textContent = 'A2 active: intermediate words only.';
+      } else if (hasA1 && hasA2) {
+        levelHint.textContent = 'A1 + A2 active: mixed beginner/intermediate pool.';
+      } else if (hasB1 || hasB2 || hasC1) {
+        levelHint.textContent = 'Plus levels active: broader vocabulary pool.';
+      } else {
+        levelHint.textContent = 'A1 active: beginner words only (free).';
+      }
     }
 
     function toggleLevel(level){
-      const isPlusLevel = ["B1","B2","C1"].includes(level);
+      const isPlusLevel = ["A2","B1","B2","C1"].includes(level);
       if (isPlusLevel && !(window.DeutschBuddyPlusModal && window.DeutschBuddyPlusModal.hasAllAccess && window.DeutschBuddyPlusModal.hasAllAccess())) {
         return;
       }
@@ -578,10 +601,10 @@ function showQuestion(){
     howModal.addEventListener('click',(e)=>{if(e.target===howModal) howModal.style.display='none';});
 
     lvlA1Btn.addEventListener('click',()=>toggleLevel('A1'));
-    lvlA2Btn.addEventListener('click',()=>toggleLevel('A2'));
-    lvlB1Btn.addEventListener('click',()=>toggleLevel('B1'));
-    lvlB2Btn.addEventListener('click',()=>toggleLevel('B2'));
-    lvlC1Btn.addEventListener('click',()=>toggleLevel('C1'));
+    lvlA2Btn.addEventListener('click',()=>{ if(!lvlA2Btn.classList.contains('locked')) toggleLevel('A2'); });
+    lvlB1Btn.addEventListener('click',()=>{ if(!lvlB1Btn.classList.contains('locked')) toggleLevel('B1'); });
+    lvlB2Btn.addEventListener('click',()=>{ if(!lvlB2Btn.classList.contains('locked')) toggleLevel('B2'); });
+    lvlC1Btn.addEventListener('click',()=>{ if(!lvlC1Btn.classList.contains('locked')) toggleLevel('C1'); });
     categorySel.addEventListener('change',()=>{ selectedCategory=categorySel.value||'All'; savePrefs(); buildPool(); });
     startBtn.addEventListener('click',startGame);
     document.getElementById('playAgainBtn').addEventListener('click',startGame);
