@@ -170,7 +170,7 @@
       border: 1px solid rgba(229,231,235,.9);
       background: rgba(255,255,255,.9);
       font-weight: 900;
-      color:#111827;
+      color:#6b7280;
       width: fit-content;
       max-width: 100%;
     }
@@ -318,7 +318,7 @@
       font-weight: 900;
       border: 1px solid rgba(229,231,235,.95);
       background: #fff7d6;
-      color:#111827;
+      color:#6b7280;
     }
 
     .badge{
@@ -331,7 +331,7 @@
       font-size: .86rem;
       border: 1px solid rgba(229,231,235,.95);
       background: #f3f4f6;
-      color:#111827;
+      color:#6b7280;
     }
     .badgePlus{
       background: #eef2ff;
@@ -420,27 +420,21 @@
       display:flex;
       flex-direction:column;
       align-items:center;
-      gap: 12px;
+      gap: 8px;
       color: var(--muted);
       text-align:center;
     }
     .footerBtns{
       display:flex;
-      gap:10px;
-      flex-wrap:wrap;
+      flex-direction:column;
+      gap:8px;
+      align-items:center;
       justify-content:center;
     }
     .footerBtn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: 1px solid rgba(229,231,235,.95);
-      background:#fff;
       font-weight: 900;
       text-decoration:none;
-      color:#111827;
+      color:#6b7280;
     }
 
     /* Modal */
@@ -508,7 +502,7 @@
       background:#fff;
       font-weight: 900;
       text-decoration:none;
-      color:#111827;
+      color:#6b7280;
       cursor:pointer;
     }
     .btnPrimary{
@@ -631,6 +625,19 @@
               </div>
               <div class="ctaPill">Play</div>
             </a>
+            <a class="gameCard" href="wortblitz.html" style="text-decoration:none; color:inherit;" aria-label="Start WortBlitz">
+              <div class="left">
+                <div class="gIcon" aria-hidden="true">
+                  <img src="wortblitz.png" alt="">
+                </div>
+                <div class="gText">
+                  <p class="gTitle">WortBlitz</p>
+                  <p class="gSub">3-choice DE → EN</p>
+                </div>
+              </div>
+              <div class="ctaPill">Play</div>
+            </a>
+
 
             <!-- PLUS / COMING SOON -->
             <div class="gameCard locked" data-plus="Plural Trainer" role="button" tabindex="0" aria-label="Plural Trainer (Coming soon)">
@@ -706,10 +713,11 @@
 
   <footer>
     <div class="footerInner">
-      <div>DeutschBuddy • Ver. 1.0</div>
+      <div>DeutschBuddy • Ver. 0.1 [BETA]</div>
       <div class="footerBtns">
         <a class="footerBtn" href="datenschutz.html">Datenschutz</a>
         <a class="footerBtn" href="impressum.html">Impressum</a>
+        <a class="footerBtn" href="ueber-mich.html">About</a>
       </div>
     </div>
   </footer>
@@ -738,54 +746,8 @@
     </div>
   </div>
 
-  <script>
-    const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSd7aZ8okTdi2sr08p8l8HZ2r6oH09BsF3L_mJQtSc8q0nFRdw/viewform?usp=header";
-
-    const modal = document.getElementById("plusModal");
-    const closeModalBtn = document.getElementById("closeModal");
-    const okBtn = document.getElementById("okBtn");
-    const plusText = document.getElementById("plusText");
-    const waitlistBtn = document.getElementById("waitlistBtn");
-
-    function openModal(moduleName){
-      plusText.innerHTML =
-        `The <strong>${moduleName}</strong> is part of <strong>DeutschBuddy Plus</strong> and will be available soon.<br>` +
-        `Want early access and updates?`;
-      waitlistBtn.href = formUrl;
-      modal.style.display = "flex";
-      modal.setAttribute("aria-hidden", "false");
-      document.body.style.overflow = "hidden";
-    }
-
-    function closeModal(){
-      modal.style.display = "none";
-      modal.setAttribute("aria-hidden", "true");
-      document.body.style.overflow = "";
-    }
-
-    // Open modal on locked cards only
-    document.querySelectorAll(".gameCard.locked").forEach(card => {
-      const name = card.getAttribute("data-plus") || "This game";
-      card.addEventListener("click", () => openModal(name));
-      card.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          openModal(name);
-        }
-      });
-    });
-
-    closeModalBtn.addEventListener("click", closeModal);
-    okBtn.addEventListener("click", closeModal);
-
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) closeModal();
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && modal.style.display === "flex") closeModal();
-    });
-  </script>
+  <script src="assets/js/components/plus-modal.js" defer></script>
+  <script src="assets/js/pages/index-plus-modal-init.js" defer></script>
 </body>
 </html>
 
