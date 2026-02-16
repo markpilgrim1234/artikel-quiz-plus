@@ -261,7 +261,7 @@
   <script src="assets/js/components/plus-modal.js" defer></script>
   <script src="assets/js/pages/quiz-plus-modal-init.js" defer></script>
   <script>
-    const dataUrl = "https://docs.google.com/spreadsheets/d/1eFtuKJWBKZaJvzVzdr6MkahBECxA3PTn/export?format=tsv&gid=0";
+    const dataUrl = "https://docs.google.com/spreadsheets/d/1eFtuKJWBKZaJvzVzdr6MkahBECxA3PTn/edit?usp=drive_link&ouid=112981731770462263160&rtpof=true&sd=true";
     const LS_PREFS="db_bt_prefs_v2", LS_STATS="db_bt_stats_v2", LS_RECENT="db_bt_recent_v2";
 
     let rawData=[], pool=[], recentQueue=[];
@@ -290,7 +290,7 @@
     async function fetchTextFromUrl(url){
       function extractDriveFileId(v){
         const u = String(v || "");
-        const m = u.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || u.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        const m = u.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/) || u.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || u.match(/[?&]id=([a-zA-Z0-9_-]+)/);
         return m ? m[1] : "";
       }
 
@@ -299,6 +299,8 @@
         const id = extractDriveFileId(v);
         if (id){
           out.push(
+            `https://docs.google.com/spreadsheets/d/${id}/export?format=tsv&gid=0`,
+            `https://docs.google.com/spreadsheets/d/e/${id}/pub?output=tsv`,
             `https://drive.google.com/uc?export=download&id=${id}`,
             `https://drive.google.com/uc?id=${id}&export=download`,
             `https://drive.usercontent.google.com/download?id=${id}&export=download&confirm=t`
