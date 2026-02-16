@@ -90,9 +90,16 @@
     .settingsHead h3{margin:0;font-size:1.05rem;font-weight:900}
     .settingsBody{padding:14px 16px 16px;display:grid;gap:12px}
     .closeBtn{border:1px solid var(--border);background:#fff;border-radius:12px;padding:8px 10px;cursor:pointer;font-weight:900}
+    #splash{position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999}
+    #splash h1{font-size:2rem;margin:0 0 1rem}
+    #splash img{width:260px;height:260px}
   </style>
 </head>
 <body>
+  <div id="splash" aria-label="Loading screen">
+    <h1>WortBlitz</h1>
+    <img src="wortblitz.png" alt="WortBlitz Logo" />
+  </div>
   <header>
     <div class="topbar">
       <div class="brand">
@@ -612,6 +619,10 @@ function showQuestion(){
 
     (async function init(){
       loadPrefs(); syncLevelButtons(); recentQueue=getRecent(); updateDeviceStats(); updateHud(); updateAnswersSummary();
+      setTimeout(()=>{
+        const splash=document.getElementById('splash');
+        if(splash) splash.style.display='none';
+      },900);
       await loadData();
     })();
   </script>
