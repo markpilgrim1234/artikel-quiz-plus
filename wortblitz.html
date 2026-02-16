@@ -146,6 +146,11 @@
             </div>
             <div id="levelHint" style="color:var(--muted);font-size:.95rem;">A1 active: beginner words only.</div>
 
+            <div class="settingsRow" aria-label="Category selection">
+              <label for="categorySel" style="font-weight:900;">Category</label>
+              <select id="categorySel"></select>
+            </div>
+
             <div class="levelRow" aria-label="Practice mistakes">
               <div class="levelLabel">Practice mistake:</div>
               <div class="levelBtn locked gameCard" role="button" tabindex="0" data-plus="Practice mistakes feature">
@@ -256,16 +261,16 @@
   <script src="assets/js/components/plus-modal.js" defer></script>
   <script src="assets/js/pages/quiz-plus-modal-init.js" defer></script>
   <script>
-    const dataUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTLMG3zUFzaLSA82QS7T4E8IAHiung0H2LYRU8hoi_svBol2OoFWmTFBhGVhCPxK2xGtADv1sM9guDr/pub?output=tsv";
+    const dataUrl = "https://drive.google.com/uc?export=download&id=1b6uUewXffILu9u-emyvt9lY1HdMHrv-R";
     const LS_PREFS="db_bt_prefs_v2", LS_STATS="db_bt_stats_v2", LS_RECENT="db_bt_recent_v2";
 
     let rawData=[], pool=[], recentQueue=[];
-    let selectedLevels=["A1"], mode="timed", delayMs=1000;
+    let selectedLevels=["A1"], selectedCategory="All", mode="timed", delayMs=1000;
     let score=0, streak=0, bestStreakSession=0, correct=0, wrong=0, answersTotal=0, timeLeft=60, timer=null, inputLocked=false, current=null;
     let gameActive=false, nextQuestionTimeout=null;
 
     const lvlA1Btn=document.getElementById('lvlA1'), lvlA2Btn=document.getElementById('lvlA2'), levelHint=document.getElementById('levelHint');
-    const modeSel=document.getElementById('modeSel'), delaySel=document.getElementById('delaySel');
+    const modeSel=document.getElementById('modeSel'), delaySel=document.getElementById('delaySel'), categorySel=document.getElementById('categorySel');
     const startBtn=document.getElementById('startBtn'), setupEl=document.getElementById('setup'), playArea=document.getElementById('playArea');
     const wordEl=document.getElementById('word'), optionsEl=document.getElementById('options'), resultEl=document.getElementById('result');
     const hudScore=document.getElementById('hudScore'), hudStreak=document.getElementById('hudStreak'), hudAcc=document.getElementById('hudAcc'), hudMistakes=document.getElementById('hudMistakes'), hudTimer=document.getElementById('hudTimer');
@@ -291,11 +296,12 @@
     function loadPrefs(){
       const p=getPrefs();
       if(Array.isArray(p.levels)){selectedLevels=p.levels.filter(l=>l==="A1"||l==="A2"); if(!selectedLevels.length) selectedLevels=["A1"];}
+      selectedCategory = safe(p.category) || "All";
       mode=(p.mode==="streak"||p.mode==="maxErrors"||p.mode==="unlimited")?p.mode:"timed";
       delayMs=(p.delayMs===3000)?3000:1000;
       modeSel.value=mode; delaySel.value=String(delayMs);
     }
-    function savePrefs(){ setPrefs({levels:selectedLevels, mode, delayMs}); }
+    function savePrefs(){ setPrefs({levels:selectedLevels, category:selectedCategory, mode, delayMs}); }
 
     function syncLevelButtons(){
       const hasA1=selectedLevels.includes("A1"), hasA2=selectedLevels.includes("A2");
@@ -312,25 +318,51 @@
     }
 
     async function loadData(){
-      const res=await fetch(dataUrl+"&t="+Date.now());
+      const res=await fetch(dataUrl+(dataUrl.includes('?')?'&':'?')+"t="+Date.now());
       const txt=await res.text();
-      const lines=txt.trim().split('\n');
-      const header=lines[0].split('\t').map(h=>safe(h).toLowerCase());
+      const lines=txt.trim().split(/\r?\n/).filter(Boolean);
+      const delimiter = lines[0].includes('	') ? '	' : (lines[0].includes(';') ? ';' : ',');
+      const header=lines[0].split(delimiter).map(h=>safe(h).toLowerCase());
       const idx=(...names)=>names.map(n=>header.indexOf(n)).find(i=>i>=0);
-      const iSing=idx('singular','word');
-      const iTrans=idx('translation','singular translation','english');
+      const iWord=idx('word','singular');
+      const iTrans=idx('english','translation','singular translation');
       const iLevel=idx('level');
-      rawData=lines.slice(1).map(line=>line.split('\t')).map(cols=>{
-        const singular=safe(cols[iSing]); const translation=safe(cols[iTrans]);
+      const iPos=idx('pos','category');
+      rawData=lines.slice(1).map(line=>line.split(delimiter)).map(cols=>{
+        const singular=safe(cols[iWord]);
+        const translation=safe(cols[iTrans]);
+        const pos=safe(cols[iPos]);
         if(!singular || !translation) return null;
         const level=parseLevel(cols[iLevel]);
-        return {singular, translation, level, key:`${singular}|${translation}`.toLowerCase()};
+        const category = pos || 'Unknown';
+        return {singular, translation, level, category, key:`${singular}|${translation}|${category}`.toLowerCase()};
       }).filter(Boolean);
+
+      const categories=[...new Set(rawData.map(r=>r.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+      categorySel.innerHTML='';
+      const allOpt=document.createElement('option');
+      allOpt.value='All';
+      allOpt.textContent='All';
+      categorySel.appendChild(allOpt);
+      categories.forEach(cat=>{
+        const opt=document.createElement('option');
+        opt.value=cat;
+        opt.textContent=cat;
+        categorySel.appendChild(opt);
+      });
+
+      if(!categories.includes(selectedCategory)) selectedCategory='All';
+      categorySel.value=selectedCategory;
+      savePrefs();
     }
 
     function buildPool(){
       const set=new Set(selectedLevels);
-      pool=rawData.filter(r=>set.has(r.level) || (!r.level && set.has('A1')));
+      pool=rawData.filter(r=>{
+        const levelOk = set.has(r.level) || (!r.level && set.has('A1'));
+        const categoryOk = selectedCategory==='All' || r.category===selectedCategory;
+        return levelOk && categoryOk;
+      });
       shuffle(pool);
     }
 
@@ -348,12 +380,12 @@
       const out=[];
       for(const c of sameLevel){ if(!used.has(c.translation)){used.add(c.translation); out.push(c.translation);} if(out.length===2) break; }
       if(out.length<2){
-        const near=rawData.filter(r=>Math.abs(levelRank(r.level)-levelRank(correctRow.level))<=1 && r.translation!==correctRow.translation);
+        const near=rawData.filter(r=>Math.abs(levelRank(r.level)-levelRank(correctRow.level))<=1 && r.translation!==correctRow.translation && (selectedCategory==='All' || r.category===selectedCategory));
         shuffle(near);
         for(const c of near){ if(!used.has(c.translation)){used.add(c.translation); out.push(c.translation);} if(out.length===2) break; }
       }
       if(out.length<2){
-        const all=[...rawData]; shuffle(all);
+        const all=rawData.filter(r=>(selectedCategory==='All' || r.category===selectedCategory)); shuffle(all);
         for(const c of all){ if(!used.has(c.translation)){used.add(c.translation); out.push(c.translation);} if(out.length===2) break; }
       }
       return out;
@@ -477,6 +509,7 @@ function showQuestion(){
 
     lvlA1Btn.addEventListener('click',()=>toggleLevel('A1'));
     lvlA2Btn.addEventListener('click',()=>toggleLevel('A2'));
+    categorySel.addEventListener('change',()=>{ selectedCategory=categorySel.value||'All'; savePrefs(); buildPool(); });
     startBtn.addEventListener('click',startGame);
     document.getElementById('playAgainBtn').addEventListener('click',startGame);
     document.getElementById('changeLevelBtn').addEventListener('click',()=>{stopGameFlow(); playArea.style.display='none'; setupEl.style.display='grid';});

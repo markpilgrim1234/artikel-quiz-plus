@@ -1056,7 +1056,7 @@
     // Data source (TSV)
     // =========================
     const dataUrl =
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vTLMG3zUFzaLSA82QS7T4E8IAHiung0H2LYRU8hoi_svBol2OoFWmTFBhGVhCPxK2xGtADv1sM9guDr/pub?output=tsv";
+      "https://drive.google.com/uc?export=download&id=1b6uUewXffILu9u-emyvt9lY1HdMHrv-R";
 
     // =========================
     // Local storage keys
@@ -1306,34 +1306,40 @@
         if (!res.ok) throw new Error("HTTP " + res.status);
         const text = await res.text();
 
-        const lines = text.trim().split("\n");
-        const header = lines[0].split("\t").map(safeText);
+        const lines = text.trim().split(/\r?\n/).filter(Boolean);
+        const delimiter = lines[0].includes("\t") ? "\t" : (lines[0].includes(";") ? ";" : ",");
+        const header = lines[0].split(delimiter).map(safeText);
         const dataLines = lines.slice(1);
 
         const idx = {};
         header.forEach((h, i) => idx[h.toLowerCase()] = i);
 
-        const iArticle = (idx["article"] ?? 0);
+        const iArticle = (idx["article"] ?? 3);
         const iWord = (idx["word"] ?? 1);
-        const iPlural = (idx["plural"] ?? 2);
-        const iExample = (idx["example"] ?? 3);
-        const iTrans = (idx["italian"] ?? idx["translation"] ?? 4);
-        const iLevel = (idx["level"] ?? (header.length - 1));
+        const iPlural = (idx["plural"] ?? -1);
+        const iPos = (idx["pos"] ?? 2);
+        const iTrans = (idx["english"] ?? idx["translation"] ?? 4);
+        const iLevel = (idx["level"] ?? 0);
+
+        const isNoun = (value) => {
+          const pos = safeText(value).toLowerCase();
+          return /noun|nomen|substantiv|subst|nome/.test(pos);
+        };
 
         rawData = dataLines
-          .map(line => line.split("\t"))
+          .map(line => line.split(delimiter))
           .map(cols => {
             const article = safeText(cols[iArticle]);
             const word = safeText(cols[iWord]);
-            if (!word || !article) return null;
+            const pos = safeText(cols[iPos]);
+            if (!word || !article || !isNoun(pos)) return null;
 
-            const plural = safeText(cols[iPlural]);
-            const example = safeText(cols[iExample]);
+            const plural = iPlural >= 0 ? safeText(cols[iPlural]) : "";
             const translation = safeText(cols[iTrans]);
             const level = parseLevel(cols[iLevel]);
 
             const key = `${article}|${word}`.toLowerCase();
-            return { key, level, article, word, plural, example, translation };
+            return { key, level, article, word, plural, translation };
           })
           .filter(Boolean);
 
@@ -1449,7 +1455,6 @@
 
       const rows = [];
       if (showPlural) rows.push(["Plural:", item.plural]);
-      rows.push(["Example:", item.example]);
 
       if (!rows.length){
         extraEl.textContent = "—";
