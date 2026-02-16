@@ -164,6 +164,9 @@
       border-color: var(--start);
       color: #fff;
       box-shadow: 0 6px 18px rgba(22,163,74,0.22);
+      min-width: 255px;
+      padding: 13px 20px;
+      font-size: 1.04rem;
     }
     .btnStart:hover{
       background: var(--startHover);
@@ -229,6 +232,13 @@
       font-weight: 900;
     }
 
+    .heroToolsBox{
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #fff;
+    }
     .heroActions{
       display: inline-flex;
       gap: 10px;
@@ -247,6 +257,8 @@
       background: #fff;
       cursor: pointer;
       font-weight: 900;
+      font-size: 0.92rem;
+      line-height: 1;
       box-shadow: 0 2px 10px rgba(0,0,0,0.04);
       white-space: nowrap;
     }
@@ -258,6 +270,10 @@
     .iconBtn:focus-visible{
       outline: 3px solid var(--focus);
       outline-offset: 2px;
+    }
+    .iconBtnGrammar{
+      text-decoration: none;
+      font-size: inherit;
     }
 
     .heroSub{
@@ -373,8 +389,30 @@
     }
     .levelBtn:active{ transform: translateY(1px); }
     .levelBtn[aria-pressed="true"]{
-      border-color: rgba(22,155,215,0.55);
-      box-shadow: 0 8px 22px rgba(22,155,215,0.18);
+      border-color: var(--primary);
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 8px 22px rgba(22,155,215,0.28);
+    }
+    .levelBtn.locked{
+      background: #eef1f5;
+      color: #64748b;
+      border-style: dashed;
+      opacity: .95;
+    }
+    .practiceLockRow{ margin-top: 2px; }
+    .lockSwitch{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .switchDot{
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      background: #cbd5e1;
+      border: 1px solid #94a3b8;
+      box-shadow: inset 0 0 0 2px #eef2f7;
     }
     .levelBtn:focus-visible{
       outline: 3px solid var(--focus);
@@ -565,16 +603,24 @@
 
     footer{
       margin-top: 18px;
+      border-top: 1px solid var(--border);
       text-align: center;
-      color: #888;
-      font-size: 0.85rem;
+      color: #64748b;
+      font-size: 0.9rem;
+      padding-top: 14px;
     }
     .footerRow{
       display: inline-flex;
-      gap: 10px;
+      flex-direction: column;
+      gap: 8px;
       align-items: center;
       justify-content: center;
-      flex-wrap: wrap;
+      padding-bottom: 12px;
+    }
+    .footerRow a{
+      color: #111827;
+      text-decoration: none;
+      font-weight: 800;
     }
 
     /* Settings panel */
@@ -633,7 +679,7 @@
       background: #fff;
     }
 
-    /* How it works modal */
+    /* How to play modal */
     .howModal{
       display: none;
       position: fixed;
@@ -718,8 +764,7 @@
 
       <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
         <a class="btn" href="index.html" aria-label="Go to home">Home</a>
-        <a class="btn" href="artikelregeln.html" aria-label="Open rules">Rules</a>
-      </div>
+              </div>
     </div>
   </header>
 
@@ -727,15 +772,19 @@
     <section class="hero" aria-label="Game intro">
       <div class="heroTitleRow">
         <h2 class="heroTitle">Choose the correct article.</h2>
+      </div>
+
+      <div class="heroToolsBox" aria-label="Quick actions">
         <div class="heroActions">
-          <button class="iconBtn" id="howBtn" type="button" aria-label="How it works">How it works</button>
+          <a class="iconBtn iconBtnGrammar" href="artikelregeln.html" aria-label="Open grammar rules">Grammar</a>
+          <button class="iconBtn" id="howBtn" type="button" aria-label="Game rules">Game rules</button>
           <button class="iconBtn" id="settingsBtn" type="button" aria-label="Open settings">Settings</button>
         </div>
       </div>
 
       <p class="heroSub">
         Tap <span lang="de">der</span>, <span lang="de">die</span> or <span lang="de">das</span>.
-        Instant feedback — the next word loads automatically (<span id="delayLabel">1</span> second<span id="delayPlural">s</span>).
+        Instant feedback — the next word loads automatically.
       </p>
     </section>
 
@@ -745,7 +794,7 @@
         <div class="cardHead">
           <div class="cardHeadLeft">
             <p class="title">Game</p>
-            <p class="subtitle">Fast practice • 1–3 minutes</p>
+            
           </div>
 
           <div class="hud" aria-label="Progress">
@@ -769,29 +818,34 @@
 
               <button class="levelBtn" type="button" id="lvlA1" aria-pressed="true" aria-label="Select A1">A1</button>
 
-              <button class="levelBtn" type="button" id="lvlA2" aria-pressed="false" aria-label="Select A2 (includes A1)">
-                A2 <span class="includeTag" title="Includes A1">A1+</span>
-              </button>
+              <button class="levelBtn" type="button" id="lvlA2" aria-pressed="false" aria-label="Select A2">A2</button>
 
               <!-- Locked levels: use same selector as Index script -->
-              <div class="levelBtn gameCard locked" role="button" tabindex="0" data-plus="B1 level" aria-label="B1 Plus (locked)">
-                B1 <span class="plusTag">Plus</span>
+              <div class="levelBtn locked gameCard" role="button" tabindex="0" data-plus="B1 level" aria-label="B1 Plus (locked)">
+                B1
               </div>
 
-              <div class="levelBtn gameCard locked" role="button" tabindex="0" data-plus="B2 level" aria-label="B2 Plus (locked)">
-                B2 <span class="plusTag">Plus</span>
+              <div class="levelBtn locked gameCard" role="button" tabindex="0" data-plus="B2 level" aria-label="B2 Plus (locked)">
+                B2
+              </div>
+
+              <div class="levelBtn locked gameCard" role="button" tabindex="0" data-plus="C1 level" aria-label="C1 Plus (locked)">
+                C1
               </div>
             </div>
 
-            <div class="miniNote" id="levelHint">A2 automatically includes A1 words for more variety.</div>
+            <div class="miniNote" id="levelHint">Tip: you can activate A1 and A2 together for a combined training set.</div>
+
+            <div class="levelRow practiceLockRow" aria-label="Practice mistakes">
+              <div class="levelLabel">Practice mistake:</div>
+              <div class="levelBtn locked gameCard lockSwitch" role="button" tabindex="0" data-plus="Fehler üben (Practice mistakes)" aria-label="Practice mistakes activate (locked)">
+                <span class="switchDot" aria-hidden="true"></span>
+                <span>Activate</span>
+              </div>
+            </div>
 
             <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-              <button class="btn btnStart" id="startBtn" type="button">Start</button>
-
-              <!-- Plus-only feature entry point -->
-              <div class="btn gameCard locked" role="button" tabindex="0" data-plus="Fehler üben (Practice mistakes)">
-                Practice mistakes <span class="plusTag">Plus</span>
-              </div>
+              <button class="btn btnStart" id="startBtn" type="button">Start the game now!</button>
             </div>
 
             <div style="height:1px; background: var(--border); margin: 14px 0;"></div>
@@ -883,8 +937,10 @@
 
     <footer>
       <div class="footerRow">
-        <span>DeutschBuddy • Ver. 1.0</span>
-        <a class="btn btnSmall" href="ueber-mich.html" aria-label="About">About</a>
+        <div>DeutschBuddy • Ver. 1.0</div>
+        <a href="datenschutz.html">Datenschutz</a>
+        <a href="impressum.html">Impressum</a>
+        <a href="ueber-mich.html" aria-label="About">About</a>
       </div>
     </footer>
   </div>
@@ -940,11 +996,11 @@
     </div>
   </div>
 
-  <!-- How it works modal -->
+  <!-- How to play modal -->
   <div class="howModal" id="howModal" aria-hidden="true">
     <div class="settingsCard" role="dialog" aria-modal="true" aria-labelledby="howTitle">
       <div class="settingsHead">
-        <h3 id="howTitle">How it works</h3>
+        <h3 id="howTitle">Game rules</h3>
         <button class="closeBtn" id="closeHow" aria-label="Close how it works">✕</button>
       </div>
       <div class="settingsBody">
@@ -955,6 +1011,9 @@
           <li>You’ll see a German noun — tap the correct article.</li>
           <li>Enable <strong>translation</strong> or <strong>plural</strong> in Settings.</li>
           <li>Default stop rule is <strong>5 mistakes</strong> (change to infinite if you want).</li>
+          <li>HUD icons explained: ⭐ <strong>Score</strong>, 🔥 <strong>Streak</strong>, 📊 <strong>Accuracy</strong>, ❌ <strong>Mistakes</strong>.</li>
+          <li><strong>Score</strong> increases with correct answers, while <strong>Streak</strong> tracks consecutive correct answers.</li>
+          <li>Each level has around <strong>1000 words</strong> and includes the key words you need to study.</li>
           <li>Your progress is stored locally on this device (no account).</li>
         </ul>
         <div style="display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap;">
@@ -1018,7 +1077,7 @@
     let streak = 0;
     let score = 0;
 
-    let selectedLevel = "A1";
+    let selectedLevels = ["A1"];
     let showTranslation = false;
     let showPlural = true;
 
@@ -1051,7 +1110,7 @@
 
     function parseLevel(s){
       const v = safeText(s).toUpperCase();
-      if (v === "A1" || v === "A2" || v === "B1" || v === "B2") return v;
+      if (v === "A1" || v === "A2" || v === "B1" || v === "B2" || v === "C1") return v;
       return "";
     }
 
@@ -1129,9 +1188,6 @@
     const dailyStreakEl = document.getElementById("dailyStreak");
     const deviceStatsLine = document.getElementById("deviceStatsLine");
 
-    // hero delay label
-    const delayLabel = document.getElementById("delayLabel");
-    const delayPlural = document.getElementById("delayPlural");
 
     // Settings UI
     const settingsBtn = document.getElementById("settingsBtn");
@@ -1146,7 +1202,7 @@
     const autoSecondsSel = document.getElementById("autoSeconds");
     const maxErrorsSel = document.getElementById("maxErrors");
 
-    // How it works UI
+    // How to play UI
     const howBtn = document.getElementById("howBtn");
     const howModal = document.getElementById("howModal");
     const closeHow = document.getElementById("closeHow");
@@ -1158,7 +1214,12 @@
     function loadPrefsToState(){
       const p = getPrefs();
 
-      selectedLevel = (p.level === "A2") ? "A2" : "A1";
+      if (Array.isArray(p.levels)) {
+        selectedLevels = p.levels.filter(l => l === "A1" || l === "A2");
+      } else {
+        selectedLevels = (p.level === "A2") ? ["A2"] : ["A1"];
+      }
+      if (!selectedLevels.length) selectedLevels = ["A1"];
       showTranslation = !!p.showTranslation;
       showPlural = (p.showPlural !== undefined) ? !!p.showPlural : true;
 
@@ -1172,7 +1233,7 @@
 
     function saveStateToPrefs(){
       setPrefs({
-        level: selectedLevel,
+        levels: selectedLevels,
         showTranslation,
         showPlural,
         autoEnabled,
@@ -1189,17 +1250,20 @@
       maxErrorsSel.value = String(maxErrors);
     }
 
-    function syncDelayLabel(){
-      delayLabel.textContent = String(autoSeconds);
-      delayPlural.textContent = (autoSeconds === 1) ? "" : "s";
-    }
-
     function syncLevelButtons(){
-      lvlA1Btn.setAttribute("aria-pressed", selectedLevel === "A1" ? "true" : "false");
-      lvlA2Btn.setAttribute("aria-pressed", selectedLevel === "A2" ? "true" : "false");
-      levelHint.textContent = (selectedLevel === "A2")
-        ? "A2 automatically includes A1 words for more variety."
-        : "A1 uses beginner words only.";
+      const hasA1 = selectedLevels.includes("A1");
+      const hasA2 = selectedLevels.includes("A2");
+
+      lvlA1Btn.setAttribute("aria-pressed", hasA1 ? "true" : "false");
+      lvlA2Btn.setAttribute("aria-pressed", hasA2 ? "true" : "false");
+
+      if (hasA1 && hasA2) {
+        levelHint.textContent = "A1 + A2 active: mixed beginner/intermediate pool.";
+      } else if (hasA2) {
+        levelHint.textContent = "A2 active: intermediate words only.";
+      } else {
+        levelHint.textContent = "A1 active: beginner words only.";
+      }
     }
 
     // =========================
@@ -1282,11 +1346,11 @@
     }
 
     function buildPool(){
-      if (selectedLevel === "A2"){
-        pool = rawData.filter(it => it.level === "A1" || it.level === "A2" || !it.level);
-      } else {
-        pool = rawData.filter(it => it.level === "A1" || !it.level);
-      }
+      const levelSet = new Set(selectedLevels);
+      pool = rawData.filter(it => {
+        if (!it.level) return levelSet.has("A1");
+        return levelSet.has(it.level);
+      });
       shuffle(pool);
       currentIndex = 0;
     }
@@ -1611,18 +1675,24 @@
     }
 
     // =========================
-    // Level selection (no Mix)
+    // Level selection (A1/A2 multi-select)
     // =========================
-    lvlA1Btn.addEventListener("click", () => {
-      selectedLevel = "A1";
+    function toggleBaseLevel(level){
+      const hasLevel = selectedLevels.includes(level);
+      if (hasLevel && selectedLevels.length === 1) return;
+
+      if (hasLevel) {
+        selectedLevels = selectedLevels.filter(l => l !== level);
+      } else {
+        selectedLevels = [...selectedLevels, level].sort();
+      }
+
       syncLevelButtons();
       saveStateToPrefs();
-    });
-    lvlA2Btn.addEventListener("click", () => {
-      selectedLevel = "A2";
-      syncLevelButtons();
-      saveStateToPrefs();
-    });
+    }
+
+    lvlA1Btn.addEventListener("click", () => toggleBaseLevel("A1"));
+    lvlA2Btn.addEventListener("click", () => toggleBaseLevel("A2"));
 
     startBtn.addEventListener("click", startGame);
 
@@ -1690,7 +1760,6 @@
       maxErrors = (me === 0 || me === 10 || me === 5) ? me : 5;
 
       saveStateToPrefs();
-      syncDelayLabel();
       updateHud();
 
       // update meta line immediately if playing
@@ -1709,7 +1778,7 @@
     });
 
     // =========================
-    // How it works modal
+    // How to play modal
     // =========================
     function openHowModal(){
       howModal.style.display = "flex";
@@ -1742,7 +1811,6 @@
     (function init(){
       loadPrefsToState();
       syncLevelButtons();
-      syncDelayLabel();
       updateHud();
       updateDeviceStatsUI();
       syncPrefsToSettingsUI();

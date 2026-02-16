@@ -420,24 +420,18 @@
       display:flex;
       flex-direction:column;
       align-items:center;
-      gap: 12px;
+      gap: 8px;
       color: var(--muted);
       text-align:center;
     }
     .footerBtns{
       display:flex;
-      gap:10px;
-      flex-wrap:wrap;
+      flex-direction:column;
+      gap:8px;
+      align-items:center;
       justify-content:center;
     }
     .footerBtn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: 1px solid rgba(229,231,235,.95);
-      background:#fff;
       font-weight: 900;
       text-decoration:none;
       color:#111827;
@@ -631,6 +625,19 @@
               </div>
               <div class="ctaPill">Play</div>
             </a>
+            <a class="gameCard" href="blitztranslate.html" style="text-decoration:none; color:inherit;" aria-label="Start BlitzTranslate">
+              <div class="left">
+                <div class="gIcon" aria-hidden="true">
+                  <img src="picdeu.png" alt="">
+                </div>
+                <div class="gText">
+                  <p class="gTitle">BlitzTranslate</p>
+                  <p class="gSub">3-choice DE → EN</p>
+                </div>
+              </div>
+              <div class="ctaPill">Play</div>
+            </a>
+
 
             <!-- PLUS / COMING SOON -->
             <div class="gameCard locked" data-plus="Plural Trainer" role="button" tabindex="0" aria-label="Plural Trainer (Coming soon)">
@@ -710,6 +717,7 @@
       <div class="footerBtns">
         <a class="footerBtn" href="datenschutz.html">Datenschutz</a>
         <a class="footerBtn" href="impressum.html">Impressum</a>
+        <a class="footerBtn" href="ueber-mich.html">About</a>
       </div>
     </div>
   </footer>
