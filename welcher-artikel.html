@@ -960,11 +960,6 @@
         </div>
 
         <div class="row">
-          <label for="showPlural">Show plural</label>
-          <input id="showPlural" type="checkbox" />
-        </div>
-
-        <div class="row">
           <label for="autoAdvance">Auto-advance</label>
           <input id="autoAdvance" type="checkbox" />
           <div class="hint">Loads the next word automatically after the delay.</div>
@@ -1080,7 +1075,7 @@
 
     let selectedLevels = ["A1"];
     let showTranslation = false;
-    let showPlural = true;
+    let showPlural = false;
 
     let autoEnabled = true;
     let autoSeconds = 1;     // default 1 second, options: 1 or 3
@@ -1254,7 +1249,6 @@ async function loadSheetRows(url){
     const resetDeviceStatsBtn = document.getElementById("resetDeviceStats");
 
     const showTranslationCb = document.getElementById("showTranslation");
-    const showPluralCb = document.getElementById("showPlural");
     const autoAdvanceCb = document.getElementById("autoAdvance");
     const autoSecondsSel = document.getElementById("autoSeconds");
     const maxErrorsSel = document.getElementById("maxErrors");
@@ -1278,7 +1272,7 @@ async function loadSheetRows(url){
       }
       if (!selectedLevels.length) selectedLevels = ["A1"];
       showTranslation = !!p.showTranslation;
-      showPlural = (p.showPlural !== undefined) ? !!p.showPlural : true;
+      showPlural = false;
 
       autoEnabled = (p.autoEnabled !== undefined) ? !!p.autoEnabled : true;
       autoSeconds = (p.autoSeconds === 3) ? 3 : 1;
@@ -1292,7 +1286,6 @@ async function loadSheetRows(url){
       setPrefs({
         levels: selectedLevels,
         showTranslation,
-        showPlural,
         autoEnabled,
         autoSeconds,
         maxErrors
@@ -1301,7 +1294,6 @@ async function loadSheetRows(url){
 
     function syncPrefsToSettingsUI(){
       showTranslationCb.checked = showTranslation;
-      showPluralCb.checked = showPlural;
       autoAdvanceCb.checked = autoEnabled;
       autoSecondsSel.value = String(autoSeconds);
       maxErrorsSel.value = String(maxErrors);
@@ -1507,7 +1499,6 @@ async function loadSheetRows(url){
       extraEl.innerHTML = "";
 
       const rows = [];
-      if (showPlural) rows.push(["Plural:", item.plural]);
 
       if (!rows.length){
         extraEl.textContent = "—";
@@ -1809,7 +1800,7 @@ async function loadSheetRows(url){
 
     saveSettingsBtn.addEventListener("click", () => {
       showTranslation = showTranslationCb.checked;
-      showPlural = showPluralCb.checked;
+      showPlural = false;
       autoEnabled = autoAdvanceCb.checked;
 
       autoSeconds = (parseInt(autoSecondsSel.value, 10) === 3) ? 3 : 1;

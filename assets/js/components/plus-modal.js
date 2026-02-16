@@ -1,6 +1,7 @@
 (function initPlusModalComponent(global){
   const LS_VALID_CODES = "db_plus_valid_codes_v1";
   const LS_UNLOCKS = "db_plus_unlocks_v1";
+  const ALL_ACCESS_KEY = "__all_plus__";
 
   function resolveElements(options){
     const root = options && options.root ? options.root : document;
@@ -27,7 +28,7 @@
   function setValidCodes(v){ localStorage.setItem(LS_VALID_CODES, JSON.stringify(v)); }
 
   function parseSheet(text){
-    const lines = text.trim().split("\n");
+    const lines = text.trim().split(/\r?\n/).filter(Boolean);
     if (!lines.length) return [];
     const delimiter = lines[0].includes("\t") ? "\t" : ",";
     const header = lines[0].split(delimiter).map(h => h.trim().toLowerCase());
@@ -41,6 +42,31 @@
       codeValue: iCodeVal >= 0 ? (cols[iCodeVal] || "").trim() : "",
       assignment: iAssign >= 0 ? (cols[iAssign] || "").trim() : ""
     })).filter(r => r.codeValue);
+  }
+
+
+  function hasAllAccess(){
+    const unlocks = getUnlocks();
+    return !!unlocks[ALL_ACCESS_KEY];
+  }
+
+  function unlockAllPlus(){
+    const unlocks = getUnlocks();
+    unlocks[ALL_ACCESS_KEY] = true;
+    setUnlocks(unlocks);
+  }
+
+  function applyUnlockState(cardSelector){
+    if (!hasAllAccess()) return;
+    document.querySelectorAll(cardSelector).forEach(card => {
+      card.classList.remove("locked");
+      card.classList.remove("gameCard");
+      card.removeAttribute("data-plus");
+      card.removeAttribute("tabindex");
+      card.removeAttribute("role");
+      card.classList.add("plusUnlocked");
+      card.setAttribute("title", "Plus unlocked");
+    });
   }
 
   async function validateCodeWithSheet({ codeSheetUrl, codeInput, moduleName }){
@@ -58,12 +84,6 @@
       const match = rows.find(r => r.codeValue.trim().toLowerCase() === normalized);
       if (!match) return { ok: false, message: "Invalid code." };
 
-      const assignment = (match.assignment || "").toLowerCase();
-      const module = (moduleName || "").toLowerCase();
-      if (assignment && module && assignment !== module) {
-        return { ok: false, message: "This code is assigned to a different feature." };
-      }
-
       return { ok: true, message: "Code accepted." };
     } catch {
       return { ok: false, message: "Code check failed. Please try again." };
@@ -73,12 +93,14 @@
   function initPlusModal(options){
     const formUrl = (options && options.formUrl) || "https://docs.google.com/forms/d/e/1FAIpQLSd7aZ8okTdi2sr08p8l8HZ2r6oH09BsF3L_mJQtSc8q0nFRdw/viewform?usp=header";
     const cardSelector = (options && options.cardSelector) || ".gameCard.locked";
-    const codeSheetUrl = (options && options.codeSheetUrl) || global.DEUTSCHBUDDY_CODE_SHEET_URL || "";
+    const codeSheetUrl = (options && options.codeSheetUrl) || global.DEUTSCHBUDDY_CODE_SHEET_URL || "https://docs.google.com/spreadsheets/d/1uvv-lBznfYWJoIOMEwAfxaj7jVPzrYKtC-9T2PjJV-g/export?format=tsv&gid=0";
 
     const { modal, closeModalBtn, okBtn, plusText, waitlistBtn, modalActions } = resolveElements(options);
     if (!modal || !closeModalBtn || !okBtn || !plusText || !waitlistBtn) return;
 
     let currentModuleName = "This game";
+
+    applyUnlockState(cardSelector);
 
     function ensureCodeButton(){
       if (!modalActions) return null;
@@ -113,9 +135,10 @@
 
     document.querySelectorAll(cardSelector).forEach(card => {
       const name = card.getAttribute("data-plus") || "This game";
-      card.addEventListener("click", () => openModal(name));
+      card.addEventListener("click", (e) => { if (hasAllAccess()) return; e.preventDefault(); openModal(name); });
       card.addEventListener("keydown", (e) => {
         if (e.key === "Enter" || e.key === " ") {
+          if (hasAllAccess()) return;
           e.preventDefault();
           openModal(name);
         }
@@ -141,11 +164,10 @@
           setValidCodes(codes);
         }
 
-        const unlocks = getUnlocks();
-        unlocks[currentModuleName] = true;
-        setUnlocks(unlocks);
+        unlockAllPlus();
+        applyUnlockState(cardSelector);
 
-        alert("Code accepted. Feature access enabled for this browser.");
+        alert("Code accepted. All Plus features are now unlocked on this browser.");
         closeModal();
       });
     }
