@@ -286,6 +286,28 @@
     function levelRank(l){return ["A1","A2","B1","B2","C1"].indexOf(l||"A1");}
     function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}}
 
+
+    async function fetchTextFromUrl(url){
+      const cacheBust = (u)=>u+(u.includes('?')?'&':'?')+"t="+Date.now();
+      const proxies = [
+        u => cacheBust(u),
+        u => `https://api.allorigins.win/raw?url=${encodeURIComponent(cacheBust(u))}`,
+        u => `https://r.jina.ai/http://${cacheBust(u).replace(/^https?:\/\//,'')}`
+      ];
+
+      let lastErr = null;
+      for(const build of proxies){
+        try{
+          const res = await fetch(build(url));
+          if(!res.ok) throw new Error(`HTTP ${res.status}`);
+          const text = await res.text();
+          if(!text || /^<!doctype html>/i.test(text.trim())) throw new Error('Non-TSV response');
+          return text;
+        }catch(e){ lastErr = e; }
+      }
+      throw lastErr || new Error('Fetch failed');
+    }
+
     function getPrefs(){try{return JSON.parse(localStorage.getItem(LS_PREFS)||"{}")}catch{return {}}}
     function setPrefs(v){localStorage.setItem(LS_PREFS, JSON.stringify(v));}
     function getStats(){try{return JSON.parse(localStorage.getItem(LS_STATS)||"{}")}catch{return {}}}
@@ -318,42 +340,54 @@
     }
 
     async function loadData(){
-      const res=await fetch(dataUrl+(dataUrl.includes('?')?'&':'?')+"t="+Date.now());
-      const txt=await res.text();
-      const lines=txt.trim().split(/\r?\n/).filter(Boolean);
-      const delimiter = lines[0].includes('	') ? '	' : (lines[0].includes(';') ? ';' : ',');
-      const header=lines[0].split(delimiter).map(h=>safe(h).toLowerCase());
-      const idx=(...names)=>names.map(n=>header.indexOf(n)).find(i=>i>=0);
-      const iWord=idx('word','singular');
-      const iTrans=idx('english','translation','singular translation');
-      const iLevel=idx('level');
-      const iPos=idx('pos','category');
-      rawData=lines.slice(1).map(line=>line.split(delimiter)).map(cols=>{
-        const singular=safe(cols[iWord]);
-        const translation=safe(cols[iTrans]);
-        const pos=safe(cols[iPos]);
-        if(!singular || !translation) return null;
-        const level=parseLevel(cols[iLevel]);
-        const category = pos || 'Unknown';
-        return {singular, translation, level, category, key:`${singular}|${translation}|${category}`.toLowerCase()};
-      }).filter(Boolean);
+      try{
+        const txt = await fetchTextFromUrl(dataUrl);
+        const lines=txt.trim().split(/\r?\n/).filter(Boolean);
+        if(!lines.length) throw new Error('Empty dataset');
+        const delimiter = lines[0].includes('\t') ? '\t' : (lines[0].includes(';') ? ';' : ',');
+        const header=lines[0].split(delimiter).map(h=>safe(h).toLowerCase());
+        const idx=(...names)=>names.map(n=>header.indexOf(n)).find(i=>i>=0);
+        const iWord=idx('word','singular');
+        const iTrans=idx('english','translation','singular translation');
+        const iLevel=idx('level');
+        const iPos=idx('pos','category');
+        rawData=lines.slice(1).map(line=>line.split(delimiter)).map(cols=>{
+          const singular=safe(cols[iWord]);
+          const translation=safe(cols[iTrans]);
+          const pos=safe(cols[iPos]);
+          if(!singular || !translation) return null;
+          const level=parseLevel(cols[iLevel]);
+          const category = pos || 'Unknown';
+          return {singular, translation, level, category, key:`${singular}|${translation}|${category}`.toLowerCase()};
+        }).filter(Boolean);
 
-      const categories=[...new Set(rawData.map(r=>r.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
-      categorySel.innerHTML='';
-      const allOpt=document.createElement('option');
-      allOpt.value='All';
-      allOpt.textContent='All';
-      categorySel.appendChild(allOpt);
-      categories.forEach(cat=>{
-        const opt=document.createElement('option');
-        opt.value=cat;
-        opt.textContent=cat;
-        categorySel.appendChild(opt);
-      });
+        if(!rawData.length) throw new Error('No valid rows');
 
-      if(!categories.includes(selectedCategory)) selectedCategory='All';
-      categorySel.value=selectedCategory;
-      savePrefs();
+        const categories=[...new Set(rawData.map(r=>r.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+        categorySel.innerHTML='';
+        const allOpt=document.createElement('option');
+        allOpt.value='All';
+        allOpt.textContent='All';
+        categorySel.appendChild(allOpt);
+        categories.forEach(cat=>{
+          const opt=document.createElement('option');
+          opt.value=cat;
+          opt.textContent=cat;
+          categorySel.appendChild(opt);
+        });
+
+        if(!categories.includes(selectedCategory)) selectedCategory='All';
+        categorySel.value=selectedCategory;
+        savePrefs();
+      }catch(e){
+        console.error(e);
+        rawData=[];
+        categorySel.innerHTML='<option value="All">All</option>';
+        categorySel.value='All';
+        selectedCategory='All';
+        wordEl.textContent='Loading failed 😕';
+        resultEl.textContent='Could not load the new word list. Check sharing/CORS and retry.';
+      }
     }
 
     function buildPool(){
