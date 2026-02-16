@@ -1096,68 +1096,48 @@
     function safeText(v){ return (v ?? "").toString().trim(); }
     function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
 
-async function fetchTextFromUrl(url){
-      function extractDriveFileId(v){
+async function loadSheetRows(url){
+      function extractSheetId(v){
         const u = String(v || "");
-        const m = u.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/) || u.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || u.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        const m = u.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/) || u.match(/[?&]id=([a-zA-Z0-9_-]+)/);
         return m ? m[1] : "";
       }
 
       function buildSourceCandidates(v){
         const out = [v];
-        const id = extractDriveFileId(v);
+        const id = extractSheetId(v);
         if (id){
           out.push(
-            `https://docs.google.com/spreadsheets/d/${id}/export?format=tsv&gid=0`,
-            `https://docs.google.com/spreadsheets/d/e/${id}/pub?output=tsv`,
-            `https://drive.google.com/uc?export=download&id=${id}`,
-            `https://drive.google.com/uc?id=${id}&export=download`,
-            `https://drive.usercontent.google.com/download?id=${id}&export=download&confirm=t`
+            `https://docs.google.com/spreadsheets/d/${id}/export?format=xlsx&gid=0`,
+            `https://docs.google.com/spreadsheets/d/${id}/export?format=xlsx`
           );
         }
         return [...new Set(out.filter(Boolean))];
       }
 
-      function looksLikeHtml(text){
-        return /^\s*<!doctype html>/i.test(text || "") || /^\s*<html/i.test(text || "");
-      }
-
-      async function tryFetchText(v){
-        const res = await fetch(v);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const text = await res.text();
-        if (!text) throw new Error("Empty response");
-
-        if (looksLikeHtml(text)){
-          const dl = text.match(/"downloadUrl":"([^"]+)"/i);
-          if (dl && dl[1]){
-            const real = dl[1].replace(/\u003d/g, "=").replace(/\u0026/g, "&");
-            const r2 = await fetch(real);
-            if (!r2.ok) throw new Error(`HTTP ${r2.status}`);
-            const t2 = await r2.text();
-            if (!looksLikeHtml(t2) && t2.trim()) return t2;
-          }
-          throw new Error("Non-TSV response");
-        }
-        return text;
-      }
-
-      const cacheBust = (v)=>v+(v.includes("?")?"&":"?")+"t="+Date.now();
-      const sources = buildSourceCandidates(url);
-      const attempts = [];
-
-      for (const src of sources){
-        attempts.push(cacheBust(src));
-        attempts.push(`https://api.allorigins.win/raw?url=${encodeURIComponent(cacheBust(src))}`);
-        attempts.push(`https://r.jina.ai/http://${cacheBust(src).replace(/^https?:\/\//,"")}`);
+      if (!window.XLSX){
+        throw new Error("XLSX parser not available");
       }
 
       let lastErr = null;
-      for (const candidate of attempts){
-        try{ return await tryFetchText(candidate); }
-        catch(e){ lastErr = e; }
+      for (const base of buildSourceCandidates(url)){
+        try{
+          const req = base + (base.includes("?") ? "&" : "?") + "t=" + Date.now();
+          const res = await fetch(req);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const buf = await res.arrayBuffer();
+          const wb = XLSX.read(buf, { type: "array" });
+          const firstSheetName = wb.SheetNames && wb.SheetNames[0];
+          if (!firstSheetName) throw new Error("Workbook has no sheets");
+          const ws = wb.Sheets[firstSheetName];
+          const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: "" });
+          if (!rows || rows.length < 2) throw new Error("Workbook has no data rows");
+          return rows;
+        }catch(e){
+          lastErr = e;
+        }
       }
-      throw lastErr || new Error("Fetch failed");
+      throw lastErr || new Error("Failed to load sheet");
     }
 
     function shuffle(array){
@@ -1366,12 +1346,10 @@ async function fetchTextFromUrl(url){
     // =========================
     async function loadData(){
       try{
-        const text = await fetchTextFromUrl(dataUrl);
+        const rows = await loadSheetRows(dataUrl);
 
-        const lines = text.trim().split(/\r?\n/).filter(Boolean);
-        const delimiter = lines[0].includes("\t") ? "\t" : (lines[0].includes(";") ? ";" : ",");
-        const header = lines[0].split(delimiter).map(safeText);
-        const dataLines = lines.slice(1);
+        const header = rows[0].map(safeText);
+        const dataLines = rows.slice(1);
 
         const idx = {};
         header.forEach((h, i) => idx[h.toLowerCase()] = i);
@@ -1389,7 +1367,7 @@ async function fetchTextFromUrl(url){
         };
 
         rawData = dataLines
-          .map(line => line.split(delimiter))
+          .map(cols => cols)
           .map(cols => {
             const article = safeText(cols[iArticle]);
             const word = safeText(cols[iWord]);
@@ -1892,6 +1870,7 @@ async function fetchTextFromUrl(url){
     })();
   </script>
 
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="assets/js/components/plus-modal.js" defer></script>
   <script src="assets/js/pages/quiz-plus-modal-init.js" defer></script>
 </body>
