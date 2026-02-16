@@ -1051,12 +1051,13 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script>
     // =========================
     // Data source (TSV)
     // =========================
     const dataUrl =
-      "https://docs.google.com/spreadsheets/d/1eFtuKJWBKZaJvzVzdr6MkahBECxA3PTn/edit?usp=drive_link&ouid=112981731770462263160&rtpof=true&sd=true";
+      "https://docs.google.com/spreadsheets/d/1eFtuKJWBKZaJvzVzdr6MkahBECxA3PTn/export?format=xlsx&gid=0";
 
     // =========================
     // Local storage keys
@@ -1126,13 +1127,25 @@ async function loadSheetRows(url){
           const res = await fetch(req);
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const buf = await res.arrayBuffer();
-          const wb = XLSX.read(buf, { type: "array" });
-          const firstSheetName = wb.SheetNames && wb.SheetNames[0];
-          if (!firstSheetName) throw new Error("Workbook has no sheets");
-          const ws = wb.Sheets[firstSheetName];
-          const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: "" });
-          if (!rows || rows.length < 2) throw new Error("Workbook has no data rows");
-          return rows;
+
+          // Primary path: XLSX workbook
+          try{
+            const wb = XLSX.read(buf, { type: "array" });
+            const firstSheetName = wb.SheetNames && wb.SheetNames[0];
+            if (firstSheetName){
+              const ws = wb.Sheets[firstSheetName];
+              const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: "" });
+              if (rows && rows.length >= 2) return rows;
+            }
+          }catch{}
+
+          // Fallback path: plain text TSV/CSV response
+          const text = new TextDecoder("utf-8").decode(buf);
+          if (!text || /^\s*<!doctype html>/i.test(text) || /^\s*<html/i.test(text)) throw new Error("Non-tabular response");
+          const lines = text.trim().split(/\r?\n/).filter(Boolean);
+          if (lines.length < 2) throw new Error("Workbook has no data rows");
+          const delimiter = lines[0].includes("	") ? "	" : (lines[0].includes(";") ? ";" : ",");
+          return lines.map(line => line.split(delimiter));
         }catch(e){
           lastErr = e;
         }
@@ -1870,7 +1883,6 @@ async function loadSheetRows(url){
     })();
   </script>
 
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="assets/js/components/plus-modal.js" defer></script>
   <script src="assets/js/pages/quiz-plus-modal-init.js" defer></script>
 </body>
