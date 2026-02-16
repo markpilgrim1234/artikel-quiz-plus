@@ -65,6 +65,7 @@
     select{border:1px solid var(--border);border-radius:12px;padding:10px 12px;font-weight:800;background:#fff}
 
     .word{font-size:2.2rem;text-align:center;font-weight:900;margin:10px 0 14px;letter-spacing:.2px}
+    .questionLevel{margin:-4px 0 10px;text-align:left;color:var(--muted);font-size:.9rem;font-weight:800}
     .options{display:grid;gap:10px}
     .options button{width:100%;padding:1rem;font-size:1.02rem;border:1px solid var(--border);border-radius:12px;cursor:pointer;background:#fff;font-weight:900;text-align:left;transition:transform .05s ease,filter .2s ease}
     .options button:hover{filter:brightness(.99)}
@@ -170,6 +171,7 @@
 
           <div id="playArea" style="display:none;">
             <div class="word" id="word">Loading…</div>
+            <div class="questionLevel" id="questionLevel"></div>
             <div class="options" id="options" aria-label="Answer options"></div>
             <div class="result" id="result" aria-live="polite"></div>
             <div class="finish" id="finishBox">
@@ -280,7 +282,7 @@
     const lvlA1Btn=document.getElementById('lvlA1'), lvlA2Btn=document.getElementById('lvlA2'), lvlB1Btn=document.getElementById('lvlB1'), lvlB2Btn=document.getElementById('lvlB2'), lvlC1Btn=document.getElementById('lvlC1'), levelHint=document.getElementById('levelHint');
     const modeSel=document.getElementById('modeSel'), delaySel=document.getElementById('delaySel'), categorySel=document.getElementById('categorySel');
     const startBtn=document.getElementById('startBtn'), setupEl=document.getElementById('setup'), playArea=document.getElementById('playArea');
-    const wordEl=document.getElementById('word'), optionsEl=document.getElementById('options'), resultEl=document.getElementById('result');
+    const wordEl=document.getElementById('word'), questionLevelEl=document.getElementById('questionLevel'), optionsEl=document.getElementById('options'), resultEl=document.getElementById('result');
     const hudScore=document.getElementById('hudScore'), hudStreak=document.getElementById('hudStreak'), hudAcc=document.getElementById('hudAcc'), hudMistakes=document.getElementById('hudMistakes'), hudTimer=document.getElementById('hudTimer');
     const finishBox=document.getElementById('finishBox'), finishSummary=document.getElementById('finishSummary'), deviceStatsLine=document.getElementById('deviceStatsLine');
     const historyBody=document.getElementById('historyBody'), answersSummary=document.getElementById('answersSummary');
@@ -526,10 +528,11 @@ function stopGameFlow(){
 
 function showQuestion(){
       if(!gameActive) return;
-      if(!pool.length){ wordEl.textContent='No words available.'; return; }
-      current=pickPrompt(); if(!current){ wordEl.textContent='No words available.'; return; }
+      if(!pool.length){ wordEl.textContent='No words available.'; questionLevelEl.textContent=''; return; }
+      current=pickPrompt(); if(!current){ wordEl.textContent='No words available.'; questionLevelEl.textContent=''; return; }
       recentQueue.push(current.key); if(recentQueue.length>30) recentQueue=recentQueue.slice(-30); setRecent(recentQueue);
       wordEl.textContent=current.singular;
+      questionLevelEl.textContent = current.level ? `Level: ${current.level}` : '';
       const opts=[current.translation, ...distractors(current)].filter(Boolean);
       const unique=[...new Set(opts)].slice(0,3); while(unique.length<3) unique.push('—'); shuffle(unique);
       optionsEl.innerHTML=''; resultEl.textContent=''; inputLocked=false;

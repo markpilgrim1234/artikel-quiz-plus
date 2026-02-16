@@ -1179,6 +1179,22 @@ async function loadSheetRows(url){
     }
     function setMistakes(obj){ localStorage.setItem(LS_MISTAKES, JSON.stringify(obj)); }
 
+    function hasPlusAccess(){
+      try {
+        const unlocks = JSON.parse(sessionStorage.getItem("db_plus_unlocks_v1") || "{}");
+        return !!unlocks.__all_plus__;
+      } catch {
+        return false;
+      }
+    }
+
+    function normalizeLevelsForAccess(){
+      if (!hasPlusAccess()) {
+        selectedLevels = ["A1"];
+        practiceMistakesOnly = false;
+      }
+    }
+
     function updateDailyStreak(){
       const stats = getStats();
       const today = todayISO();
@@ -1270,6 +1286,7 @@ async function loadSheetRows(url){
       }
       if (!selectedLevels.length) selectedLevels = ["A1"];
       practiceMistakesOnly = !!p.practiceMistakesOnly;
+      normalizeLevelsForAccess();
       showTranslation = !!p.showTranslation;
       showPlural = false;
 
@@ -1411,6 +1428,7 @@ async function loadSheetRows(url){
     }
 
     function buildPool(){
+      normalizeLevelsForAccess();
       const levelSet = new Set(selectedLevels);
       const mistakes = practiceMistakesOnly ? getMistakes() : null;
       const source = practiceMistakesOnly
