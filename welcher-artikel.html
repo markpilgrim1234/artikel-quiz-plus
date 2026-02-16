@@ -618,7 +618,7 @@
       padding-bottom: 12px;
     }
     .footerRow a{
-      color: #111827;
+      color: #6b7280;
       text-decoration: none;
       font-weight: 800;
     }
@@ -771,8 +771,13 @@
   <div class="wrap">
     <section class="hero" aria-label="Game intro">
       <div class="heroTitleRow">
-        <h2 class="heroTitle">Choose the correct article.</h2>
+        <h2 class="heroTitle">Welcher Artikel?</h2>
       </div>
+
+      <p class="heroSub">
+        Tap <span lang="de">der</span>, <span lang="de">die</span> or <span lang="de">das</span>.
+        Instant feedback — the next word loads automatically.
+      </p>
 
       <div class="heroToolsBox" aria-label="Quick actions">
         <div class="heroActions">
@@ -781,11 +786,6 @@
           <button class="iconBtn" id="settingsBtn" type="button" aria-label="Open settings">Settings</button>
         </div>
       </div>
-
-      <p class="heroSub">
-        Tap <span lang="de">der</span>, <span lang="de">die</span> or <span lang="de">das</span>.
-        Instant feedback — the next word loads automatically.
-      </p>
     </section>
 
     <div class="grid">
@@ -937,7 +937,7 @@
 
     <footer>
       <div class="footerRow">
-        <div>DeutschBuddy • Ver. 1.0</div>
+        <div>DeutschBuddy • Ver. 0.1 [BETA]</div>
         <a href="datenschutz.html">Datenschutz</a>
         <a href="impressum.html">Impressum</a>
         <a href="ueber-mich.html" aria-label="About">About</a>
@@ -957,11 +957,6 @@
         <div class="row">
           <label for="showTranslation">Show translation</label>
           <input id="showTranslation" type="checkbox" />
-        </div>
-
-        <div class="row">
-          <label for="showPlural">Show plural</label>
-          <input id="showPlural" type="checkbox" />
         </div>
 
         <div class="row">
@@ -1051,12 +1046,13 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script>
     // =========================
     // Data source (TSV)
     // =========================
     const dataUrl =
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vTLMG3zUFzaLSA82QS7T4E8IAHiung0H2LYRU8hoi_svBol2OoFWmTFBhGVhCPxK2xGtADv1sM9guDr/pub?output=tsv";
+      "https://docs.google.com/spreadsheets/d/1eFtuKJWBKZaJvzVzdr6MkahBECxA3PTn/export?format=xlsx&gid=0";
 
     // =========================
     // Local storage keys
@@ -1079,7 +1075,7 @@
 
     let selectedLevels = ["A1"];
     let showTranslation = false;
-    let showPlural = true;
+    let showPlural = false;
 
     let autoEnabled = true;
     let autoSeconds = 1;     // default 1 second, options: 1 or 3
@@ -1095,6 +1091,62 @@
     // =========================
     function safeText(v){ return (v ?? "").toString().trim(); }
     function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+
+async function loadSheetRows(url){
+      function extractSheetId(v){
+        const u = String(v || "");
+        const m = u.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/) || u.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        return m ? m[1] : "";
+      }
+
+      function buildSourceCandidates(v){
+        const out = [v];
+        const id = extractSheetId(v);
+        if (id){
+          out.push(
+            `https://docs.google.com/spreadsheets/d/${id}/export?format=xlsx&gid=0`,
+            `https://docs.google.com/spreadsheets/d/${id}/export?format=xlsx`
+          );
+        }
+        return [...new Set(out.filter(Boolean))];
+      }
+
+      if (!window.XLSX){
+        throw new Error("XLSX parser not available");
+      }
+
+      let lastErr = null;
+      for (const base of buildSourceCandidates(url)){
+        try{
+          const req = base + (base.includes("?") ? "&" : "?") + "t=" + Date.now();
+          const res = await fetch(req);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const buf = await res.arrayBuffer();
+
+          // Primary path: XLSX workbook
+          try{
+            const wb = XLSX.read(buf, { type: "array" });
+            const firstSheetName = wb.SheetNames && wb.SheetNames[0];
+            if (firstSheetName){
+              const ws = wb.Sheets[firstSheetName];
+              const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: "" });
+              if (rows && rows.length >= 2) return rows;
+            }
+          }catch{}
+
+          // Fallback path: plain text TSV/CSV response
+          const text = new TextDecoder("utf-8").decode(buf);
+          if (!text || /^\s*<!doctype html>/i.test(text) || /^\s*<html/i.test(text)) throw new Error("Non-tabular response");
+          const lines = text.trim().split(/\r?\n/).filter(Boolean);
+          if (lines.length < 2) throw new Error("Workbook has no data rows");
+          const delimiter = lines[0].includes("	") ? "	" : (lines[0].includes(";") ? ";" : ",");
+          return lines.map(line => line.split(delimiter));
+        }catch(e){
+          lastErr = e;
+        }
+      }
+      throw lastErr || new Error("Failed to load sheet");
+    }
 
     function shuffle(array){
       for (let i = array.length - 1; i > 0; i--){
@@ -1197,7 +1249,6 @@
     const resetDeviceStatsBtn = document.getElementById("resetDeviceStats");
 
     const showTranslationCb = document.getElementById("showTranslation");
-    const showPluralCb = document.getElementById("showPlural");
     const autoAdvanceCb = document.getElementById("autoAdvance");
     const autoSecondsSel = document.getElementById("autoSeconds");
     const maxErrorsSel = document.getElementById("maxErrors");
@@ -1221,7 +1272,7 @@
       }
       if (!selectedLevels.length) selectedLevels = ["A1"];
       showTranslation = !!p.showTranslation;
-      showPlural = (p.showPlural !== undefined) ? !!p.showPlural : true;
+      showPlural = false;
 
       autoEnabled = (p.autoEnabled !== undefined) ? !!p.autoEnabled : true;
       autoSeconds = (p.autoSeconds === 3) ? 3 : 1;
@@ -1235,7 +1286,6 @@
       setPrefs({
         levels: selectedLevels,
         showTranslation,
-        showPlural,
         autoEnabled,
         autoSeconds,
         maxErrors
@@ -1244,7 +1294,6 @@
 
     function syncPrefsToSettingsUI(){
       showTranslationCb.checked = showTranslation;
-      showPluralCb.checked = showPlural;
       autoAdvanceCb.checked = autoEnabled;
       autoSecondsSel.value = String(autoSeconds);
       maxErrorsSel.value = String(maxErrors);
@@ -1302,38 +1351,40 @@
     // =========================
     async function loadData(){
       try{
-        const res = await fetch(dataUrl + "&t=" + Date.now());
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        const text = await res.text();
+        const rows = await loadSheetRows(dataUrl);
 
-        const lines = text.trim().split("\n");
-        const header = lines[0].split("\t").map(safeText);
-        const dataLines = lines.slice(1);
+        const header = rows[0].map(safeText);
+        const dataLines = rows.slice(1);
 
         const idx = {};
         header.forEach((h, i) => idx[h.toLowerCase()] = i);
 
-        const iArticle = (idx["article"] ?? 0);
+        const iArticle = (idx["article"] ?? 3);
         const iWord = (idx["word"] ?? 1);
-        const iPlural = (idx["plural"] ?? 2);
-        const iExample = (idx["example"] ?? 3);
-        const iTrans = (idx["italian"] ?? idx["translation"] ?? 4);
-        const iLevel = (idx["level"] ?? (header.length - 1));
+        const iPlural = (idx["plural"] ?? -1);
+        const iPos = (idx["pos"] ?? 2);
+        const iTrans = (idx["english"] ?? idx["translation"] ?? 4);
+        const iLevel = (idx["level"] ?? 0);
+
+        const isNoun = (value) => {
+          const pos = safeText(value).toLowerCase();
+          return /noun|nomen|substantiv|subst|nome/.test(pos);
+        };
 
         rawData = dataLines
-          .map(line => line.split("\t"))
+          .map(cols => cols)
           .map(cols => {
             const article = safeText(cols[iArticle]);
             const word = safeText(cols[iWord]);
-            if (!word || !article) return null;
+            const pos = safeText(cols[iPos]);
+            if (!word || !article || !isNoun(pos)) return null;
 
-            const plural = safeText(cols[iPlural]);
-            const example = safeText(cols[iExample]);
+            const plural = iPlural >= 0 ? safeText(cols[iPlural]) : "";
             const translation = safeText(cols[iTrans]);
             const level = parseLevel(cols[iLevel]);
 
             const key = `${article}|${word}`.toLowerCase();
-            return { key, level, article, word, plural, example, translation };
+            return { key, level, article, word, plural, translation };
           })
           .filter(Boolean);
 
@@ -1448,8 +1499,6 @@
       extraEl.innerHTML = "";
 
       const rows = [];
-      if (showPlural) rows.push(["Plural:", item.plural]);
-      rows.push(["Example:", item.example]);
 
       if (!rows.length){
         extraEl.textContent = "—";
@@ -1751,7 +1800,7 @@
 
     saveSettingsBtn.addEventListener("click", () => {
       showTranslation = showTranslationCb.checked;
-      showPlural = showPluralCb.checked;
+      showPlural = false;
       autoEnabled = autoAdvanceCb.checked;
 
       autoSeconds = (parseInt(autoSecondsSel.value, 10) === 3) ? 3 : 1;
