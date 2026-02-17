@@ -361,6 +361,10 @@
     function setRecent(v){localStorage.setItem(LS_RECENT, JSON.stringify(v.slice(-30)));}
 
     function hasPlusAccess(){
+      const token = sessionStorage.getItem('db_plus_token_v1');
+      if (token) return true;
+
+      // Retrocompatibility fallback only (non-primary source)
       try{
         const unlocks = JSON.parse(sessionStorage.getItem('db_plus_unlocks_v1') || '{}');
         return !!unlocks.__all_plus__;
