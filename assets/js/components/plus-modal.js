@@ -3,10 +3,12 @@
   const LS_UNLOCKS = "db_plus_unlocks_v1";
   const ALL_ACCESS_KEY = "__all_plus__";
 
-  const PLUS_VERIFY_URL = "https://deutschbuddy-api.marco-pellegrino-1.workers.dev/api/plus/verify";
-  const PLUS_STATUS_URL = "https://deutschbuddy-api.marco-pellegrino-1.workers.dev/api/plus/status";
+  const API_BASE = global.DEUTSCHBUDDY_API_BASE || "https://deutschbuddy-api.marco-pellegrino-1.workers.dev";
+  const PLUS_VERIFY_URL = `${API_BASE}/api/plus/verify`;
+  const PLUS_STATUS_URL = `${API_BASE}/api/plus/status`;
   const PLUS_TOKEN_KEY = "db_plus_token_v1";
   const PLUS_TOKEN_EXP_KEY = "db_plus_token_exp_v1";
+  let plusStatusPromise = null;
 
   function resolveElements(options){
     const root = options && options.root ? options.root : document;
@@ -81,9 +83,26 @@
     const token = getPlusToken();
     if (!token) return { plus: false };
 
-    const res = await fetch(PLUS_STATUS_URL, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    const tokenExp = parseInt(sessionStorage.getItem(PLUS_TOKEN_EXP_KEY) || "0", 10);
+    const now = Math.floor(Date.now() / 1000);
+
+    if (!navigator.onLine) {
+      if (token && tokenExp && tokenExp > now) return { plus: true, exp: tokenExp };
+      clearPlusToken();
+      return { plus: false };
+    }
+
+    let res;
+    try {
+      res = await fetch(PLUS_STATUS_URL, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    } catch {
+      if (token && tokenExp && tokenExp > now) return { plus: true, exp: tokenExp };
+      clearPlusToken();
+      return { plus: false };
+    }
+
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok || !data.ok || !data.plus){
@@ -95,6 +114,13 @@
     return { plus: true, exp: data.exp };
   }
 
+  function refreshPlusStatusOnce(){
+    if (!plusStatusPromise) {
+      plusStatusPromise = refreshPlusStatusWithWorker();
+    }
+    return plusStatusPromise;
+  }
+
   function initPlusModal(options){
     const formUrl = (options && options.formUrl) || "https://docs.google.com/forms/d/e/1FAIpQLSd7aZ8okTdi2sr08p8l8HZ2r6oH09BsF3L_mJQtSc8q0nFRdw/viewform?usp=header";
     const cardSelector = (options && options.cardSelector) || ".gameCard.locked";
@@ -104,7 +130,7 @@
 
     let currentModuleName = "This game";
 
-    refreshPlusStatusWithWorker().then(status => {
+    refreshPlusStatusOnce().then(status => {
       if (status.plus) {
         unlockAllPlus();
         applyUnlockState(cardSelector);
@@ -182,8 +208,10 @@
             alert("Invalid code.");
           } else if (msg === "rate_limited") {
             alert("Too many attempts. Try again in a minute.");
+          } else if (msg === "missing_code") {
+            alert("Please enter a code.");
           } else {
-            alert("Error verifying code. Please try again.");
+            alert("Couldn’t verify right now. Check connection and try again.");
           }
         }
       });
@@ -205,6 +233,7 @@
     initPlusModal,
     hasAllAccess,
     refreshPlusStatusWithWorker,
+    refreshPlusStatusOnce,
     getPlusToken,
     clearPlusToken
   };
