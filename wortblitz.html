@@ -267,11 +267,11 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="assets/js/components/plus-modal.js" defer></script>
   <script src="assets/js/pages/quiz-plus-modal-init.js" defer></script>
   <script>
-    const dataUrl = "https://docs.google.com/spreadsheets/d/1eFtuKJWBKZaJvzVzdr6MkahBECxA3PTn/export?format=xlsx&gid=0";
+    const DATA_API_BASE = window.DEUTSCHBUDDY_DATA_API_BASE || "https://deutschbuddy-api.marco-pellegrino-1.workers.dev";
+    const dataUrl = `${DATA_API_BASE}/api/data/merged.tsv`;
     const LS_PREFS="db_bt_prefs_v2", LS_STATS="db_bt_stats_v2", LS_RECENT="db_bt_recent_v2";
 
     let rawData=[], pool=[], recentQueue=[];
@@ -298,59 +298,15 @@
 
 
     async function loadSheetRows(url){
-      function extractSheetId(v){
-        const u = String(v || "");
-        const m = u.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/) || u.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-        return m ? m[1] : "";
-      }
-
-      function buildSourceCandidates(v){
-        const out = [v];
-        const id = extractSheetId(v);
-        if (id){
-          out.push(
-            `https://docs.google.com/spreadsheets/d/${id}/export?format=xlsx&gid=0`,
-            `https://docs.google.com/spreadsheets/d/${id}/export?format=xlsx`
-          );
-        }
-        return [...new Set(out.filter(Boolean))];
-      }
-
-      if (!window.XLSX){
-        throw new Error("XLSX parser not available");
-      }
-
-      let lastErr = null;
-      for (const base of buildSourceCandidates(url)){
-        try{
-          const req = base + (base.includes("?") ? "&" : "?") + "t=" + Date.now();
-          const res = await fetch(req);
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const buf = await res.arrayBuffer();
-
-          // Primary path: XLSX workbook
-          try{
-            const wb = XLSX.read(buf, { type: "array" });
-            const firstSheetName = wb.SheetNames && wb.SheetNames[0];
-            if (firstSheetName){
-              const ws = wb.Sheets[firstSheetName];
-              const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: "" });
-              if (rows && rows.length >= 2) return rows;
-            }
-          }catch{}
-
-          // Fallback path: plain text TSV/CSV response
-          const text = new TextDecoder("utf-8").decode(buf);
-          if (!text || /^\s*<!doctype html>/i.test(text) || /^\s*<html/i.test(text)) throw new Error("Non-tabular response");
-          const lines = text.trim().split(/\r?\n/).filter(Boolean);
-          if (lines.length < 2) throw new Error("Workbook has no data rows");
-          const delimiter = lines[0].includes("	") ? "	" : (lines[0].includes(";") ? ";" : ",");
-          return lines.map(line => line.split(delimiter));
-        }catch(e){
-          lastErr = e;
-        }
-      }
-      throw lastErr || new Error("Failed to load sheet");
+      const token = sessionStorage.getItem("db_plus_token_v1");
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const req = url + (url.includes("?") ? "&" : "?") + "t=" + Date.now();
+      const res = await fetch(req, { headers });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = await res.text();
+      const lines = text.trim().split(/\r?\n/).filter(Boolean);
+      if (lines.length < 2) throw new Error("Dataset has no data rows");
+      return lines.map(line => line.split("\t"));
     }
 
     function getPrefs(){try{return JSON.parse(localStorage.getItem(LS_PREFS)||"{}")}catch{return {}}}

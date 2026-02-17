@@ -249,7 +249,8 @@
   <script src="assets/js/components/plus-modal.js" defer></script>
   <script src="assets/js/pages/quiz-plus-modal-init.js" defer></script>
   <script>
-    const dataUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTLMG3zUFzaLSA82QS7T4E8IAHiung0H2LYRU8hoi_svBol2OoFWmTFBhGVhCPxK2xGtADv1sM9guDr/pub?output=tsv";
+    const DATA_API_BASE = window.DEUTSCHBUDDY_DATA_API_BASE || "https://deutschbuddy-api.marco-pellegrino-1.workers.dev";
+    const dataUrl = `${DATA_API_BASE}/api/data/merged.tsv`;
     const LS_PREFS="db_bt_prefs_v2", LS_STATS="db_bt_stats_v2", LS_RECENT="db_bt_recent_v2";
 
     let rawData=[], pool=[], recentQueue=[];
@@ -304,20 +305,30 @@
       syncLevelButtons(); savePrefs();
     }
 
+    async function fetchMergedTSV(url){
+      const token = sessionStorage.getItem('db_plus_token_v1');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const req = url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
+      const res = await fetch(req, { headers });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.text();
+    }
+
     async function loadData(){
-      const res=await fetch(dataUrl+"&t="+Date.now());
-      const txt=await res.text();
+      const txt=await fetchMergedTSV(dataUrl);
       const lines=txt.trim().split('\n');
       const header=lines[0].split('\t').map(h=>safe(h).toLowerCase());
       const idx=(...names)=>names.map(n=>header.indexOf(n)).find(i=>i>=0);
       const iSing=idx('singular','word');
       const iTrans=idx('translation','singular translation','english');
       const iLevel=idx('level');
+      const iSourceFile=idx('sourcefile');
       rawData=lines.slice(1).map(line=>line.split('\t')).map(cols=>{
         const singular=safe(cols[iSing]); const translation=safe(cols[iTrans]);
         if(!singular || !translation) return null;
         const level=parseLevel(cols[iLevel]);
-        return {singular, translation, level, key:`${singular}|${translation}`.toLowerCase()};
+        const sourceFile=safe(cols[iSourceFile]);
+        return {singular, translation, level, sourceFile, key:`${singular}|${translation}`.toLowerCase()};
       }).filter(Boolean);
     }
 
