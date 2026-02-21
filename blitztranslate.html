@@ -250,7 +250,8 @@
   <script src="assets/js/pages/quiz-plus-modal-init.js" defer></script>
   <script>
     const DATA_API_BASE = window.DEUTSCHBUDDY_DATA_API_BASE || "https://deutschbuddy-api.marco-pellegrino-1.workers.dev";
-    const dataUrl = `${DATA_API_BASE}/api/data/merged.tsv`;
+    const DATASET_VERSION = "2026-02-17";
+    const dataUrl = `${DATA_API_BASE}/api/data/merged.tsv?v=${encodeURIComponent(DATASET_VERSION)}`;
     const LS_PREFS="db_bt_prefs_v2", LS_STATS="db_bt_stats_v2", LS_RECENT="db_bt_recent_v2";
 
     let rawData=[], pool=[], recentQueue=[];
@@ -308,8 +309,7 @@
     async function fetchMergedTSV(url){
       const token = sessionStorage.getItem('db_plus_token_v1');
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const req = url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
-      const res = await fetch(req, { headers });
+      const res = await fetch(url, { headers });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return res.text();
     }

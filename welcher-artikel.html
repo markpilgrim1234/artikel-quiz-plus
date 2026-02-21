@@ -1044,7 +1044,8 @@
     // Data source (TSV)
     // =========================
     const DATA_API_BASE = window.DEUTSCHBUDDY_DATA_API_BASE || "https://deutschbuddy-api.marco-pellegrino-1.workers.dev";
-    const dataUrl = `${DATA_API_BASE}/api/data/merged.tsv`;
+    const DATASET_VERSION = "2026-02-17";
+    const dataUrl = `${DATA_API_BASE}/api/data/merged.tsv?v=${encodeURIComponent(DATASET_VERSION)}`;
 
     // =========================
     // Local storage keys
@@ -1089,8 +1090,7 @@
 async function loadSheetRows(url){
       const token = sessionStorage.getItem("db_plus_token_v1");
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const req = url + (url.includes("?") ? "&" : "?") + "t=" + Date.now();
-      const res = await fetch(req, { headers });
+      const res = await fetch(url, { headers });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const text = await res.text();
       const lines = text.trim().split(/\r?\n/).filter(Boolean);
@@ -1294,15 +1294,19 @@ async function loadSheetRows(url){
         if (label) label.textContent = practiceMistakesOnly ? "Active" : "Activate";
       }
 
-      if (hasA2 && !hasB1 && !hasB2 && !hasC1) {
-        levelHint.textContent = "A2 active: intermediate words only.";
-      } else if (hasA1 && hasA2) {
-        levelHint.textContent = "A1 + A2 active: mixed beginner/intermediate pool.";
-      } else if (hasB1 || hasB2 || hasC1) {
-        levelHint.textContent = "Plus levels active: broader vocabulary pool.";
+      const ordered = ["A1", "A2", "B1", "B2", "C1"];
+      const active = ordered.filter(l => selectedLevels.includes(l));
+      if (active.length === 1){
+        const one = active[0];
+        levelHint.textContent = one === "A1"
+          ? "A1 active: beginner words only (free)."
+          : `${one} active: ${one === "A2" ? "intermediate" : "plus"} words only.`;
+      } else if (active.length > 1){
+        levelHint.textContent = `Levels active: ${active.join(" + ")}.`;
       } else {
         levelHint.textContent = "A1 active: beginner words only (free).";
       }
+      if (practiceMistakesOnly) levelHint.textContent += " Practice mistakes mode is ON.";
     }
 
     // =========================
