@@ -812,7 +812,7 @@
 
               <button class="levelBtn" type="button" id="lvlA1" aria-pressed="true" aria-label="Select A1">A1</button>
 
-              <button class="levelBtn" type="button" id="lvlA2" aria-pressed="false" aria-label="Select A2">A2</button>
+              <div class="levelBtn locked gameCard" id="lvlA2" role="button" tabindex="0" data-plus="A2 level" aria-label="A2 Plus (locked)">A2</div>
 
               <!-- Locked levels: use same selector as Index script -->
               <div class="levelBtn locked gameCard" id="lvlB1" role="button" tabindex="0" data-plus="B1 level" aria-label="B1 Plus (locked)">
@@ -828,7 +828,7 @@
               </div>
             </div>
 
-            <div class="miniNote" id="levelHint">Tip: you can activate A1 and A2 together for a combined training set.</div>
+            <div class="miniNote" id="levelHint">Tip: A1 is free. Unlock Plus to activate A2 and higher levels.</div>
 
             <div class="levelRow practiceLockRow" aria-label="Practice mistakes">
               <div class="levelLabel">Practice mistake:</div>
@@ -1039,13 +1039,13 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script>
     // =========================
     // Data source (TSV)
     // =========================
-    const dataUrl =
-      "https://docs.google.com/spreadsheets/d/1eFtuKJWBKZaJvzVzdr6MkahBECxA3PTn/export?format=xlsx&gid=0";
+    const DATA_API_BASE = window.DEUTSCHBUDDY_DATA_API_BASE || "https://deutschbuddy-api.marco-pellegrino-1.workers.dev";
+    const DATASET_VERSION = "2026-02-17";
+    const dataUrl = `${DATA_API_BASE}/api/data/merged.tsv?v=${encodeURIComponent(DATASET_VERSION)}`;
 
     // =========================
     // Local storage keys
@@ -1088,59 +1088,14 @@
     function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
 
 async function loadSheetRows(url){
-      function extractSheetId(v){
-        const u = String(v || "");
-        const m = u.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/) || u.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-        return m ? m[1] : "";
-      }
-
-      function buildSourceCandidates(v){
-        const out = [v];
-        const id = extractSheetId(v);
-        if (id){
-          out.push(
-            `https://docs.google.com/spreadsheets/d/${id}/export?format=xlsx&gid=0`,
-            `https://docs.google.com/spreadsheets/d/${id}/export?format=xlsx`
-          );
-        }
-        return [...new Set(out.filter(Boolean))];
-      }
-
-      if (!window.XLSX){
-        throw new Error("XLSX parser not available");
-      }
-
-      let lastErr = null;
-      for (const base of buildSourceCandidates(url)){
-        try{
-          const req = base + (base.includes("?") ? "&" : "?") + "t=" + Date.now();
-          const res = await fetch(req);
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const buf = await res.arrayBuffer();
-
-          // Primary path: XLSX workbook
-          try{
-            const wb = XLSX.read(buf, { type: "array" });
-            const firstSheetName = wb.SheetNames && wb.SheetNames[0];
-            if (firstSheetName){
-              const ws = wb.Sheets[firstSheetName];
-              const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: "" });
-              if (rows && rows.length >= 2) return rows;
-            }
-          }catch{}
-
-          // Fallback path: plain text TSV/CSV response
-          const text = new TextDecoder("utf-8").decode(buf);
-          if (!text || /^\s*<!doctype html>/i.test(text) || /^\s*<html/i.test(text)) throw new Error("Non-tabular response");
-          const lines = text.trim().split(/\r?\n/).filter(Boolean);
-          if (lines.length < 2) throw new Error("Workbook has no data rows");
-          const delimiter = lines[0].includes("	") ? "	" : (lines[0].includes(";") ? ";" : ",");
-          return lines.map(line => line.split(delimiter));
-        }catch(e){
-          lastErr = e;
-        }
-      }
-      throw lastErr || new Error("Failed to load sheet");
+      const token = sessionStorage.getItem("db_plus_token_v1");
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(url, { headers });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = await res.text();
+      const lines = text.trim().split(/\r?\n/).filter(Boolean);
+      if (lines.length < 2) throw new Error("Dataset has no data rows");
+      return lines.map(line => line.split("\t"));
     }
 
     function shuffle(array){
@@ -1178,6 +1133,26 @@ async function loadSheetRows(url){
       catch{ return {}; }
     }
     function setMistakes(obj){ localStorage.setItem(LS_MISTAKES, JSON.stringify(obj)); }
+
+    function hasPlusAccess(){
+      const token = sessionStorage.getItem("db_plus_token_v1");
+      if (token) return true;
+
+      // Retrocompatibility fallback only (non-primary source)
+      try {
+        const unlocks = JSON.parse(sessionStorage.getItem("db_plus_unlocks_v1") || "{}");
+        return !!unlocks.__all_plus__;
+      } catch {
+        return false;
+      }
+    }
+
+    function normalizeLevelsForAccess(){
+      if (!hasPlusAccess()) {
+        selectedLevels = ["A1"];
+        practiceMistakesOnly = false;
+      }
+    }
 
     function updateDailyStreak(){
       const stats = getStats();
@@ -1270,6 +1245,7 @@ async function loadSheetRows(url){
       }
       if (!selectedLevels.length) selectedLevels = ["A1"];
       practiceMistakesOnly = !!p.practiceMistakesOnly;
+      normalizeLevelsForAccess();
       showTranslation = !!p.showTranslation;
       showPlural = false;
 
@@ -1318,15 +1294,19 @@ async function loadSheetRows(url){
         if (label) label.textContent = practiceMistakesOnly ? "Active" : "Activate";
       }
 
-      if (hasA1 && hasA2) {
-        levelHint.textContent = "A1 + A2 active: mixed beginner/intermediate pool.";
-      } else if (hasA2 && !hasB1 && !hasB2 && !hasC1) {
-        levelHint.textContent = "A2 active: intermediate words only.";
-      } else if (hasB1 || hasB2 || hasC1) {
-        levelHint.textContent = "Plus levels active: broader vocabulary pool.";
+      const ordered = ["A1", "A2", "B1", "B2", "C1"];
+      const active = ordered.filter(l => selectedLevels.includes(l));
+      if (active.length === 1){
+        const one = active[0];
+        levelHint.textContent = one === "A1"
+          ? "A1 active: beginner words only (free)."
+          : `${one} active: ${one === "A2" ? "intermediate" : "plus"} words only.`;
+      } else if (active.length > 1){
+        levelHint.textContent = `Levels active: ${active.join(" + ")}.`;
       } else {
-        levelHint.textContent = "A1 active: beginner words only.";
+        levelHint.textContent = "A1 active: beginner words only (free).";
       }
+      if (practiceMistakesOnly) levelHint.textContent += " Practice mistakes mode is ON.";
     }
 
     // =========================
@@ -1411,6 +1391,7 @@ async function loadSheetRows(url){
     }
 
     function buildPool(){
+      normalizeLevelsForAccess();
       const levelSet = new Set(selectedLevels);
       const mistakes = practiceMistakesOnly ? getMistakes() : null;
       const source = practiceMistakesOnly
@@ -1731,7 +1712,10 @@ async function loadSheetRows(url){
     }
 
     lvlA1Btn.addEventListener("click", () => toggleBaseLevel("A1"));
-    lvlA2Btn.addEventListener("click", () => toggleBaseLevel("A2"));
+    lvlA2Btn.addEventListener("click", () => {
+      if (lvlA2Btn.classList.contains("locked")) return;
+      toggleBaseLevel("A2");
+    });
     if (lvlB1Btn) lvlB1Btn.addEventListener("click", () => { if (!lvlB1Btn.classList.contains("locked")) toggleBaseLevel("B1"); });
     if (lvlB2Btn) lvlB2Btn.addEventListener("click", () => { if (!lvlB2Btn.classList.contains("locked")) toggleBaseLevel("B2"); });
     if (lvlC1Btn) lvlC1Btn.addEventListener("click", () => { if (!lvlC1Btn.classList.contains("locked")) toggleBaseLevel("C1"); });
