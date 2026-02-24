@@ -255,12 +255,18 @@
       border-radius: 999px;
       border: 1px solid var(--border);
       background: #fff;
+      color: #111827;
+      text-decoration: none;
       cursor: pointer;
       font-weight: 900;
       font-size: 0.92rem;
       line-height: 1;
       box-shadow: 0 2px 10px rgba(0,0,0,0.04);
       white-space: nowrap;
+    }
+    .iconBtn:visited,
+    .iconBtn:link{
+      color: #111827;
     }
     .iconBtn:hover{
       border-color: #d1d5db;
@@ -498,18 +504,6 @@
       text-align: center;
       font-size: 1.25rem;
       min-height: 1.6em;
-    }
-
-    .extra{
-      margin-top: 10px;
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px dashed #d1d5db;
-      background: #fbfbfb;
-      text-align: center;
-      color: #374151;
-      font-size: 1.05rem;
-      min-height: 1.2em;
     }
 
     .countdownRow{
@@ -818,27 +812,27 @@
 
               <button class="levelBtn" type="button" id="lvlA1" aria-pressed="true" aria-label="Select A1">A1</button>
 
-              <button class="levelBtn" type="button" id="lvlA2" aria-pressed="false" aria-label="Select A2">A2</button>
+              <div class="levelBtn locked gameCard" id="lvlA2" role="button" tabindex="0" data-plus="A2 level" aria-label="A2 Plus (locked)">A2</div>
 
               <!-- Locked levels: use same selector as Index script -->
-              <div class="levelBtn locked gameCard" role="button" tabindex="0" data-plus="B1 level" aria-label="B1 Plus (locked)">
+              <div class="levelBtn locked gameCard" id="lvlB1" role="button" tabindex="0" data-plus="B1 level" aria-label="B1 Plus (locked)">
                 B1
               </div>
 
-              <div class="levelBtn locked gameCard" role="button" tabindex="0" data-plus="B2 level" aria-label="B2 Plus (locked)">
+              <div class="levelBtn locked gameCard" id="lvlB2" role="button" tabindex="0" data-plus="B2 level" aria-label="B2 Plus (locked)">
                 B2
               </div>
 
-              <div class="levelBtn locked gameCard" role="button" tabindex="0" data-plus="C1 level" aria-label="C1 Plus (locked)">
+              <div class="levelBtn locked gameCard" id="lvlC1" role="button" tabindex="0" data-plus="C1 level" aria-label="C1 Plus (locked)">
                 C1
               </div>
             </div>
 
-            <div class="miniNote" id="levelHint">Tip: you can activate A1 and A2 together for a combined training set.</div>
+            <div class="miniNote" id="levelHint">Tip: A1 is free. Unlock Plus to activate A2 and higher levels.</div>
 
             <div class="levelRow practiceLockRow" aria-label="Practice mistakes">
               <div class="levelLabel">Practice mistake:</div>
-              <div class="levelBtn locked gameCard lockSwitch" role="button" tabindex="0" data-plus="Fehler üben (Practice mistakes)" aria-label="Practice mistakes activate (locked)">
+              <div class="levelBtn locked gameCard lockSwitch" id="practiceMistakes" role="button" tabindex="0" data-plus="Fehler üben (Practice mistakes)" aria-label="Practice mistakes activate (locked)">
                 <span class="switchDot" aria-hidden="true"></span>
                 <span>Activate</span>
               </div>
@@ -862,7 +856,6 @@
 
             <div class="result" id="result" aria-live="polite"></div>
 
-            <div class="extra" id="extra" aria-live="polite"></div>
 
             <div class="countdownRow">
               <div id="countdown"></div>
@@ -1046,13 +1039,13 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script>
     // =========================
     // Data source (TSV)
     // =========================
-    const dataUrl =
-      "https://docs.google.com/spreadsheets/d/1eFtuKJWBKZaJvzVzdr6MkahBECxA3PTn/export?format=xlsx&gid=0";
+    const DATA_API_BASE = window.DEUTSCHBUDDY_DATA_API_BASE || "https://deutschbuddy-api.marco-pellegrino-1.workers.dev";
+    const DATASET_VERSION = "2026-02-17";
+    const dataUrl = `${DATA_API_BASE}/api/data/merged.tsv?v=${encodeURIComponent(DATASET_VERSION)}`;
 
     // =========================
     // Local storage keys
@@ -1066,6 +1059,7 @@
     // =========================
     let rawData = [];
     let pool = [];
+    let dataLoadedWithPlusToken = false;
     let currentIndex = 0;
 
     let correct = 0;
@@ -1076,6 +1070,8 @@
     let selectedLevels = ["A1"];
     let showTranslation = false;
     let showPlural = false;
+
+    let practiceMistakesOnly = false;
 
     let autoEnabled = true;
     let autoSeconds = 1;     // default 1 second, options: 1 or 3
@@ -1093,59 +1089,14 @@
     function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
 
 async function loadSheetRows(url){
-      function extractSheetId(v){
-        const u = String(v || "");
-        const m = u.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/) || u.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-        return m ? m[1] : "";
-      }
-
-      function buildSourceCandidates(v){
-        const out = [v];
-        const id = extractSheetId(v);
-        if (id){
-          out.push(
-            `https://docs.google.com/spreadsheets/d/${id}/export?format=xlsx&gid=0`,
-            `https://docs.google.com/spreadsheets/d/${id}/export?format=xlsx`
-          );
-        }
-        return [...new Set(out.filter(Boolean))];
-      }
-
-      if (!window.XLSX){
-        throw new Error("XLSX parser not available");
-      }
-
-      let lastErr = null;
-      for (const base of buildSourceCandidates(url)){
-        try{
-          const req = base + (base.includes("?") ? "&" : "?") + "t=" + Date.now();
-          const res = await fetch(req);
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const buf = await res.arrayBuffer();
-
-          // Primary path: XLSX workbook
-          try{
-            const wb = XLSX.read(buf, { type: "array" });
-            const firstSheetName = wb.SheetNames && wb.SheetNames[0];
-            if (firstSheetName){
-              const ws = wb.Sheets[firstSheetName];
-              const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: "" });
-              if (rows && rows.length >= 2) return rows;
-            }
-          }catch{}
-
-          // Fallback path: plain text TSV/CSV response
-          const text = new TextDecoder("utf-8").decode(buf);
-          if (!text || /^\s*<!doctype html>/i.test(text) || /^\s*<html/i.test(text)) throw new Error("Non-tabular response");
-          const lines = text.trim().split(/\r?\n/).filter(Boolean);
-          if (lines.length < 2) throw new Error("Workbook has no data rows");
-          const delimiter = lines[0].includes("	") ? "	" : (lines[0].includes(";") ? ";" : ",");
-          return lines.map(line => line.split(delimiter));
-        }catch(e){
-          lastErr = e;
-        }
-      }
-      throw lastErr || new Error("Failed to load sheet");
+      const token = sessionStorage.getItem("db_plus_token_v1");
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(url, { headers });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = await res.text();
+      const lines = text.trim().split(/\r?\n/).filter(Boolean);
+      if (lines.length < 2) throw new Error("Dataset has no data rows");
+      return lines.map(line => line.split("\t"));
     }
 
     function shuffle(array){
@@ -1184,6 +1135,26 @@ async function loadSheetRows(url){
     }
     function setMistakes(obj){ localStorage.setItem(LS_MISTAKES, JSON.stringify(obj)); }
 
+    function hasPlusAccess(){
+      const token = sessionStorage.getItem("db_plus_token_v1");
+      if (token) return true;
+
+      // Retrocompatibility fallback only (non-primary source)
+      try {
+        const unlocks = JSON.parse(sessionStorage.getItem("db_plus_unlocks_v1") || "{}");
+        return !!unlocks.__all_plus__;
+      } catch {
+        return false;
+      }
+    }
+
+    function normalizeLevelsForAccess(){
+      if (!hasPlusAccess()) {
+        selectedLevels = ["A1"];
+        practiceMistakesOnly = false;
+      }
+    }
+
     function updateDailyStreak(){
       const stats = getStats();
       const today = todayISO();
@@ -1212,6 +1183,10 @@ async function loadSheetRows(url){
 
     const lvlA1Btn = document.getElementById("lvlA1");
     const lvlA2Btn = document.getElementById("lvlA2");
+    const lvlB1Btn = document.getElementById("lvlB1");
+    const lvlB2Btn = document.getElementById("lvlB2");
+    const lvlC1Btn = document.getElementById("lvlC1");
+    const practiceMistakesBtn = document.getElementById("practiceMistakes");
     const levelHint = document.getElementById("levelHint");
     const startBtn = document.getElementById("startBtn");
 
@@ -1222,7 +1197,6 @@ async function loadSheetRows(url){
     const metaLineEl = document.getElementById("metaLine");
     const optionsDiv = document.getElementById("options");
     const resultDiv = document.getElementById("result");
-    const extraEl = document.getElementById("extra");
     const countdownEl = document.getElementById("countdown");
     const pauseBtn = document.getElementById("pauseBtn");
     const resetBtn = document.getElementById("resetBtn");
@@ -1266,11 +1240,13 @@ async function loadSheetRows(url){
       const p = getPrefs();
 
       if (Array.isArray(p.levels)) {
-        selectedLevels = p.levels.filter(l => l === "A1" || l === "A2");
+        selectedLevels = p.levels.filter(l => l === "A1" || l === "A2" || l === "B1" || l === "B2" || l === "C1");
       } else {
         selectedLevels = (p.level === "A2") ? ["A2"] : ["A1"];
       }
       if (!selectedLevels.length) selectedLevels = ["A1"];
+      practiceMistakesOnly = !!p.practiceMistakesOnly;
+      normalizeLevelsForAccess();
       showTranslation = !!p.showTranslation;
       showPlural = false;
 
@@ -1285,6 +1261,7 @@ async function loadSheetRows(url){
     function saveStateToPrefs(){
       setPrefs({
         levels: selectedLevels,
+        practiceMistakesOnly,
         showTranslation,
         autoEnabled,
         autoSeconds,
@@ -1302,17 +1279,35 @@ async function loadSheetRows(url){
     function syncLevelButtons(){
       const hasA1 = selectedLevels.includes("A1");
       const hasA2 = selectedLevels.includes("A2");
+      const hasB1 = selectedLevels.includes("B1");
+      const hasB2 = selectedLevels.includes("B2");
+      const hasC1 = selectedLevels.includes("C1");
 
       lvlA1Btn.setAttribute("aria-pressed", hasA1 ? "true" : "false");
       lvlA2Btn.setAttribute("aria-pressed", hasA2 ? "true" : "false");
+      if (lvlB1Btn) lvlB1Btn.setAttribute("aria-pressed", hasB1 ? "true" : "false");
+      if (lvlB2Btn) lvlB2Btn.setAttribute("aria-pressed", hasB2 ? "true" : "false");
+      if (lvlC1Btn) lvlC1Btn.setAttribute("aria-pressed", hasC1 ? "true" : "false");
 
-      if (hasA1 && hasA2) {
-        levelHint.textContent = "A1 + A2 active: mixed beginner/intermediate pool.";
-      } else if (hasA2) {
-        levelHint.textContent = "A2 active: intermediate words only.";
-      } else {
-        levelHint.textContent = "A1 active: beginner words only.";
+      if (practiceMistakesBtn){
+        practiceMistakesBtn.setAttribute("aria-pressed", practiceMistakesOnly ? "true" : "false");
+        const label = practiceMistakesBtn.querySelector("span:last-child");
+        if (label) label.textContent = practiceMistakesOnly ? "Active" : "Activate";
       }
+
+      const ordered = ["A1", "A2", "B1", "B2", "C1"];
+      const active = ordered.filter(l => selectedLevels.includes(l));
+      if (active.length === 1){
+        const one = active[0];
+        levelHint.textContent = one === "A1"
+          ? "A1 active: beginner words only (free)."
+          : `${one} active: ${one === "A2" ? "intermediate" : "plus"} words only.`;
+      } else if (active.length > 1){
+        levelHint.textContent = `Levels active: ${active.join(" + ")}.`;
+      } else {
+        levelHint.textContent = "A1 active: beginner words only (free).";
+      }
+      if (practiceMistakesOnly) levelHint.textContent += " Practice mistakes mode is ON.";
     }
 
     // =========================
@@ -1351,6 +1346,7 @@ async function loadSheetRows(url){
     // =========================
     async function loadData(){
       try{
+        const hadToken = !!sessionStorage.getItem("db_plus_token_v1");
         const rows = await loadSheetRows(dataUrl);
 
         const header = rows[0].map(safeText);
@@ -1389,6 +1385,7 @@ async function loadSheetRows(url){
           .filter(Boolean);
 
         if (!rawData.length) throw new Error("No valid rows.");
+        dataLoadedWithPlusToken = hadToken;
       }catch(e){
         wordEl.textContent = "Loading failed 😕";
         resultDiv.textContent = "Please check your connection and reload the page.";
@@ -1397,8 +1394,14 @@ async function loadSheetRows(url){
     }
 
     function buildPool(){
+      normalizeLevelsForAccess();
       const levelSet = new Set(selectedLevels);
-      pool = rawData.filter(it => {
+      const mistakes = practiceMistakesOnly ? getMistakes() : null;
+      const source = practiceMistakesOnly
+        ? rawData.filter(it => !!mistakes[it.key])
+        : rawData;
+
+      pool = source.filter(it => {
         if (!it.level) return levelSet.has("A1");
         return levelSet.has(it.level);
       });
@@ -1495,26 +1498,6 @@ async function loadSheetRows(url){
       updateAnswersSummary();
     }
 
-    function renderExtra(item){
-      extraEl.innerHTML = "";
-
-      const rows = [];
-
-      if (!rows.length){
-        extraEl.textContent = "—";
-        return;
-      }
-
-      rows.forEach(([label, value]) => {
-        const line = document.createElement("div");
-        const strong = document.createElement("strong");
-        strong.textContent = label + " ";
-        line.appendChild(strong);
-        line.appendChild(document.createTextNode(value || "—"));
-        extraEl.appendChild(line);
-      });
-    }
-
     // =========================
     // Mistakes store (saved locally; practice mode is Plus-only)
     // =========================
@@ -1568,12 +1551,6 @@ async function loadSheetRows(url){
       Array.from(optionsDiv.querySelectorAll("button")).forEach(b => b.disabled = true);
 
       resultDiv.textContent = "🛑 Game over — mistake limit reached.";
-      extraEl.innerHTML = `
-        <div><strong>Session summary</strong></div>
-        <div>Score: <strong>${score}</strong> • Correct: <strong>${correct}</strong> • Wrong: <strong>${wrong}</strong></div>
-        <div>Best streak this session: <strong>${sessionBestStreak}</strong></div>
-      `;
-
       setCountdownText("");
 
       finalizeSessionToDeviceStats();
@@ -1615,7 +1592,6 @@ async function loadSheetRows(url){
       renderMetaLine(item);
 
       resultDiv.textContent = "";
-      extraEl.textContent = "";
       setCountdownText("");
 
       optionsDiv.innerHTML = "";
@@ -1657,7 +1633,6 @@ async function loadSheetRows(url){
         resultDiv.textContent = `❌ Wrong — correct is "${item.article}"`;
       }
 
-      renderExtra(item);
       addHistoryRow(opt, item.word, isCorrect, item.article);
       updateHud();
       updateDeviceStatsUI();
@@ -1689,7 +1664,6 @@ async function loadSheetRows(url){
       updateAnswersSummary();
 
       resultDiv.textContent = "";
-      extraEl.textContent = "";
       clearCountdown(false);
 
       updateHud();
@@ -1700,6 +1674,10 @@ async function loadSheetRows(url){
       endBanner.style.display = "none";
 
       if (!rawData.length){
+        await loadData();
+      }
+
+      if (hasPlusAccess() && !dataLoadedWithPlusToken){
         await loadData();
       }
 
@@ -1741,7 +1719,22 @@ async function loadSheetRows(url){
     }
 
     lvlA1Btn.addEventListener("click", () => toggleBaseLevel("A1"));
-    lvlA2Btn.addEventListener("click", () => toggleBaseLevel("A2"));
+    lvlA2Btn.addEventListener("click", () => {
+      if (lvlA2Btn.classList.contains("locked")) return;
+      toggleBaseLevel("A2");
+    });
+    if (lvlB1Btn) lvlB1Btn.addEventListener("click", () => { if (!lvlB1Btn.classList.contains("locked")) toggleBaseLevel("B1"); });
+    if (lvlB2Btn) lvlB2Btn.addEventListener("click", () => { if (!lvlB2Btn.classList.contains("locked")) toggleBaseLevel("B2"); });
+    if (lvlC1Btn) lvlC1Btn.addEventListener("click", () => { if (!lvlC1Btn.classList.contains("locked")) toggleBaseLevel("C1"); });
+
+    if (practiceMistakesBtn) {
+      practiceMistakesBtn.addEventListener("click", () => {
+        if (practiceMistakesBtn.classList.contains("locked")) return;
+        practiceMistakesOnly = !practiceMistakesOnly;
+        syncLevelButtons();
+        saveStateToPrefs();
+      });
+    }
 
     startBtn.addEventListener("click", startGame);
 

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DeutschBuddy — Wortsuche</title>
+  <meta name="description" content="Simple German/English word search using the DeutschBuddy dataset." />
+  <link rel="icon" type="image/png" href="db.png" />
+  <style>
+    :root{
+      --bg:#ffffff; --text:#1f2937; --muted:#6b7280; --card:#ffffff; --border:#e5e7eb;
+      --shadow:0 10px 25px rgba(0,0,0,.06); --radius:14px;
+      --primary:#169BD7; --focus:rgba(22,155,215,.35);
+      --ok:#166534; --okbg:#dcfce7; --warn:#92400e; --warnbg:#fef3c7;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.55}
+    header{position:sticky;top:0;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);z-index:10}
+    .topbar{max-width:900px;margin:0 auto;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand{display:flex;align-items:center;gap:10px;min-width:0}
+    .brand img{width:34px;height:34px;border-radius:10px}
+    .titles h1{margin:0;font-size:1.05rem;line-height:1.2}
+    .titles p{margin:0;color:var(--muted);font-size:.9rem}
+
+    .wrap{max-width:900px;margin:0 auto;padding:18px 16px 28px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+    .cardHead{padding:14px 16px;border-bottom:1px solid var(--border)}
+    .cardHead h2{margin:0;font-size:1.2rem}
+    .cardHead p{margin:6px 0 0;color:var(--muted)}
+    .content{padding:16px;display:grid;gap:12px}
+
+    .searchRow{display:flex;gap:10px;flex-wrap:wrap}
+    .searchInput{flex:1;min-width:220px;border:1px solid var(--border);border-radius:12px;padding:12px 14px;font-size:1rem}
+    .searchInput:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-color:var(--primary)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 14px;border-radius:12px;border:1px solid var(--primary);background:var(--primary);color:#fff;font-weight:800;cursor:pointer}
+
+    .status{font-size:.95rem;color:var(--muted)}
+    .result{border:1px solid var(--border);border-radius:12px;padding:12px 14px;background:#fafafa;min-height:56px}
+    .result.ok{border-color:#86efac;background:var(--okbg);color:var(--ok)}
+    .result.warn{border-color:#fcd34d;background:var(--warnbg);color:var(--warn)}
+    .item{padding:6px 0;border-bottom:1px dashed rgba(0,0,0,.08)}
+    .item:last-child{border-bottom:0}
+    .meta{color:var(--muted);font-size:.9rem}
+    .listCard{margin-top:14px}
+    .wordList{max-height:360px;overflow:auto;border:1px solid var(--border);border-radius:12px;background:#fff}
+    .wordRow{display:flex;justify-content:space-between;gap:10px;padding:8px 10px;border-bottom:1px dashed rgba(0,0,0,.08)}
+    .wordRow:last-child{border-bottom:0}
+    .wordDe{font-weight:800}
+    .wordEn{color:var(--muted)}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="topbar">
+      <div class="brand">
+        <img src="db.png" alt="DeutschBuddy logo" />
+        <div class="titles">
+          <h1>DeutschBuddy</h1>
+          <p>Wortsuche • DE ↔ EN</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card">
+      <div class="cardHead">
+        <h2>Wortsuche</h2>
+        <p>Type a German or English word and press Enter.</p>
+      </div>
+      <div class="content">
+        <form id="searchForm" class="searchRow" autocomplete="off">
+          <input id="searchInput" class="searchInput" type="text" placeholder="e.g. Hund or dog" />
+          <button class="btn" type="submit">Search</button>
+        </form>
+        <div id="status" class="status">Loading words…</div>
+        <div id="result" class="result" aria-live="polite">Ready.</div>
+      </div>
+    </section>
+    <section class="card listCard">
+      <div class="cardHead">
+        <h2>Complete word list (German A→Z)</h2>
+        <p id="listInfo">Loading list…</p>
+      </div>
+      <div class="content">
+        <div id="wordList" class="wordList" aria-live="polite"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    const DATA_API_BASE = window.DEUTSCHBUDDY_DATA_API_BASE || "https://deutschbuddy-api.marco-pellegrino-1.workers.dev";
+    const DATASET_VERSION = "2026-02-17";
+    const DATASET_URL = `${DATA_API_BASE}/api/data/merged.tsv?v=${encodeURIComponent(DATASET_VERSION)}`;
+
+    const form = document.getElementById('searchForm');
+    const input = document.getElementById('searchInput');
+    const statusEl = document.getElementById('status');
+    const resultEl = document.getElementById('result');
+    const wordListEl = document.getElementById('wordList');
+    const listInfoEl = document.getElementById('listInfo');
+
+    let rows = [];
+
+    function safe(v){ return (v ?? '').toString().trim(); }
+    function norm(v){ return safe(v).toLowerCase(); }
+
+    async function loadDataset(){
+      const token = sessionStorage.getItem('db_plus_token_v1');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(DATASET_URL, { headers });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const txt = await res.text();
+      const lines = txt.trim().split(/\r?\n/).filter(Boolean);
+      if (lines.length < 2) throw new Error('No dataset rows');
+
+      const header = lines[0].split('\t').map(h => norm(h));
+      const idx = (...names) => names.map(n => header.indexOf(norm(n))).find(i => i >= 0);
+
+      const iWord = idx('Word', 'Singular');
+      const iEng = idx('English', 'Translation', 'Singular Translation');
+      const iArticle = idx('Article');
+      const iLevel = idx('Level');
+
+      rows = lines.slice(1).map(line => line.split('\t')).map(cols => {
+        const german = safe(cols[iWord]);
+        const english = safe(cols[iEng]);
+        if (!german || !english) return null;
+        return {
+          german,
+          english,
+          germanNorm: norm(german),
+          englishNorm: norm(english),
+          article: safe(cols[iArticle]),
+          level: safe(cols[iLevel])
+        };
+      }).filter(Boolean);
+
+      statusEl.textContent = `${rows.length} words loaded.`;
+      renderWordList();
+    }
+
+    function renderWordList(){
+      const sorted = [...rows].sort((a,b)=>a.german.localeCompare(b.german, 'de', { sensitivity:'base' }));
+      listInfoEl.textContent = `${sorted.length} words (German alphabetical).`;
+      wordListEl.innerHTML = sorted.map(r=>{
+        const de = r.article ? `${r.article} ${r.german}` : r.german;
+        const level = r.level ? ` (${r.level})` : '';
+        return `<div class="wordRow"><span class="wordDe">${de}${level}</span><span class="wordEn">${r.english}</span></div>`;
+      }).join('');
+    }
+
+    function renderMatches(query){
+      const q = norm(query);
+      if (!q){
+        resultEl.className = 'result';
+        resultEl.textContent = 'Type a word first.';
+        return;
+      }
+
+      const exact = rows.filter(r => r.germanNorm === q || r.englishNorm === q);
+      const fallback = rows.filter(r => r.germanNorm.includes(q) || r.englishNorm.includes(q));
+      const matches = (exact.length ? exact : fallback).slice(0, 8);
+
+      if (!matches.length){
+        resultEl.className = 'result warn';
+        resultEl.textContent = 'No match found.';
+        return;
+      }
+
+      resultEl.className = 'result ok';
+      resultEl.innerHTML = matches.map(r => {
+        const de = r.article ? `${r.article} ${r.german}` : r.german;
+        const meta = [r.level].filter(Boolean).join(' • ');
+        return `<div class="item"><strong>${de}</strong> → <strong>${r.english}</strong>${meta ? `<div class="meta">${meta}</div>` : ''}</div>`;
+      }).join('');
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      renderMatches(input.value);
+    });
+
+    (async function init(){
+      try{
+        await loadDataset();
+        resultEl.textContent = 'Ready. Search in German or English.';
+        input.focus({ preventScroll: true });
+      }catch(e){
+        console.error(e);
+        statusEl.textContent = 'Could not load dataset.';
+        resultEl.className = 'result warn';
+        resultEl.textContent = 'Loading failed. Check connection and retry.';
+        listInfoEl.textContent = 'List unavailable (dataset not loaded).';
+        wordListEl.innerHTML = '';
+      }
+    })();
+  </script>
+</body>
+</html>
