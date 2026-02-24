@@ -65,6 +65,7 @@
     select{border:1px solid var(--border);border-radius:12px;padding:10px 12px;font-weight:800;background:#fff}
 
     .word{font-size:2.2rem;text-align:center;font-weight:900;margin:10px 0 14px;letter-spacing:.2px}
+    .questionLevel{margin:-4px 0 10px;text-align:left;color:var(--muted);font-size:.9rem;font-weight:800}
     .options{display:grid;gap:10px}
     .options button{width:100%;padding:1rem;font-size:1.02rem;border:1px solid var(--border);border-radius:12px;cursor:pointer;background:#fff;font-weight:900;text-align:left;transition:transform .05s ease,filter .2s ease}
     .options button:hover{filter:brightness(.99)}
@@ -90,9 +91,16 @@
     .settingsHead h3{margin:0;font-size:1.05rem;font-weight:900}
     .settingsBody{padding:14px 16px 16px;display:grid;gap:12px}
     .closeBtn{border:1px solid var(--border);background:#fff;border-radius:12px;padding:8px 10px;cursor:pointer;font-weight:900}
+    #splash{position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999}
+    #splash h1{font-size:2rem;margin:0 0 1rem}
+    #splash img{width:260px;height:260px}
   </style>
 </head>
 <body>
+  <div id="splash" aria-label="Loading screen">
+    <h1>WortBlitz</h1>
+    <img src="wortblitz.png" alt="WortBlitz Logo" />
+  </div>
   <header>
     <div class="topbar">
       <div class="brand">
@@ -139,12 +147,12 @@
             <div class="levelRow" aria-label="Level selection">
               <div class="levelLabel">Level:</div>
               <button class="levelBtn" type="button" id="lvlA1" aria-pressed="true">A1</button>
-              <button class="levelBtn" type="button" id="lvlA2" aria-pressed="false">A2</button>
+              <button class="levelBtn locked gameCard" type="button" id="lvlA2" aria-pressed="false" data-plus="A2 level">A2</button>
               <button class="levelBtn locked gameCard" type="button" id="lvlB1" aria-pressed="false" data-plus="B1 level">B1</button>
               <button class="levelBtn locked gameCard" type="button" id="lvlB2" aria-pressed="false" data-plus="B2 level">B2</button>
               <button class="levelBtn locked gameCard" type="button" id="lvlC1" aria-pressed="false" data-plus="C1 level">C1</button>
             </div>
-            <div id="levelHint" style="color:var(--muted);font-size:.95rem;">A1 active: beginner words only.</div>
+            <div id="levelHint" style="color:var(--muted);font-size:.95rem;">A1 active: beginner words only (free).</div>
 
             <div class="settingsRow" aria-label="Category selection">
               <label for="categorySel" style="font-weight:900;">Category</label>
@@ -153,9 +161,7 @@
 
             <div class="levelRow" aria-label="Practice mistakes">
               <div class="levelLabel">Practice mistake:</div>
-              <div class="levelBtn locked gameCard" role="button" tabindex="0" data-plus="Practice mistakes feature">
-                Activate
-              </div>
+              <button class="levelBtn locked gameCard" type="button" id="practiceMistakesBtn" aria-pressed="false" data-plus="Practice mistakes feature">Activate</button>
             </div>
 
             <button class="btn btnStart" id="startBtn" type="button">Start the game now!</button>
@@ -163,6 +169,7 @@
 
           <div id="playArea" style="display:none;">
             <div class="word" id="word">Loading…</div>
+            <div class="questionLevel" id="questionLevel"></div>
             <div class="options" id="options" aria-label="Answer options"></div>
             <div class="result" id="result" aria-live="polite"></div>
             <div class="finish" id="finishBox">
@@ -231,7 +238,7 @@
         </div>
         <div style="color:var(--muted)">Save is automatic. Close and press Start.</div>
         <div style="display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;">
-          <a class="btn" href="index.html">Done</a>
+          <button class="btn" type="button" id="doneSettings">Done</button>
         </div>
       </div>
     </div>
@@ -258,28 +265,31 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="assets/js/components/plus-modal.js" defer></script>
   <script src="assets/js/pages/quiz-plus-modal-init.js" defer></script>
   <script>
-    const dataUrl = "https://docs.google.com/spreadsheets/d/1eFtuKJWBKZaJvzVzdr6MkahBECxA3PTn/export?format=xlsx&gid=0";
-    const LS_PREFS="db_bt_prefs_v2", LS_STATS="db_bt_stats_v2", LS_RECENT="db_bt_recent_v2";
+    const DATA_API_BASE = window.DEUTSCHBUDDY_DATA_API_BASE || "https://deutschbuddy-api.marco-pellegrino-1.workers.dev";
+    const DATASET_VERSION = "2026-02-17";
+    const dataUrl = `${DATA_API_BASE}/api/data/merged.tsv?v=${encodeURIComponent(DATASET_VERSION)}`;
+    const LS_PREFS="db_bt_prefs_v2", LS_STATS="db_bt_stats_v2", LS_RECENT="db_bt_recent_v2", LS_MISTAKES="db_wb_mistakes_v1";
 
     let rawData=[], pool=[], recentQueue=[];
+    let dataLoadedWithPlusToken=false;
     let selectedLevels=["A1"], selectedCategory="All", mode="timed", delayMs=1000;
     let score=0, streak=0, bestStreakSession=0, correct=0, wrong=0, answersTotal=0, timeLeft=60, timer=null, inputLocked=false, current=null;
     let gameActive=false, nextQuestionTimeout=null;
+    let practiceMistakesOnly=false;
 
-    const lvlA1Btn=document.getElementById('lvlA1'), lvlA2Btn=document.getElementById('lvlA2'), lvlB1Btn=document.getElementById('lvlB1'), lvlB2Btn=document.getElementById('lvlB2'), lvlC1Btn=document.getElementById('lvlC1'), levelHint=document.getElementById('levelHint');
+    const lvlA1Btn=document.getElementById('lvlA1'), lvlA2Btn=document.getElementById('lvlA2'), lvlB1Btn=document.getElementById('lvlB1'), lvlB2Btn=document.getElementById('lvlB2'), lvlC1Btn=document.getElementById('lvlC1'), practiceMistakesBtn=document.getElementById('practiceMistakesBtn'), levelHint=document.getElementById('levelHint');
     const modeSel=document.getElementById('modeSel'), delaySel=document.getElementById('delaySel'), categorySel=document.getElementById('categorySel');
     const startBtn=document.getElementById('startBtn'), setupEl=document.getElementById('setup'), playArea=document.getElementById('playArea');
-    const wordEl=document.getElementById('word'), optionsEl=document.getElementById('options'), resultEl=document.getElementById('result');
+    const wordEl=document.getElementById('word'), questionLevelEl=document.getElementById('questionLevel'), optionsEl=document.getElementById('options'), resultEl=document.getElementById('result');
     const hudScore=document.getElementById('hudScore'), hudStreak=document.getElementById('hudStreak'), hudAcc=document.getElementById('hudAcc'), hudMistakes=document.getElementById('hudMistakes'), hudTimer=document.getElementById('hudTimer');
     const finishBox=document.getElementById('finishBox'), finishSummary=document.getElementById('finishSummary'), deviceStatsLine=document.getElementById('deviceStatsLine');
     const historyBody=document.getElementById('historyBody'), answersSummary=document.getElementById('answersSummary');
     const bestScoreEl=document.getElementById('bestScore'), bestStreakEl=document.getElementById('bestStreak'), lifetimeLine=document.getElementById('lifetimeLine');
 
-    const settingsBtn=document.getElementById('settingsBtn'), settingsPanel=document.getElementById('settingsPanel'), closeSettings=document.getElementById('closeSettings');
+    const settingsBtn=document.getElementById('settingsBtn'), settingsPanel=document.getElementById('settingsPanel'), closeSettings=document.getElementById('closeSettings'), doneSettings=document.getElementById('doneSettings');
     const howBtn=document.getElementById('howBtn'), howModal=document.getElementById('howModal'), closeHow=document.getElementById('closeHow');
 
     function safe(v){return (v??'').toString().trim();}
@@ -289,59 +299,14 @@
 
 
     async function loadSheetRows(url){
-      function extractSheetId(v){
-        const u = String(v || "");
-        const m = u.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/) || u.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-        return m ? m[1] : "";
-      }
-
-      function buildSourceCandidates(v){
-        const out = [v];
-        const id = extractSheetId(v);
-        if (id){
-          out.push(
-            `https://docs.google.com/spreadsheets/d/${id}/export?format=xlsx&gid=0`,
-            `https://docs.google.com/spreadsheets/d/${id}/export?format=xlsx`
-          );
-        }
-        return [...new Set(out.filter(Boolean))];
-      }
-
-      if (!window.XLSX){
-        throw new Error("XLSX parser not available");
-      }
-
-      let lastErr = null;
-      for (const base of buildSourceCandidates(url)){
-        try{
-          const req = base + (base.includes("?") ? "&" : "?") + "t=" + Date.now();
-          const res = await fetch(req);
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const buf = await res.arrayBuffer();
-
-          // Primary path: XLSX workbook
-          try{
-            const wb = XLSX.read(buf, { type: "array" });
-            const firstSheetName = wb.SheetNames && wb.SheetNames[0];
-            if (firstSheetName){
-              const ws = wb.Sheets[firstSheetName];
-              const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: "" });
-              if (rows && rows.length >= 2) return rows;
-            }
-          }catch{}
-
-          // Fallback path: plain text TSV/CSV response
-          const text = new TextDecoder("utf-8").decode(buf);
-          if (!text || /^\s*<!doctype html>/i.test(text) || /^\s*<html/i.test(text)) throw new Error("Non-tabular response");
-          const lines = text.trim().split(/\r?\n/).filter(Boolean);
-          if (lines.length < 2) throw new Error("Workbook has no data rows");
-          const delimiter = lines[0].includes("	") ? "	" : (lines[0].includes(";") ? ";" : ",");
-          return lines.map(line => line.split(delimiter));
-        }catch(e){
-          lastErr = e;
-        }
-      }
-      throw lastErr || new Error("Failed to load sheet");
+      const token = sessionStorage.getItem("db_plus_token_v1");
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(url, { headers });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = await res.text();
+      const lines = text.trim().split(/\r?\n/).filter(Boolean);
+      if (lines.length < 2) throw new Error("Dataset has no data rows");
+      return lines.map(line => line.split("\t"));
     }
 
     function getPrefs(){try{return JSON.parse(localStorage.getItem(LS_PREFS)||"{}")}catch{return {}}}
@@ -350,25 +315,55 @@
     function setStats(v){localStorage.setItem(LS_STATS, JSON.stringify(v));}
     function getRecent(){try{return JSON.parse(localStorage.getItem(LS_RECENT)||"[]")}catch{return []}}
     function setRecent(v){localStorage.setItem(LS_RECENT, JSON.stringify(v.slice(-30)));}
+    function getMistakes(){try{return JSON.parse(localStorage.getItem(LS_MISTAKES)||'{}')}catch{return {}}}
+    function setMistakes(v){localStorage.setItem(LS_MISTAKES, JSON.stringify(v));}
+
+    function hasPlusAccess(){
+      const token = sessionStorage.getItem('db_plus_token_v1');
+      if (token) return true;
+
+      // Retrocompatibility fallback only (non-primary source)
+      try{
+        const unlocks = JSON.parse(sessionStorage.getItem('db_plus_unlocks_v1') || '{}');
+        return !!unlocks.__all_plus__;
+      }catch{ return false; }
+    }
 
     function loadPrefs(){
       const p=getPrefs();
       if(Array.isArray(p.levels)){selectedLevels=p.levels.filter(l=>["A1","A2","B1","B2","C1"].includes(l)); if(!selectedLevels.length) selectedLevels=["A1"];}
+      if(!hasPlusAccess()) selectedLevels=['A1'];
+      practiceMistakesOnly=!!p.practiceMistakesOnly;
+      if(!hasPlusAccess()) practiceMistakesOnly=false;
       selectedCategory = "All";
       mode=(p.mode==="streak"||p.mode==="maxErrors"||p.mode==="unlimited")?p.mode:"timed";
       delayMs=(p.delayMs===3000)?3000:1000;
       modeSel.value=mode; delaySel.value=String(delayMs);
     }
-    function savePrefs(){ setPrefs({levels:selectedLevels, category:selectedCategory, mode, delayMs}); }
+    function savePrefs(){ setPrefs({levels:selectedLevels, category:selectedCategory, mode, delayMs, practiceMistakesOnly}); }
 
     function syncLevelButtons(){
       const levels=[['A1',lvlA1Btn],['A2',lvlA2Btn],['B1',lvlB1Btn],['B2',lvlB2Btn],['C1',lvlC1Btn]];
       levels.forEach(([lvl,btn])=>{ if(btn) btn.setAttribute('aria-pressed', selectedLevels.includes(lvl)?'true':'false'); });
-      levelHint.textContent = `${selectedLevels.join(' + ')} active.`;
+      if(practiceMistakesBtn) practiceMistakesBtn.setAttribute('aria-pressed', practiceMistakesOnly ? 'true' : 'false');
+
+      const ordered=['A1','A2','B1','B2','C1'];
+      const active=ordered.filter(l=>selectedLevels.includes(l));
+      if (active.length===1){
+        const one=active[0];
+        levelHint.textContent = one==='A1'
+          ? 'A1 active: beginner words only (free).'
+          : `${one} active: ${one==='A2' ? 'intermediate' : 'plus'} words only.`;
+      } else if (active.length>1) {
+        levelHint.textContent = `Levels active: ${active.join(' + ')}.`;
+      } else {
+        levelHint.textContent = 'A1 active: beginner words only (free).';
+      }
+      if (practiceMistakesOnly) levelHint.textContent += ' Practice mistakes mode is ON.';
     }
 
     function toggleLevel(level){
-      const isPlusLevel = ["B1","B2","C1"].includes(level);
+      const isPlusLevel = ["A2","B1","B2","C1"].includes(level);
       if (isPlusLevel && !(window.DeutschBuddyPlusModal && window.DeutschBuddyPlusModal.hasAllAccess && window.DeutschBuddyPlusModal.hasAllAccess())) {
         return;
       }
@@ -380,6 +375,7 @@
 
     async function loadData(){
       try{
+        const hadToken = !!sessionStorage.getItem("db_plus_token_v1");
         const rows = await loadSheetRows(dataUrl);
         const header=rows[0].map(h=>safe(h).toLowerCase());
         const idx=(...names)=>names.map(n=>header.indexOf(n)).find(i=>i>=0);
@@ -398,6 +394,7 @@
         }).filter(Boolean);
 
         if(!rawData.length) throw new Error('No valid rows');
+        dataLoadedWithPlusToken=hadToken;
 
         const categories=[...new Set(rawData.map(r=>r.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
         categorySel.innerHTML='';
@@ -428,11 +425,17 @@
 
     function buildPool(){
       const set=new Set(selectedLevels);
-      pool=rawData.filter(r=>{
+      const base=rawData.filter(r=>{
         const levelOk = set.has(r.level);
         const categoryOk = selectedCategory==='All' || r.category===selectedCategory;
         return levelOk && categoryOk;
       });
+      if (practiceMistakesOnly){
+        const mistakes=getMistakes();
+        pool=base.filter(r=>!!mistakes[r.key]);
+      } else {
+        pool=base;
+      }
       shuffle(pool);
     }
 
@@ -496,10 +499,11 @@ function stopGameFlow(){
 
 function showQuestion(){
       if(!gameActive) return;
-      if(!pool.length){ wordEl.textContent='No words available.'; return; }
-      current=pickPrompt(); if(!current){ wordEl.textContent='No words available.'; return; }
+      if(!pool.length){ wordEl.textContent='No words available.'; questionLevelEl.textContent=''; return; }
+      current=pickPrompt(); if(!current){ wordEl.textContent='No words available.'; questionLevelEl.textContent=''; return; }
       recentQueue.push(current.key); if(recentQueue.length>30) recentQueue=recentQueue.slice(-30); setRecent(recentQueue);
       wordEl.textContent=current.singular;
+      questionLevelEl.textContent = current.level ? `Level: ${current.level}` : '';
       const opts=[current.translation, ...distractors(current)].filter(Boolean);
       const unique=[...new Set(opts)].slice(0,3); while(unique.length<3) unique.push('—'); shuffle(unique);
       optionsEl.innerHTML=''; resultEl.textContent=''; inputLocked=false;
@@ -518,7 +522,7 @@ function showQuestion(){
       const ok=opt===current.translation;
       addHistoryRow(opt, ok, current.translation);
       if(ok){correct++;streak++;bestStreakSession=Math.max(bestStreakSession,streak);score+=1;btn.classList.add('correct');resultEl.textContent='✓ Correct';}
-      else{wrong++;streak=0;btn.classList.add('wrong');const right=buttons.find(b=>b.textContent===current.translation);if(right) right.classList.add('correct');resultEl.textContent='✗ Wrong';}
+      else{wrong++;streak=0;btn.classList.add('wrong');const right=buttons.find(b=>b.textContent===current.translation);if(right) right.classList.add('correct');resultEl.textContent='✗ Wrong'; const m=getMistakes(); m[current.key]=Date.now(); setMistakes(m);}
       updateHud();
       if((mode==='maxErrors' && wrong>=3) || (mode==='streak' && wrong>=1)) {
         nextQuestionTimeout=setTimeout(finishGame, delayMs);
@@ -559,29 +563,44 @@ function showQuestion(){
       finishBox.style.display='block'; updateDeviceStats();
     }
 
-    function startGame(){
+    async function startGame(){
       score=0;streak=0;bestStreakSession=0;correct=0;wrong=0;answersTotal=0;timeLeft=60;finishBox.style.display='none';
       historyBody.innerHTML=''; updateAnswersSummary();
       if(nextQuestionTimeout){ clearTimeout(nextQuestionTimeout); nextQuestionTimeout=null; }
       gameActive=true;
       mode=modeSel.value; delayMs=parseInt(delaySel.value,10); savePrefs();
+      if (hasPlusAccess() && !dataLoadedWithPlusToken){
+        await loadData();
+      }
       buildPool(); updateHud(); setupEl.style.display='none'; playArea.style.display=''; showQuestion();
       if(mode==='timed') startTimer(); else clearInterval(timer);
     }
 
     // modal handlers
+    function closeSettingsPanel(){
+      mode=modeSel.value;
+      delayMs=parseInt(delaySel.value,10);
+      savePrefs();
+      settingsPanel.style.display='none';
+      if(gameActive){
+        if(mode==='timed' && !timer) startTimer();
+        if(mode!=='timed'){ clearInterval(timer); timer=null; hudTimer.textContent='—'; }
+      }
+    }
     settingsBtn.addEventListener('click',()=>{settingsPanel.style.display='flex';});
-    closeSettings.addEventListener('click',()=>{settingsPanel.style.display='none';});
-    settingsPanel.addEventListener('click',(e)=>{if(e.target===settingsPanel) settingsPanel.style.display='none';});
+    closeSettings.addEventListener('click',closeSettingsPanel);
+    doneSettings.addEventListener('click',closeSettingsPanel);
+    settingsPanel.addEventListener('click',(e)=>{if(e.target===settingsPanel) closeSettingsPanel();});
     howBtn.addEventListener('click',()=>{howModal.style.display='flex';});
     closeHow.addEventListener('click',()=>{howModal.style.display='none';});
     howModal.addEventListener('click',(e)=>{if(e.target===howModal) howModal.style.display='none';});
 
     lvlA1Btn.addEventListener('click',()=>toggleLevel('A1'));
-    lvlA2Btn.addEventListener('click',()=>toggleLevel('A2'));
-    lvlB1Btn.addEventListener('click',()=>toggleLevel('B1'));
-    lvlB2Btn.addEventListener('click',()=>toggleLevel('B2'));
-    lvlC1Btn.addEventListener('click',()=>toggleLevel('C1'));
+    lvlA2Btn.addEventListener('click',()=>{ if(!lvlA2Btn.classList.contains('locked')) toggleLevel('A2'); });
+    lvlB1Btn.addEventListener('click',()=>{ if(!lvlB1Btn.classList.contains('locked')) toggleLevel('B1'); });
+    lvlB2Btn.addEventListener('click',()=>{ if(!lvlB2Btn.classList.contains('locked')) toggleLevel('B2'); });
+    lvlC1Btn.addEventListener('click',()=>{ if(!lvlC1Btn.classList.contains('locked')) toggleLevel('C1'); });
+    practiceMistakesBtn.addEventListener('click',()=>{ if(practiceMistakesBtn.classList.contains('locked')) return; practiceMistakesOnly=!practiceMistakesOnly; syncLevelButtons(); savePrefs(); buildPool(); });
     categorySel.addEventListener('change',()=>{ selectedCategory=categorySel.value||'All'; savePrefs(); buildPool(); });
     startBtn.addEventListener('click',startGame);
     document.getElementById('playAgainBtn').addEventListener('click',startGame);
@@ -589,6 +608,10 @@ function showQuestion(){
 
     (async function init(){
       loadPrefs(); syncLevelButtons(); recentQueue=getRecent(); updateDeviceStats(); updateHud(); updateAnswersSummary();
+      setTimeout(()=>{
+        const splash=document.getElementById('splash');
+        if(splash) splash.style.display='none';
+      },900);
       await loadData();
     })();
   </script>
