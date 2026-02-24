@@ -1059,6 +1059,7 @@
     // =========================
     let rawData = [];
     let pool = [];
+    let dataLoadedWithPlusToken = false;
     let currentIndex = 0;
 
     let correct = 0;
@@ -1345,6 +1346,7 @@ async function loadSheetRows(url){
     // =========================
     async function loadData(){
       try{
+        const hadToken = !!sessionStorage.getItem("db_plus_token_v1");
         const rows = await loadSheetRows(dataUrl);
 
         const header = rows[0].map(safeText);
@@ -1383,6 +1385,7 @@ async function loadSheetRows(url){
           .filter(Boolean);
 
         if (!rawData.length) throw new Error("No valid rows.");
+        dataLoadedWithPlusToken = hadToken;
       }catch(e){
         wordEl.textContent = "Loading failed 😕";
         resultDiv.textContent = "Please check your connection and reload the page.";
@@ -1671,6 +1674,10 @@ async function loadSheetRows(url){
       endBanner.style.display = "none";
 
       if (!rawData.length){
+        await loadData();
+      }
+
+      if (hasPlusAccess() && !dataLoadedWithPlusToken){
         await loadData();
       }
 

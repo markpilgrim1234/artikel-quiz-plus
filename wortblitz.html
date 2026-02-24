@@ -274,6 +274,7 @@
     const LS_PREFS="db_bt_prefs_v2", LS_STATS="db_bt_stats_v2", LS_RECENT="db_bt_recent_v2", LS_MISTAKES="db_wb_mistakes_v1";
 
     let rawData=[], pool=[], recentQueue=[];
+    let dataLoadedWithPlusToken=false;
     let selectedLevels=["A1"], selectedCategory="All", mode="timed", delayMs=1000;
     let score=0, streak=0, bestStreakSession=0, correct=0, wrong=0, answersTotal=0, timeLeft=60, timer=null, inputLocked=false, current=null;
     let gameActive=false, nextQuestionTimeout=null;
@@ -374,6 +375,7 @@
 
     async function loadData(){
       try{
+        const hadToken = !!sessionStorage.getItem("db_plus_token_v1");
         const rows = await loadSheetRows(dataUrl);
         const header=rows[0].map(h=>safe(h).toLowerCase());
         const idx=(...names)=>names.map(n=>header.indexOf(n)).find(i=>i>=0);
@@ -392,6 +394,7 @@
         }).filter(Boolean);
 
         if(!rawData.length) throw new Error('No valid rows');
+        dataLoadedWithPlusToken=hadToken;
 
         const categories=[...new Set(rawData.map(r=>r.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
         categorySel.innerHTML='';
@@ -560,12 +563,15 @@ function showQuestion(){
       finishBox.style.display='block'; updateDeviceStats();
     }
 
-    function startGame(){
+    async function startGame(){
       score=0;streak=0;bestStreakSession=0;correct=0;wrong=0;answersTotal=0;timeLeft=60;finishBox.style.display='none';
       historyBody.innerHTML=''; updateAnswersSummary();
       if(nextQuestionTimeout){ clearTimeout(nextQuestionTimeout); nextQuestionTimeout=null; }
       gameActive=true;
       mode=modeSel.value; delayMs=parseInt(delaySel.value,10); savePrefs();
+      if (hasPlusAccess() && !dataLoadedWithPlusToken){
+        await loadData();
+      }
       buildPool(); updateHud(); setupEl.style.display='none'; playArea.style.display=''; showQuestion();
       if(mode==='timed') startTimer(); else clearInterval(timer);
     }
