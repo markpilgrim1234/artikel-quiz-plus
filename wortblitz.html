@@ -147,12 +147,12 @@
             <div class="levelRow" aria-label="Level selection">
               <div class="levelLabel">Level:</div>
               <button class="levelBtn" type="button" id="lvlA1" aria-pressed="true">A1</button>
-              <button class="levelBtn locked gameCard" type="button" id="lvlA2" aria-pressed="false" data-plus="A2 level">A2</button>
-              <button class="levelBtn locked gameCard" type="button" id="lvlB1" aria-pressed="false" data-plus="B1 level">B1</button>
-              <button class="levelBtn locked gameCard" type="button" id="lvlB2" aria-pressed="false" data-plus="B2 level">B2</button>
-              <button class="levelBtn locked gameCard" type="button" id="lvlC1" aria-pressed="false" data-plus="C1 level">C1</button>
+              <button class="levelBtn" type="button" id="lvlA2" aria-pressed="false">A2</button>
+              <button class="levelBtn" type="button" id="lvlB1" aria-pressed="false">B1</button>
+              <button class="levelBtn" type="button" id="lvlB2" aria-pressed="false">B2</button>
+              <button class="levelBtn" type="button" id="lvlC1" aria-pressed="false">C1</button>
             </div>
-            <div id="levelHint" style="color:var(--muted);font-size:.95rem;">A1 active: beginner words only (free).</div>
+            <div id="levelHint" style="color:var(--muted);font-size:.95rem;">A1 active: beginner words only.</div>
 
             <div class="settingsRow" aria-label="Category selection">
               <label for="categorySel" style="font-weight:900;">Category</label>
@@ -332,7 +332,6 @@
     function loadPrefs(){
       const p=getPrefs();
       if(Array.isArray(p.levels)){selectedLevels=p.levels.filter(l=>["A1","A2","B1","B2","C1"].includes(l)); if(!selectedLevels.length) selectedLevels=["A1"];}
-      if(!hasPlusAccess()) selectedLevels=['A1'];
       practiceMistakesOnly=!!p.practiceMistakesOnly;
       if(!hasPlusAccess()) practiceMistakesOnly=false;
       selectedCategory = "All";
@@ -363,10 +362,6 @@
     }
 
     function toggleLevel(level){
-      const isPlusLevel = ["A2","B1","B2","C1"].includes(level);
-      if (isPlusLevel && !(window.DeutschBuddyPlusModal && window.DeutschBuddyPlusModal.hasAllAccess && window.DeutschBuddyPlusModal.hasAllAccess())) {
-        return;
-      }
       const has=selectedLevels.includes(level);
       if(has && selectedLevels.length===1) return;
       selectedLevels = has ? selectedLevels.filter(x=>x!==level) : [...selectedLevels, level].sort();
@@ -596,10 +591,10 @@ function showQuestion(){
     howModal.addEventListener('click',(e)=>{if(e.target===howModal) howModal.style.display='none';});
 
     lvlA1Btn.addEventListener('click',()=>toggleLevel('A1'));
-    lvlA2Btn.addEventListener('click',()=>{ if(!lvlA2Btn.classList.contains('locked')) toggleLevel('A2'); });
-    lvlB1Btn.addEventListener('click',()=>{ if(!lvlB1Btn.classList.contains('locked')) toggleLevel('B1'); });
-    lvlB2Btn.addEventListener('click',()=>{ if(!lvlB2Btn.classList.contains('locked')) toggleLevel('B2'); });
-    lvlC1Btn.addEventListener('click',()=>{ if(!lvlC1Btn.classList.contains('locked')) toggleLevel('C1'); });
+    lvlA2Btn.addEventListener('click',()=>toggleLevel('A2'));
+    lvlB1Btn.addEventListener('click',()=>toggleLevel('B1'));
+    lvlB2Btn.addEventListener('click',()=>toggleLevel('B2'));
+    lvlC1Btn.addEventListener('click',()=>toggleLevel('C1'));
     practiceMistakesBtn.addEventListener('click',()=>{ if(practiceMistakesBtn.classList.contains('locked')) return; practiceMistakesOnly=!practiceMistakesOnly; syncLevelButtons(); savePrefs(); buildPool(); });
     categorySel.addEventListener('change',()=>{ selectedCategory=categorySel.value||'All'; savePrefs(); buildPool(); });
     startBtn.addEventListener('click',startGame);
