@@ -123,32 +123,39 @@
       const iEng = idx('English', 'Translation', 'Singular Translation');
       const iArticle = idx('Article');
       const iLevel = idx('Level');
+      const iPos = idx('POS', 'Category');
 
-      rows = lines.slice(1).map(line => line.split('\t')).map(cols => {
+      const allRows = lines.slice(1).map(line => line.split('\t'));
+      rows = allRows.map(cols => {
         const german = safe(cols[iWord]);
         const english = safe(cols[iEng]);
-        if (!german || !english) return null;
+        if (!german && !english) return null;
         return {
           german,
           english,
           germanNorm: norm(german),
           englishNorm: norm(english),
           article: safe(cols[iArticle]),
-          level: safe(cols[iLevel])
+          level: safe(cols[iLevel]),
+          pos: safe(cols[iPos])
         };
       }).filter(Boolean);
 
-      statusEl.textContent = `${rows.length} words loaded.`;
-      renderWordList();
+      const germanRows = rows.filter(r => !!r.german);
+      const tokenNote = token ? '' : ' (free view without Plus token)';
+      statusEl.textContent = `${allRows.length} dataset rows • ${germanRows.length} German entries${tokenNote}.`;
+      renderWordList(germanRows);
     }
 
-    function renderWordList(){
-      const sorted = [...rows].sort((a,b)=>a.german.localeCompare(b.german, 'de', { sensitivity:'base' }));
+    function renderWordList(sourceRows){
+      const base = Array.isArray(sourceRows) ? sourceRows : rows.filter(r=>!!r.german);
+      const sorted = [...base].sort((a,b)=>a.german.localeCompare(b.german, 'de', { sensitivity:'base' }));
       listInfoEl.textContent = `${sorted.length} words (German alphabetical).`;
       wordListEl.innerHTML = sorted.map(r=>{
         const de = r.article ? `${r.article} ${r.german}` : r.german;
         const level = r.level ? ` (${r.level})` : '';
-        return `<div class="wordRow"><span class="wordDe">${de}${level}</span><span class="wordEn">${r.english}</span></div>`;
+        const en = r.english || '—';
+        return `<div class="wordRow"><span class="wordDe">${de}${level}</span><span class="wordEn">${en}</span></div>`;
       }).join('');
     }
 
@@ -172,9 +179,10 @@
 
       resultEl.className = 'result ok';
       resultEl.innerHTML = matches.map(r => {
-        const de = r.article ? `${r.article} ${r.german}` : r.german;
-        const meta = [r.level].filter(Boolean).join(' • ');
-        return `<div class="item"><strong>${de}</strong> → <strong>${r.english}</strong>${meta ? `<div class="meta">${meta}</div>` : ''}</div>`;
+        const de = r.article && r.german ? `${r.article} ${r.german}` : (r.german || '—');
+        const en = r.english || '—';
+        const meta = [r.level, r.pos].filter(Boolean).join(' • ');
+        return `<div class="item"><strong>${de}</strong> → <strong>${en}</strong>${meta ? `<div class="meta">${meta}</div>` : ''}</div>`;
       }).join('');
     }
 
