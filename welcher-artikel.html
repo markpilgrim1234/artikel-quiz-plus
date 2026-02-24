@@ -812,23 +812,17 @@
 
               <button class="levelBtn" type="button" id="lvlA1" aria-pressed="true" aria-label="Select A1">A1</button>
 
-              <div class="levelBtn locked gameCard" id="lvlA2" role="button" tabindex="0" data-plus="A2 level" aria-label="A2 Plus (locked)">A2</div>
+              <button class="levelBtn" type="button" id="lvlA2" aria-pressed="false" aria-label="Select A2">A2</button>
 
               <!-- Locked levels: use same selector as Index script -->
-              <div class="levelBtn locked gameCard" id="lvlB1" role="button" tabindex="0" data-plus="B1 level" aria-label="B1 Plus (locked)">
-                B1
-              </div>
+              <button class="levelBtn" type="button" id="lvlB1" aria-pressed="false" aria-label="Select B1">B1</button>
 
-              <div class="levelBtn locked gameCard" id="lvlB2" role="button" tabindex="0" data-plus="B2 level" aria-label="B2 Plus (locked)">
-                B2
-              </div>
+              <button class="levelBtn" type="button" id="lvlB2" aria-pressed="false" aria-label="Select B2">B2</button>
 
-              <div class="levelBtn locked gameCard" id="lvlC1" role="button" tabindex="0" data-plus="C1 level" aria-label="C1 Plus (locked)">
-                C1
-              </div>
+              <button class="levelBtn" type="button" id="lvlC1" aria-pressed="false" aria-label="Select C1">C1</button>
             </div>
 
-            <div class="miniNote" id="levelHint">Tip: A1 is free. Unlock Plus to activate A2 and higher levels.</div>
+            <div class="miniNote" id="levelHint">A1 active: beginner words only.</div>
 
             <div class="levelRow practiceLockRow" aria-label="Practice mistakes">
               <div class="levelLabel">Practice mistake:</div>
@@ -1149,10 +1143,7 @@ async function loadSheetRows(url){
     }
 
     function normalizeLevelsForAccess(){
-      if (!hasPlusAccess()) {
-        selectedLevels = ["A1"];
-        practiceMistakesOnly = false;
-      }
+      // Levels are available to everyone.
     }
 
     function updateDailyStreak(){
@@ -1720,12 +1711,11 @@ async function loadSheetRows(url){
 
     lvlA1Btn.addEventListener("click", () => toggleBaseLevel("A1"));
     lvlA2Btn.addEventListener("click", () => {
-      if (lvlA2Btn.classList.contains("locked")) return;
       toggleBaseLevel("A2");
     });
-    if (lvlB1Btn) lvlB1Btn.addEventListener("click", () => { if (!lvlB1Btn.classList.contains("locked")) toggleBaseLevel("B1"); });
-    if (lvlB2Btn) lvlB2Btn.addEventListener("click", () => { if (!lvlB2Btn.classList.contains("locked")) toggleBaseLevel("B2"); });
-    if (lvlC1Btn) lvlC1Btn.addEventListener("click", () => { if (!lvlC1Btn.classList.contains("locked")) toggleBaseLevel("C1"); });
+    if (lvlB1Btn) lvlB1Btn.addEventListener("click", () => { toggleBaseLevel("B1"); });
+    if (lvlB2Btn) lvlB2Btn.addEventListener("click", () => { toggleBaseLevel("B2"); });
+    if (lvlC1Btn) lvlC1Btn.addEventListener("click", () => { toggleBaseLevel("C1"); });
 
     if (practiceMistakesBtn) {
       practiceMistakesBtn.addEventListener("click", () => {
