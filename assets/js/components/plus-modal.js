@@ -3,6 +3,12 @@
   const LS_UNLOCKS = "db_plus_unlocks_v1";
   const ALL_ACCESS_KEY = "__all_plus__";
 
+  // Temporary public-access switch. Set this to false to restore code entry.
+  // The bootstrap code is exchanged for a short-lived token so protected
+  // datasets remain available without asking visitors for a password.
+  const PUBLIC_PLUS_ACCESS = true;
+  const PUBLIC_PLUS_BOOTSTRAP_CODE = "test-plus-1234";
+
   const API_BASE = global.DEUTSCHBUDDY_API_BASE || "https://deutschbuddy-api.marco-pellegrino-1.workers.dev";
   const PLUS_VERIFY_URL = `${API_BASE}/api/plus/verify`;
   const PLUS_STATUS_URL = `${API_BASE}/api/plus/status`;
@@ -45,7 +51,7 @@
   }
 
   function hasAllAccess(){
-    return !!getPlusToken();
+    return PUBLIC_PLUS_ACCESS || !!getPlusToken();
   }
 
   function unlockAllPlus(){
@@ -80,7 +86,11 @@
   }
 
   async function refreshPlusStatusWithWorker(){
-    const token = getPlusToken();
+    let token = getPlusToken();
+    if (PUBLIC_PLUS_ACCESS && !token) {
+      const access = await verifyCodeWithWorker(PUBLIC_PLUS_BOOTSTRAP_CODE);
+      return { plus: true, exp: access.exp };
+    }
     if (!token) return { plus: false };
 
     const tokenExp = parseInt(sessionStorage.getItem(PLUS_TOKEN_EXP_KEY) || "0", 10);
