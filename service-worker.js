@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v1.2.1'; // <-- cambia questo numero a ogni aggiornamento
+const CACHE_VERSION = 'v1.2.2'; // <-- cambia questo numero a ogni aggiornamento
 const CACHE_NAME = `artikelquiz-cache-${CACHE_VERSION}`;
 
 const ASSETS_TO_CACHE = [
